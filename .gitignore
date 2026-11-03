@@ -26,7 +26,6 @@ settings.ini
 *.mp3
 *.mp4
 *.wav
-!assets/wake/wake_ack_zh.wav
 !assets/wake/wake_ack_zh_fast.wav
 # Build and interpreter output
 __pycache__/

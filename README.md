@@ -10,7 +10,7 @@
 | `ukui-air-gesture/` | 当前摄像头手势识别、中心复位、方向翻页与桌面反馈 |
 | `system-tools/` | 当前sys/docs MCP服务：音量、应用启动、文档摘要和执行后校验 |
 | `asr-service/` | 当前SenseVoice ASR HTTP包装 |
-| `runtime-integration/` / `assets/wake/` | 当前唤醒播报桥接及固定提示音 |
+| `assets/wake/` | 当前KylinBot直接播放的固定唤醒提示音 |
 | `patches/` | 当前使用的SpacemiT GGML和TTS修改补丁、修改后完整源码及测试 |
 | `deploy/` | 这台K1当前生效的一套服务配置和脱敏应用配置 |
 | `dependencies/` | 当前方案的外部依赖、模型来源/校验值、组件源码基线 |
