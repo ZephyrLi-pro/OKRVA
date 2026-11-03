@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+<policyconfig>
+  <action id="org.ukui.airgesture.ensure-vcam">
+    <description>Set up UKUI Air Gesture virtual camera</description>
+    <description xml:lang="zh_CN">加载隔空手势虚拟摄像头</description>
+    <message>Authentication is required to set up the shared virtual camera</message>
+    <message xml:lang="zh_CN">需要授权以加载隔空手势共享虚拟摄像头</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/ukui-air-gesture/ensure-vcam</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+</policyconfig>

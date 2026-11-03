@@ -1,0 +1,232 @@
+[
+  {
+    "branch": "riscv-iq1-m-drop-barriers",
+    "head": "f4c6671fbf70d30c269838e1053c2b9e1ccf44c6",
+    "base": "99f3dc32296f825fec94f202da1e9fede1e78cf9",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "e69208dca25f2b774df829e18b664faa2e9ab33134ea63f823b506ab73335cf5"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "riscv-iq3s-qh-vid",
+    "head": "7205c465e3006c24436d0c60d4dd59ab79339ffb",
+    "base": "230ea9d214320c5e79cc8166ed708ac60514c71e",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "eebea6b68d2c894784a955c988c03e53fc899cbd503df4942ad9a8c6ff5960e6"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "riscv-q2-0-vl256-vecdot",
+    "head": "dfe0c6497c7c03eb20df7190bbdd6f0deef09eb3",
+    "base": "67b9b0e7f6ce45d929a4411907d3c48ec719e81c",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch-fallback.h",
+        "before_sha256": "2dc6b116f732329effe45d3f9384d5ebae628f3c19e2f2ac69551fd2e3721917",
+        "after_sha256": "6777d5ff548189bd76c84d8f9f442d6b376506aff6e28e213fb9f4762afa6b57"
+      },
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "c07b80b9bf56fc045e2d61256c5c2c44525897b1b9a70b737c2de505aa3405d0"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "riscv-q4-1-vwmaccsu",
+    "head": "46f20f644074511713b2aaab8fb59a2298cc6fa4",
+    "base": "99f3dc32296f825fec94f202da1e9fede1e78cf9",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "512d78d980021516b53cfba8a131c87cfca808b1bddc5679e7509ea900064dc6"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "riscv-q5-vl256-fast-path",
+    "head": "4dc14aee6a6284988f0e54fb0049108c26330386",
+    "base": "99f3dc32296f825fec94f202da1e9fede1e78cf9",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "c5f94dbbffc418397cb9d2e912d549b3fcaf14463807b6a59b1ef22718d981c3"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "riscv-q8-0-4x1-rvv-quant",
+    "head": "f769679ca51350344733e0c93b69f3c26c56a84c",
+    "base": "91f8c9c5fb038c086e13e9cd823c29b33b07ba54",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch-fallback.h",
+        "before_sha256": "2dc6b116f732329effe45d3f9384d5ebae628f3c19e2f2ac69551fd2e3721917",
+        "after_sha256": "b77efde8af2d345f48e63a5e78ff3d96483e631de31775572862fb7708cc634a"
+      },
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/repack.cpp",
+        "before_sha256": "57b1362562ec0dfe8475e49a639783468da3ddbf7a5f009adcd01a7e4ed61fbf",
+        "after_sha256": "e102b346f07ea78f4b65995889748d36d60d182ddea50e456c04cb1e44fca21c"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "riscv-tq2-accumulate-chunks",
+    "head": "1021374a27cd3ecebe73422f69ea6637ce0c1262",
+    "base": "230ea9d214320c5e79cc8166ed708ac60514c71e",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "7df6b6beeb4376bb9ea2f26151a33871829a7097e1144e4ec85e935b675c2167"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "rvv-iq4-nl-gemm-vwmacc",
+    "head": "0df5544a8c7edf6f701613d641185cf930c5356e",
+    "base": "dec5ca5577d6042b4e870fadf4087c5b9b8d3a70",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/repack.cpp",
+        "before_sha256": "57b1362562ec0dfe8475e49a639783468da3ddbf7a5f009adcd01a7e4ed61fbf",
+        "after_sha256": "1f49b7d088c88df0cc5b672adcb707fa994c72a4dc0d2bffbad2c23bed486f59"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "rvv-iq4-xs-cleanup",
+    "head": "46fa227ec9714cbe1b4de041186940a52aa30f48",
+    "base": "898b08854d64befbbb7f6e22a5e3052d65e94f4b",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "0545b5f267e64e60db0206fa6308caa1b0496f21072fec6b4306abdbfc4a3a0f"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "rvv-q4-0-gemm-loop-interchange",
+    "head": "2ccd3df8ebf2fdad464d576e239a48953059a5b2",
+    "base": "12127defda4f41b7679cb2477a4b0d65ee6a0c8f",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/repack.cpp",
+        "before_sha256": "57b1362562ec0dfe8475e49a639783468da3ddbf7a5f009adcd01a7e4ed61fbf",
+        "after_sha256": "d874871998d24d3a8fb5410af33e419bb5fbc3d22a29a2653b03e61e79084498"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "rvv-q5-k-vwmacc",
+    "head": "9b95d0cb9c1f460794ff71290f7c5c5216885b17",
+    "base": "f818065d753700341b5355ce36ca676ecfb5d139",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "2402bd1b5c16e20ae896cbe263d525a082827dffbd92f3727bb97dd5d5cd3b08"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "rvv-q6-k-16x1-repack",
+    "head": "5a4f718ce6c2260c30ea37d74470333eb9554721",
+    "base": "e9fa0781f1c25fc4fe8c86be1edc6970661ad6f0",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/repack.cpp",
+        "before_sha256": "57b1362562ec0dfe8475e49a639783468da3ddbf7a5f009adcd01a7e4ed61fbf",
+        "after_sha256": "687b1c29adbc6be93f82e3f30a295650e73dd1ed5570348b82b83a3ff4dde8fc"
+      },
+      {
+        "path": "ggml/src/ggml-cpu/repack.cpp",
+        "before_sha256": "b3a1d6953fc61f2a4088337384166fb5102db617afe37a4b92f7cf07992a9f8a",
+        "after_sha256": "6ca69027f9e455dc026a5c9a56b9c1774cb57546888366527b77c70ab5a60d39"
+      },
+      {
+        "path": "ggml/src/ggml-cpu/repack.h",
+        "before_sha256": "fe472315b4106400d7890fca308659c74bcdedad1b011a9ba60c02dcd5bef57b",
+        "after_sha256": "947edc8e537e669013e8d094a6938fc486b764e882c955e96753f9a8a758b8cc"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": true
+  },
+  {
+    "branch": "rvv-q6-k-vwmacc",
+    "head": "7fa04c930d327938a3f70f989b40c6ca82651d24",
+    "base": "86b94708f22478f900b76ca02e316f4f3418faff",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "5183e13ee2a17225e541eec0f70f260fd44d6d691f11b3c273c625079315c5fc"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": true
+  },
+  {
+    "branch": "rvv-q8-0-gemm-vwmacc",
+    "head": "3d15cf55eee4d8167927aeb807e424aebc094677",
+    "base": "6eab47181cbd3532c88a105682b81b4729ab809b",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/repack.cpp",
+        "before_sha256": "57b1362562ec0dfe8475e49a639783468da3ddbf7a5f009adcd01a7e4ed61fbf",
+        "after_sha256": "0a7f2b7869fc9358a2316c920a56ee5aa1e8a7e0f666daf469844d4d7938a0d7"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  },
+  {
+    "branch": "rvv-tq1-vmacc",
+    "head": "81beb3a084b3488ca9a736f342a66de393c71b0e",
+    "base": "86b94708f22478f900b76ca02e316f4f3418faff",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+        "before_sha256": "acf089ff8b39c1eeb7cb8f67df8ab49055a5b82a530b9c4871ea7ab732cf390f",
+        "after_sha256": "caabe0d2be7daaf882b65f3616ea0715edb0b8efdf1be067848106eaaf279550"
+      }
+    ],
+    "patch_verified": true,
+    "integrated_into_current_runtime": false
+  }
+]

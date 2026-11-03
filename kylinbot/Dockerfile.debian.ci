@@ -1,0 +1,43 @@
+# Dockerfile.debian.ci — CI/release Debian image using pre-built binaries.
+# Mirrors Dockerfile.ci but uses debian:bookworm-slim with shell tools
+# so the agent can use shell-based tools (pwd, ls, git, curl, etc.).
+# Used by release workflows to skip ~60 min QEMU cross-compilation.
+
+# ── Runtime (Debian with shell) ────────────────────────────────
+FROM debian:bookworm-slim
+
+ARG TARGETARCH
+
+# Install essential tools for agent shell operations
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        curl \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the pre-built binary for this platform (amd64 or arm64)
+COPY bin/${TARGETARCH}/kylinbot /usr/local/bin/kylinbot
+
+# Copy the web dashboard bundled alongside the binary in the release tarball.
+# The dashboard was decoupled from the binary in #5665 and is now served from
+# disk at `gateway.web_dist_dir`; without this COPY the image has no
+# `/kylinbot-data/web/dist` and `GET /` returns HTTP 503.
+COPY bin/${TARGETARCH}/web/dist /kylinbot-data/web/dist
+
+# Runtime directory structure and default config
+COPY --chown=65534:65534 kylinbot-data/ /kylinbot-data/
+
+ENV LANG=C.UTF-8
+ENV KYLINBOT_WORKSPACE=/kylinbot-data/workspace
+ENV HOME=/kylinbot-data
+ENV KYLINBOT_GATEWAY_TRANSPORT=tcp
+ENV KYLINBOT_GATEWAY_PORT=42617
+
+WORKDIR /kylinbot-data
+USER 65534:65534
+EXPOSE 42617
+# CI/release images intentionally use TCP. UDS is the Linux desktop default;
+# container socket sharing is out of scope for this image.
+ENTRYPOINT ["kylinbot"]
+CMD ["daemon"]

@@ -1,0 +1,412 @@
+[workspace]
+members = [".", "crates/kylinbot-api", "crates/kylinbot-infra", "crates/kylinbot-config", "crates/kylinbot-providers", "crates/kylinbot-memory", "crates/kylinbot-channels", "crates/kylinbot-tools", "crates/kylinbot-runtime", "crates/kylinbot-tui", "crates/kylinbot-plugins", "crates/kylinbot-gateway", "crates/kylinbot-tool-call-parser", "crates/kart-embedding-sys", "crates/kart-vector-database-sys","crates/kart-speech-sys", "crates/kart-vision-sys", "crates/kart-coreai-vision-sys", "crates/kylinbot-macros", "apps/tauri", "tools/fill-translations", "xtask"]
+resolver = "2"
+exclude = ["plugins/image-gen-fal"]
+
+[workspace.package]
+version = "0.7.4"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://gitee.com/openkylin/kylinbot"
+rust-version = "1.87"
+
+[workspace.dependencies]
+kylinbot-api = { path = "crates/kylinbot-api", version = "0.7.4" }
+kylinbot-infra = { path = "crates/kylinbot-infra", version = "0.7.4" }
+kylinbot-config = { path = "crates/kylinbot-config", version = "0.7.4", default-features = false }
+kylinbot-providers = { path = "crates/kylinbot-providers", version = "0.7.4" }
+kylinbot-memory = { path = "crates/kylinbot-memory", version = "0.7.4" }
+kylinbot-channels = { path = "crates/kylinbot-channels", version = "0.7.4", default-features = false }
+kylinbot-tools = { path = "crates/kylinbot-tools", version = "0.7.4" }
+kylinbot-runtime = { path = "crates/kylinbot-runtime", version = "0.7.4", default-features = false }
+kylinbot-tui = { path = "crates/kylinbot-tui", version = "0.7.4" }
+kylinbot-plugins = { path = "crates/kylinbot-plugins", version = "0.7.4" }
+kylinbot-gateway = { path = "crates/kylinbot-gateway", version = "0.7.4" }
+kylinbot-tool-call-parser = { path = "crates/kylinbot-tool-call-parser", version = "0.7.4" }
+kylinbot-macros = { path = "crates/kylinbot-macros", version = "0.7.4" }
+kart-speech-sys = { path = "crates/kart-speech-sys", version = "0.1.0" }
+kart-vision-sys = { path = "crates/kart-vision-sys", version = "0.1.0" }
+kart-coreai-vision-sys = { path = "crates/kart-coreai-vision-sys", version = "0.1.0" }
+
+[package]
+name = "kylinbot"
+# Publishing blocked during microkernel workspace transition — see #5811.
+# All 14 workspace sub-crates are publish = false and therefore unresolvable
+# on crates.io. Flip or remove this once the multi-crate publish topology is
+# designed per RFC #5579.
+publish = false
+version.workspace = true
+edition.workspace = true
+authors = ["theonlyhennygod"]
+license.workspace = true
+description = "Zero overhead. Zero compromise. 100% Rust. The fastest, smallest AI assistant."
+repository.workspace = true
+readme = "README.md"
+keywords = ["ai", "agent", "cli", "assistant", "chatbot"]
+categories = ["command-line-utilities", "api-bindings"]
+rust-version.workspace = true
+include = [
+  "/src/**/*",
+  "/build.rs",
+  "/Cargo.toml",
+  "/Cargo.lock",
+  "/LICENSE*",
+  "/README.md",
+  "/web/dist/**/*",
+  "/locales/**/*",
+]
+
+[[bin]]
+name = "kylinbot"
+path = "src/main.rs"
+
+[lib]
+name = "kylinbot"
+path = "src/lib.rs"
+
+[dependencies]
+# Internal workspace crates — versions and paths declared once in [workspace.dependencies]
+kylinbot-api.workspace = true
+kylinbot-infra.workspace = true
+kylinbot-config.workspace = true
+kylinbot-providers.workspace = true
+kylinbot-memory.workspace = true
+kylinbot-channels = { workspace = true, optional = true }
+kylinbot-tools = { workspace = true, optional = true }
+kylinbot-runtime = { workspace = true, optional = true }
+kylinbot-tui = { workspace = true, optional = true }
+kylinbot-plugins = { workspace = true, optional = true }
+kylinbot-gateway = { workspace = true, optional = true }
+kylinbot-tool-call-parser.workspace = true
+kylinbot-macros.workspace = true
+# CLI - minimal and fast
+clap = { version = "4.5", features = ["derive"] }
+clap_complete = "4.5"
+clap-markdown = "0.1"
+
+# Async runtime - feature-optimized for size
+tokio = { version = "1.50", default-features = false, features = ["rt-multi-thread", "macros", "time", "net", "io-util", "sync", "process", "io-std", "fs", "signal"] }
+tokio-util = { version = "0.7", default-features = false }
+tokio-stream = { version = "0.1.18", default-features = false, features = ["fs", "sync"] }
+
+# HTTP client - minimal features
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking", "multipart", "stream", "socks"] }
+
+# Serialization
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0", default-features = false, features = ["std"] }
+
+# Config
+directories = "6.0"
+toml = "1.0"
+toml_edit = "0.25"  # already a transitive dep via toml — zero added compile/binary cost
+shellexpand = "3.1"
+
+# JSON Schema generation for config export
+schemars = "1.2"
+
+# Logging - minimal
+tracing = { version = "0.1", default-features = false }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "ansi", "env-filter"] }
+
+# Base64 encoding (screenshots, image data)
+base64 = "0.22"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+
+# URL encoding for web search
+urlencoding = "2.1"
+
+# HTML to plain text conversion (web_fetch tool)
+nanohtml2text = "0.2"
+
+rumqttc = "0.25"
+
+# Tarball extraction for binary updates
+flate2 = "1"
+tar = "0.4"
+
+# Progress bars (update pipeline)
+indicatif = "0.18"
+
+# Temp files (update pipeline rollback)
+tempfile = "3.26"
+
+# Zip extraction for ClawhHub / OpenClaw registry installers
+zip = { version = "8.1", default-features = false, features = ["deflate-flate2"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# UUID generation
+uuid = { version = "1.22", default-features = false, features = ["v4", "std"] }
+
+# Authenticated encryption (AEAD) for secret store
+chacha20poly1305 = "0.10"
+
+# HMAC for webhook signature verification
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+
+# CSPRNG for secure token generation
+rand = "0.10"
+
+# Portable atomic fallbacks for targets without native 64-bit atomics
+portable-atomic = "1"
+
+# Fast mutexes that don't poison on panic
+parking_lot = "0.12"
+
+# Async traits
+async-trait = "0.1"
+
+# HMAC-SHA256 (Zhipu/GLM JWT auth)
+ring = { version = "0.17", optional = true }
+
+# LRU cache for bounded sender state
+lru = { version = "0.16", optional = true }
+
+# Memory / persistence (migration.rs, behind agent-runtime)
+rusqlite = { version = "0.37", features = ["bundled"], optional = true }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std", "serde"] }
+chrono-tz = { version = "0.10", optional = true }
+cron = { version = "0.15", optional = true }
+
+# Interactive CLI prompts (memory CLI uses dialoguer unconditionally)
+dialoguer = { version = "0.12", features = ["fuzzy-select"] }
+console = "0.16"
+
+# TUI onboarding (ratatui + crossterm)
+ratatui = { version = "0.30", default-features = true, optional = true }
+crossterm = { version = "0.29", features = ["event-stream"], optional = true }
+
+# Nostr key validation for wizard (behind channel-nostr feature)
+nostr-sdk = { version = "0.44", default-features = false, optional = true }
+
+# Binary discovery (desktop companion, init system detection)
+which = { version = "8.0", optional = true }
+
+# WebSocket client channels (Discord/Lark/DingTalk/Nostr)
+tokio-tungstenite = { version = "0.29", features = ["rustls-tls-webpki-roots"], optional = true }
+tokio-socks = { version = "0.5", optional = true }
+futures-util = { version = "0.3", default-features = false, features = ["sink"] }
+regex = "1.10"
+hostname = { version = "0.4.2", optional = true }
+rustls = { version = "0.23", optional = true }
+rustls-pemfile = { version = "2", optional = true }
+rustls-pki-types = { version = "1.14.0", optional = true }
+tokio-rustls = { version = "0.26.4", optional = true }
+webpki-roots = { version = "1.0.6", optional = true }
+
+# email
+lettre = { version = "0.11.19", default-features = false, features = ["builder", "smtp-transport", "rustls-tls"], optional = true }
+mail-parser = { version = "0.11.2", optional = true }
+async-imap = { version = "0.11", features = ["runtime-tokio"], default-features = false, optional = true }
+
+# HTTP server (gateway) — replaces raw TCP for proper HTTP/1.1 compliance
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "tokio", "query", "ws", "macros"], optional = true }
+hyper = { version = "1", features = ["http1", "server"], optional = true }
+hyper-util = { version = "0.1", features = ["tokio", "server-auto", "server-graceful"], optional = true }
+tower = { version = "0.5", default-features = false, features = ["util"], optional = true }
+tower-http = { version = "0.6", default-features = false, features = ["limit", "timeout"], optional = true }
+http-body-util = { version = "0.1", optional = true }
+
+# rust-embed removed — web dashboard served from filesystem via gateway.web_dist_dir
+mime_guess = { version = "2", optional = true }
+
+# Use the blocking HTTP exporter client to avoid Tokio-reactor panics in
+# non-Tokio contexts.
+
+# (Linux, macOS, Windows). Android/Termux uses target_os="android" and is excluded.
+
+# Uses wa-rs for Bot and Client, wa-rs-core for storage traits, custom rusqlite backend avoids Diesel conflict.
+
+# Unix-specific dependencies (for root check, etc.)
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[features]
+default = [
+    "agent-runtime",
+    "gateway",
+    "tui-onboarding",
+    "observability-prometheus",
+    "schema-export",
+    "kart-nlp",
+    "kart-embedding",
+    "vectordb",
+    "kart-speech",
+    "kart-vision",
+    "kart-coreai-vision",
+]
+
+# The full agent runtime — agent loop, channels, tools, all subsystems.
+# Without this, you get the kernel: config + providers + memory + CLI chat.
+# Gateway and TUI onboarding are opt-in separately (included in `default`).
+agent-runtime = [
+    "dep:kylinbot-runtime", "dep:kylinbot-channels", "dep:kylinbot-tools",
+    "dep:rusqlite",
+    "dep:ring", "dep:lru", "dep:chrono-tz", "dep:cron", "dep:which",
+    "dep:ratatui", "dep:crossterm",
+    "dep:tokio-tungstenite", "dep:tokio-socks", "dep:hostname",
+    "dep:rustls", "dep:rustls-pemfile", "dep:rustls-pki-types", "dep:tokio-rustls", "dep:webpki-roots",
+    "dep:lettre", "dep:mail-parser", "dep:async-imap",
+    "channel-email", "channel-telegram", "channel-lark",
+    "channel-discord", "channel-slack", "channel-signal",
+    "channel-mattermost", "channel-irc",
+    "channel-dingtalk", "channel-qq", "channel-bluesky",
+    "channel-twitter", "channel-reddit", "channel-notion",
+    "channel-linq", "channel-wati", "channel-nextcloud",
+    "channel-mochat", "channel-wecom", "channel-clawdtalk",
+    "channel-webhook", "channel-acp-server", "channel-whatsapp-cloud",
+    "channel-voice-call",
+]
+
+# Major subsystems — each forwards to exactly ONE crate
+gateway = [
+    "dep:kylinbot-gateway",
+    "dep:axum", "dep:hyper", "dep:hyper-util", "dep:tower", "dep:tower-http", "dep:http-body-util",
+    "dep:mime_guess",
+]
+tui-onboarding = ["dep:kylinbot-tui"]
+schema-export = ["kylinbot-config/schema-export"]
+
+# Channels — each forwards directly to kylinbot-channels (1 hop)
+channel-email = ["kylinbot-channels/channel-email"]
+channel-telegram = ["kylinbot-channels/channel-telegram"]
+channel-lark = ["kylinbot-channels/channel-lark"]
+channel-nostr = ["kylinbot-channels/channel-nostr", "kylinbot-runtime/channel-nostr", "dep:nostr-sdk"]
+channel-matrix = ["kylinbot-channels/channel-matrix"]
+channel-discord = ["kylinbot-channels/channel-discord"]
+channel-slack = ["kylinbot-channels/channel-slack"]
+channel-signal = ["kylinbot-channels/channel-signal"]
+channel-mattermost = ["kylinbot-channels/channel-mattermost"]
+channel-irc = ["kylinbot-channels/channel-irc"]
+channel-dingtalk = ["kylinbot-channels/channel-dingtalk"]
+channel-qq = ["kylinbot-channels/channel-qq"]
+channel-bluesky = ["kylinbot-channels/channel-bluesky"]
+channel-twitter = ["kylinbot-channels/channel-twitter"]
+channel-reddit = ["kylinbot-channels/channel-reddit"]
+channel-notion = ["kylinbot-channels/channel-notion"]
+channel-linq = ["kylinbot-channels/channel-linq"]
+channel-wati = ["kylinbot-channels/channel-wati"]
+channel-nextcloud = ["kylinbot-channels/channel-nextcloud"]
+channel-mochat = ["kylinbot-channels/channel-mochat"]
+channel-wechat = ["kylinbot-channels/channel-wechat"]
+channel-wecom = ["kylinbot-channels/channel-wecom"]
+channel-clawdtalk = ["kylinbot-channels/channel-clawdtalk"]
+channel-webhook = ["kylinbot-channels/channel-webhook"]
+channel-acp-server = ["kylinbot-channels/channel-acp-server"]
+channel-whatsapp-cloud = ["kylinbot-channels/channel-whatsapp-cloud"]
+channel-voice-call = ["kylinbot-channels/channel-voice-call"]
+channel-feishu = ["channel-lark"]
+whatsapp-web = ["kylinbot-channels/whatsapp-web"]
+voice-wake = ["kylinbot-channels/voice-wake"]
+
+# Backends and platform flags — each forwards to ONE crate
+observability-prometheus = [
+    "kylinbot-runtime/observability-prometheus",
+    "kylinbot-gateway/observability-prometheus",
+]
+observability-otel = ["kylinbot-runtime/observability-otel"]
+sandbox-landlock = ["kylinbot-runtime/sandbox-landlock"]
+sandbox-bubblewrap = ["kylinbot-runtime/sandbox-bubblewrap"]
+browser-native = ["kylinbot-tools/browser-native"]
+plugins-wasm = ["dep:kylinbot-plugins", "kylinbot-runtime/plugins-wasm"]
+rag-pdf = ["kylinbot-tools/rag-pdf", "kylinbot-runtime/rag-pdf"]
+webauthn = ["kylinbot-runtime/webauthn"]
+
+# Kart (kylin-genai-nlp native SDK) — opt-in; requires libkylin-genai-nlp-dev
+kart-nlp = ["kylinbot-providers/kart-nlp"]
+
+# Kart on-device speech (libkysdk-coreai-speech) — opt-in;
+# requires libkylin-coreai-speech-dev.
+kart-speech = ["kylinbot-channels/kart-speech"]
+
+# Kart on-device image generation (libkysdk-genai-vision) — opt-in;
+# requires libkysdk-genai-vision-dev.
+kart-vision = ["kylinbot-channels/kart-vision", "kylinbot-tools/kart-vision"]
+
+# Kart CoreAI Vision (OCR + subject segmentation, libkysdk-coreai-vision) — opt-in;
+# requires libkysdk-coreai-vision-dev.
+kart-coreai-vision = ["kylinbot-tools/kart-coreai-vision"]
+
+# Kart on-device text embedding (libkysdk-coreai-embedding) — opt-in;
+# requires libkylin-coreai-embedding-dev.
+kart-embedding = ["kylinbot-memory/kart-embedding"]
+
+# On-device vector + BM25 hybrid memory via local VectorDataEngine bridge.
+vectordb = ["kylinbot-memory/vectordb"]
+
+# Backward-compatible aliases
+fantoccini = ["browser-native"]
+landlock = ["sandbox-landlock"]
+metrics = ["observability-prometheus"]
+
+# CI meta-feature
+ci-all = [
+    "agent-runtime",
+    "channel-nostr", "channel-matrix", "whatsapp-web",
+    "observability-prometheus", "observability-otel",
+    "sandbox-landlock", "sandbox-bubblewrap",
+    "browser-native", "plugins-wasm", "rag-pdf",
+    "webauthn",
+]
+
+[profile.dev]
+incremental = true
+opt-level = 0
+
+[profile.release]
+opt-level = "z"      # Optimize for size
+lto = "fat"          # Maximum cross-crate optimization for smaller binaries
+codegen-units = 1    # Serialized codegen for smaller binaries
+                     # Higher values (e.g., 8) compile faster but require more RAM during compilation
+strip = true          # Remove debug symbols
+panic = "abort"      # Reduce binary size
+
+[profile.release-fast]
+inherits = "release"
+codegen-units = 8    # Parallel codegen for faster builds on powerful machines (16GB+ RAM recommended)
+                     # Use: cargo build --profile release-fast
+
+[profile.ci]
+inherits = "release"
+lto = "thin"         # Much faster than fat LTO; still catches release-mode issues
+codegen-units = 16   # Full parallelism for CI runners
+
+[profile.dist]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[dev-dependencies]
+tempfile = "3.26"
+criterion = { version = "0.8", features = ["async_tokio"] }
+wiremock = "0.6"
+scopeguard = "1.2"
+rcgen = "0.13"
+
+[[test]]
+name = "component"
+path = "tests/test_component.rs"
+
+[[test]]
+name = "integration"
+path = "tests/test_integration.rs"
+
+[[test]]
+name = "system"
+path = "tests/test_system.rs"
+
+[[test]]
+name = "live"
+path = "tests/test_live.rs"
+
+[[bench]]
+name = "agent_benchmarks"
+harness = false

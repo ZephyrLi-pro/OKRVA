@@ -1,0 +1,5 @@
+#!/bin/sh
+# KylinBot uses spd-say only for its fixed wake acknowledgement.  Play a
+# pre-rendered Mandarin WAV so this works even when eSpeak's Mandarin voice is
+# unavailable or unintelligible on the target image.
+exec /usr/bin/pw-play --volume 0.65 @HOME@/.local/share/kylinbot/wake_ack_zh.wav

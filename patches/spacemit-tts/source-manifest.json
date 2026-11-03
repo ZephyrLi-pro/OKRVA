@@ -1,0 +1,32 @@
+{
+  "upstream": "https://github.com/spacemit-com/model-zoo-tts",
+  "base_revision": "a13613dfa41d5dd971d1f897eb4b9e668540f2cb",
+  "download": "https://github.com/spacemit-com/model-zoo-tts/archive/a13613dfa41d5dd971d1f897eb4b9e668540f2cb.tar.gz",
+  "original_main_zip_sha256": "65b62beb7c71bd1e301926e0dc97d278f7115f2da99c1522430136c720c4cdd2",
+  "files": [
+    {
+      "path": "CMakeLists.txt",
+      "before_sha256": "bf3d0cb0e91bffbc79c925d9b6bc2df6c9877ca13caf0328e0b800341d5a252a",
+      "after_sha256": "7eeed46a83e51fc78d7895a5d2abeff762eaaf0824c08e1d09ecfbd9f0f724a4"
+    },
+    {
+      "path": "src/backends/matcha/matcha_backend.cpp",
+      "before_sha256": "f1a9980171c8df35858fff29252502fd903f0f062455bf1106361e8be681f0a7",
+      "after_sha256": "9ca57928f0b8f594c7a835b3857063a600fb329afb942a1d6a5e2f48893be12d"
+    },
+    {
+      "path": "src/backends/matcha/tts_model_downloader.cpp",
+      "before_sha256": "e8ce80b089d8a16ee282648dce5898ce1b05d6873be19e5008e972c63d54b310",
+      "after_sha256": "4f01670ba916c568781f9186d4cc03d941705a0f09649cd563652ccc126c96be"
+    },
+    {
+      "path": "src/text/text_normalizer.cpp",
+      "before_sha256": "e09b2349e72b6d30b5156833e5c23affdabd7c51b9cf5488e63377c29cd5b21e",
+      "after_sha256": "052d65ba4d7985797c2a9810ddd203fa93f24de597b33cb5aa909774f3890197"
+    }
+  ],
+  "patch_applies_and_matches_overrides": true,
+  "runtime_provider": "CPU",
+  "runtime_model": "matcha-icefall-zh-en",
+  "note": "Includes all device-side source delta, including optional Kokoro/Melo frontend work. Only the Matcha profile is currently deployed."
+}

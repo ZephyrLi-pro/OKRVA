@@ -1,0 +1,41 @@
+# %h/.config/systemd/user/kylinbot-tts.service
+[Unit]
+Description=Local Chinese-English TTS for RISC-V AI Adapter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/riscv-ai-adapter/scripts/tts_server.py --binary %h/.local/share/kylinbot-asr/sherpa-v1.13.2/bin/sherpa-onnx-offline-tts --model-dir %h/.cache/models/tts/vits-melo-tts-zh_en --model-file model.int8.onnx --profile melo-zh-en --extra-lexicon %h/riscv-ai-adapter/scripts/tts_melo_lexicon.txt --native-bridge %h/riscv-ai-adapter/scripts/libkylinbot-tts.so --threads 2
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+UMask=0077
+MemoryMax=768M
+TasksMax=64
+
+[Install]
+WantedBy=default.target
+
+# %h/.config/systemd/user/kylinbot-tts.service.d/20-matcha.conf
+# Drop-in for kylinbot-tts.service. Preserve its original Melo ExecStart for rollback.
+[Service]
+Environment=RVAI_TTS_CACHE_ROOT=%h/.local/share/riscv-ai-adapter/tts-matcha-20261016
+Environment=PATH=%h/.local/lib/riscv-ai-adapter/tts-matcha-20261016/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=
+ExecStart=/usr/bin/python3 %h/riscv-ai-adapter/scripts/tts_server.py --model-dir %h/.local/share/riscv-ai-adapter/tts-matcha-20261016/models/tts/matcha-tts --model-file matcha-icefall-zh-en/model-steps-3.q.onnx --profile matcha-zh-en --native-bridge %h/.local/lib/riscv-ai-adapter/tts-matcha-20261016/libkylinbot-matcha.so --threads 4
+CPUAffinity=0-3
+
+# %h/.config/systemd/user/kylinbot-tts.service.d/30-stream-priority.conf
+[Service]
+CPUWeight=400
+
+# /run/user/1000/systemd/user.control/kylinbot-tts.service.d/50-CPUWeight.conf
+# This is a drop-in unit file extension, created via "systemctl set-property"
+# or an equivalent operation. Do not edit.
+[Service]
+CPUWeight=400

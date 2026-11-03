@@ -1,0 +1,59 @@
+{
+    "toneStyles":
+    [
+        {
+            "toneInstruction": "使用规范、严谨的语言，条理清晰地陈述流程、要求和注意事项，避免口语化表达，保持客观、权威的叙述风格",
+            "toneName": "正式",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用富有美感、形象生动、富有想象力的语言，可适当运用比喻、拟人、排比等修辞手法，营造情感共鸣与艺术氛围",
+            "toneName": "艺术性",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用口语化、日常的语言，流畅的表达",
+            "toneName": "口语化",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用规范、严肃的政治术语，体现政策导向与思想引领，结构清晰、立场鲜明，语言庄重且具有号召力",
+            "toneName": "党政风",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用严谨、准确、逻辑性强的学术语言，注重术语使用与文献支撑，结构清晰、论证充分，避免主观情感表达",
+            "toneName": "学术",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用轻松、亲切、富有感染力的语言，可加入语气词、网络流行语或幽默表达，节奏明快，适合年轻化交流场景",
+            "toneName": "活泼",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用规范、简洁、格式固定的官方语言，遵循公文写作规范，措辞准确、层次分明、语气庄重，适用于正式文件与通知",
+            "toneName": "公文",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用专业、得体、高效的语言，注重礼貌与合作意向，结构清晰、重点突出，适用于商务沟通、提案与报告",
+            "toneName": "商务",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        },
+        {
+            "toneInstruction": "使用精确、专业、逻辑严密的行业术语，注重数据、流程与规范说明，避免模糊表述",
+            "toneName": "技术性",
+            "isCustom": false,
+            "fileURL": "//template/defaultDocs.json"
+        }
+    ]
+}

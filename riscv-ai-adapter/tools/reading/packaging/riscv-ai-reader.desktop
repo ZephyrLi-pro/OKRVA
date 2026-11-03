@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=多模态PPT阅读
+Comment=挥手翻页，语音询问当前页面
+Icon=libreoffice-impress
+Exec=systemctl --user start riscv-ai-reader.service
+Terminal=false
+Categories=Office;Presentation;

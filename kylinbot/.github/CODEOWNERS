@@ -1,0 +1,32 @@
+# Default owner for all files
+* @openkylin/kylinbot-maintainers
+
+# Important functional modules
+/src/agent/** @openkylin/kylinbot-maintainers
+/src/providers/** @openkylin/kylinbot-maintainers
+/src/channels/** @openkylin/kylinbot-maintainers
+/src/tools/** @openkylin/kylinbot-maintainers
+/src/gateway/** @openkylin/kylinbot-maintainers
+/src/runtime/** @openkylin/kylinbot-maintainers
+/src/memory/** @openkylin/kylinbot-maintainers
+/Cargo.toml @openkylin/kylinbot-maintainers
+/Cargo.lock @openkylin/kylinbot-maintainers
+
+# Security / tests / CI-CD ownership
+/src/security/** @openkylin/kylinbot-maintainers
+/tests/** @openkylin/kylinbot-maintainers
+/.github/** @openkylin/kylinbot-maintainers
+/.github/workflows/** @openkylin/kylinbot-maintainers
+/.github/codeql/** @openkylin/kylinbot-maintainers
+/.github/dependabot.yml @openkylin/kylinbot-maintainers
+/SECURITY.md @openkylin/kylinbot-maintainers
+/docs/actions-source-policy.md @openkylin/kylinbot-maintainers
+/docs/ci-map.md @openkylin/kylinbot-maintainers
+
+# Docs & governance
+/docs/** @openkylin/kylinbot-maintainers
+/AGENTS.md @openkylin/kylinbot-maintainers
+/CLAUDE.md @openkylin/kylinbot-maintainers
+/CONTRIBUTING.md @openkylin/kylinbot-maintainers
+/docs/pr-workflow.md @openkylin/kylinbot-maintainers
+/docs/reviewer-playbook.md @openkylin/kylinbot-maintainers

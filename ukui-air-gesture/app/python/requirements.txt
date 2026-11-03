@@ -1,0 +1,4 @@
+mediapipe==0.10.14
+dbus-next==0.2.3
+jax==0.10.1
+jaxlib==0.10.1

@@ -1,0 +1,20 @@
+# %h/.config/systemd/user/riscv-ai-reader.service
+[Unit]
+Description=Multimodal PPT reader, scoped navigation and voice page context
+Wants=kylinbot.service
+After=kylinbot.service
+
+[Service]
+Type=notify
+NotifyAccess=main
+Environment=XDG_RUNTIME_DIR=%t
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=DISPLAY=:0
+ExecStart=/usr/bin/python3 -u -B %h/riscv-ai-adapter/tools/reading/reader.py --file %h/scenario5-20261028/openKylin-2026.pptx --title openKylin社区介绍2026 --start-page 13
+ExecStopPost=-/usr/bin/python3 -B %h/riscv-ai-adapter/tools/reading/reader.py --clear-context
+TimeoutStartSec=120
+TimeoutStopSec=15
+KillMode=control-group
+Restart=no
+NoNewPrivileges=true

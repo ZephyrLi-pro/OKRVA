@@ -1,0 +1,5 @@
+# MeloTTS phones followed by equally many tones (English tone offset: 7).
+# Project pronunciation: Kylin ~= killin; Bot ~= bott (English, not Chinese alias).
+kylin k ih l ih n 7 9 7 8 7
+bot b aa t 7 9 7
+kylinbot k ih l ih n b aa t 7 9 7 8 7 7 9 7

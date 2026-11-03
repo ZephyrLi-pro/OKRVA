@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" type="image/svg" href="%BASE_URL%kylin-bot.svg" />
+  <title>KylinBot</title>
+  <!-- QML 可能在 ES module 加载完成前就调用 __kylinbotNavigate（WebEngine 在 HTML 加载成功时即触发） -->
+  <script>
+    (function () {
+      var pending = [];
+      window.__kylinbotNavigate = function (path) {
+        if (typeof window.__kylinbotNavigateImpl === 'function') {
+          window.__kylinbotNavigateImpl(path);
+        } else {
+          pending.push(path);
+        }
+      };
+      window.__kylinbotFlushNavigate = function () {
+        var impl = window.__kylinbotNavigateImpl;
+        if (typeof impl !== 'function') return;
+        while (pending.length) impl(pending.shift());
+      };
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <!-- Dialog portals target this node so overlays stack predictably vs Qt WebEngine + #root -->
+  <div id="modal-root"></div>
+  <!-- Qt WebChannel JS API，Vite 会将 public/qwebchannel.js 拷贝到 dist/ -->
+  <script src="./qwebchannel.js"></script>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

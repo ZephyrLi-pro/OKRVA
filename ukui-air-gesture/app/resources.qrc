@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="data/hand-palm-up-24-symbolic.svg">../data/hand-palm-up-24-symbolic.svg</file>
+        <file alias="data/hand-palm-right-24-symbolic.svg">../data/hand-palm-right-24-symbolic.svg</file>
+        <file alias="data/hand-back-left-24-symbolic.svg">../data/hand-back-left-24-symbolic.svg</file>
+        <file alias="data/hand-back-down-24-symbolic.svg">../data/hand-back-down-24-symbolic.svg</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,1278 @@
+--- a/ggml/src/ggml-cpu/spacemit/ime.cpp
++++ b/ggml/src/ggml-cpu/spacemit/ime.cpp
+@@ -14,6 +14,7 @@
+ #include "repack.h"
+ #include "rvv_kernels.h"
+ #include "spine_mem_pool.h"
++#include "spine_tcm.h"
+ #include "traits.h"
+ #include "vec.h"
+ 
+@@ -22,11 +23,15 @@
+ #include <unistd.h>
+ 
+ #include <algorithm>
++#include <array>
+ #include <atomic>
+ #include <cassert>
+ #include <cerrno>
+ #include <cmath>
+ #include <cstdio>  // for GGML_ASSERT
++#include <cstdlib>
++#include <cstring>
++#include <limits>
+ #include <stdexcept>
+ #include <thread>
+ // clang-format off
+@@ -68,6 +73,15 @@
+ extern "C" {
+ extern void ggml_threadpool_chunk_set(struct ggml_threadpool * tp, int value);
+ extern int  ggml_threadpool_chunk_add(struct ggml_threadpool * tp, int value);
++}
++
++// Private, opt-in experiment. A raw Q4_K sidecar follows each eligible
++// tensor's IME data inside the same allocation, with buffer-owned lifetime.
++static size_t ggml_riscv64_spacemit_packed_nbytes(const ggml_tensor * tensor);
++static bool ggml_riscv64_spacemit_has_cpu_copy(const ggml_tensor * tensor);
++static bool ggml_riscv64_spacemit_cpu_decode(const ggml_tensor * op);
++static void * ggml_riscv64_spacemit_cpu_copy(const ggml_tensor * tensor) {
++    return (char *) tensor->data + GGML_PAD(ggml_riscv64_spacemit_packed_nbytes(tensor), 64);
+ }
+ 
+ namespace ggml::cpu::riscv64_spacemit {
+@@ -81,11 +95,71 @@
+ 
+ thread_local TLSContext tls_context;
+ 
++// Opt-in K1/v1 coexistence mode: ASR retains two of four 128-KiB blocks.
++// Give each of the four LLM workers its own non-overlapping 64-KiB slice.
++// v1 has process-lifetime mappings and no per-core acquire/release protocol;
++// never share a v2 lease between workers through this legacy-only path.
++struct k1_tcm_workspace_pool {
++    static constexpr size_t slice_bytes = 64 * 1024;
++    std::array<void *, 4> slices{};
++    std::array<int, 4> blocks{};
++    int acquired = 0;
++    bool enabled = false;
++
++    k1_tcm_workspace_pool() {
++        const char * value = std::getenv("SPACEMIT_K1_TCM_SPLIT");
++        enabled = value && std::strcmp(value, "1") == 0;
++        if (!enabled) {
++            return;
++        }
++        if (!global_spine_env_info.use_tcm || !global_spine_env_info.use_ime1 ||
++            global_spine_env_info.perfer_core_arch_id != spine_core_arch_id::core_arch_a60 ||
++            global_spine_env_info.perfer_core_ids.size() != slices.size() ||
++            global_spine_env_info.tcm_blk_size != 2 * slice_bytes) {
++            GGML_ABORT("K1 TCM split requires four K1 AI cores and 128-KiB TCM blocks");
++        }
++        if (spine_tcm_open_handle(nullptr) != 0) {
++            GGML_ABORT("K1 TCM split cannot load the TCM runtime");
++        }
++        spine_tcm_mem_info_t layout{};
++        if (spine_tcm_mem_info(&layout) != 0 || layout.is_fake_tcm) {
++            GGML_ABORT("K1 TCM split requires real TCM, not emulated buffers");
++        }
++        spine_tcm_block_info_t metadata{};
++        if (spine_tcm_block_info(0, &metadata) != 0 || metadata.is_acquired != -1 ||
++            metadata.cpu_affinity_mask != 0 || metadata.phys_addr != 0) {
++            GGML_ABORT("K1 TCM split requires the legacy v1 allocation-only backend");
++        }
++        // Function-static initialization serializes allocation before any
++        // worker receives a view; allocation failure must never mix layouts.
++        for (int block = 0; block < 2; ++block) {
++            auto * base = static_cast<char *>(spine_mem_pool_tcm_mem_get(block));
++            if (!base) {
++                GGML_ABORT("K1 TCM split cannot reserve two blocks; TCM is busy");
++            }
++            ++acquired;
++            for (int part = 0; part < 2; ++part) {
++                slices[block * 2 + part] = base + part * slice_bytes;
++                blocks[block * 2 + part] = block;
++            }
++        }
++        GGML_LOG_INFO("K1 TCM split: 2 x 128 KiB reserved, 4 x 64 KiB worker workspaces\n");
++    }
++
++    ~k1_tcm_workspace_pool() {
++        for (int block = 0; block < acquired; ++block) {
++            spine_tcm_mem_free(block);
++        }
++    }
++};
++
+ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS> constexpr size_t get_repacked_block_type_size() {
+     if constexpr (std::is_same_v<BLOC_TYPE, block_q6_K> || std::is_same_v<BLOC_TYPE, block_q8_0>) {
+         return sizeof(block_q8_0);
+     } else if constexpr (std::is_same_v<BLOC_TYPE, block_q4_0>) {
+         return sizeof(block_q4_0) * INTER_SIZE / QK4_0;
++    } else if constexpr (std::is_same_v<BLOC_TYPE, block_q4_K> && NB_COLS == 16) {
++        return sizeof(spacemit_kernels::ime1::block_q4_k_x16) / 16;
+     } else if constexpr (std::is_same_v<BLOC_TYPE, block_q4_1> || std::is_same_v<BLOC_TYPE, block_q4_K>) {
+         return (sizeof(block_q4_0) + sizeof(uint8_t)) * INTER_SIZE / QK4_1;
+     } else if constexpr (std::is_same_v<BLOC_TYPE, block_q2_K>) {
+@@ -126,6 +200,11 @@
+ 
+ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS> class tensor_traits : public tensor_traits_base {
+     bool work_size(int /* n_threads */, const ggml_tensor * op, size_t & size) override {
++        if (ggml_riscv64_spacemit_cpu_decode(op)) {
++            const auto vec_type = ggml_get_type_traits_cpu(op->src[0]->type)->vec_dot_type;
++            size = ggml_row_size(vec_type, ggml_nelements(op->src[1]));
++            return true;
++        }
+         switch (op->op) {
+             case GGML_OP_MUL_MAT:
+                 {
+@@ -134,6 +213,9 @@
+                     if constexpr (std::is_same_v<BLOC_TYPE, block_q2_K> || std::is_same_v<BLOC_TYPE, block_q3_K>) {
+                         size =
+                             spacemit_kernels::div_round_up(src1_nelements, QK_K) * spacemit_kernels::q8k_blk_size(QK_K);
++                    } else if constexpr (std::is_same_v<BLOC_TYPE, block_q4_K> && NB_COLS == 16) {
++                        size = spacemit_kernels::div_round_up(src1_nelements, QK4_0) *
++                               spacemit_kernels::ime1::q4_k_activation_block_size;
+                     } else if constexpr (INTER_SIZE == QK4_0) {
+                         size = spacemit_kernels::div_round_up(src1_nelements, QK4_0) *
+                                spacemit_kernels::q8_blk_size(QK4_0, true);
+@@ -155,6 +237,9 @@
+                     if constexpr (std::is_same_v<BLOC_TYPE, block_q2_K> || std::is_same_v<BLOC_TYPE, block_q3_K>) {
+                         size =
+                             spacemit_kernels::div_round_up(src1_nelements, QK_K) * spacemit_kernels::q8k_blk_size(QK_K);
++                    } else if constexpr (std::is_same_v<BLOC_TYPE, block_q4_K> && NB_COLS == 16) {
++                        size = spacemit_kernels::div_round_up(src1_nelements, QK4_0) *
++                               spacemit_kernels::ime1::q4_k_activation_block_size;
+                     } else if constexpr (INTER_SIZE == QK4_0) {
+                         size = spacemit_kernels::div_round_up(src1_nelements, QK4_0) *
+                                spacemit_kernels::q8_blk_size(QK4_0, true);
+@@ -185,6 +270,22 @@
+     }
+ 
+     bool compute_forward(ggml_compute_params * params, ggml_tensor * op) override {
++        if (ggml_riscv64_spacemit_cpu_decode(op)) {
++            // Thread-local descriptors: never mutate the shared graph tensor,
++            // and never let the native kernel interpret packed IME bytes.
++            ggml_tensor raw = *op->src[0];
++            raw.data = ggml_riscv64_spacemit_cpu_copy(op->src[0]);
++            raw.buffer = nullptr;
++            raw.extra = nullptr;
++            ggml_tensor native = *op;
++            native.src[0] = &raw;
++            ggml_compute_forward_mul_mat(params, &native);
++            return true;
++        }
++        if (global_spine_env_info.use_tcm && !tls_context.tcm_buffer &&
++            (op->op == GGML_OP_MUL_MAT || op->op == GGML_OP_MUL_MAT_ID)) {
++            GGML_ABORT("TCM allocation failed for a matrix worker; refusing mixed TCM/DRAM scheduling");
++        }
+         switch (op->op) {
+             case GGML_OP_MUL_MAT:
+                 switch (op->src[0]->type) {
+@@ -317,7 +418,19 @@
+ 
+             if constexpr (std::is_same_v<BLOC_TYPE, block_q4_0> || std::is_same_v<BLOC_TYPE, block_q4_1> ||
+                           std::is_same_v<BLOC_TYPE, block_q4_K>) {
+-                gemm_kernel     = spacemit_kernels::ime1::gemm_kernel_i8i4;
++                if constexpr (std::is_same_v<BLOC_TYPE, block_q4_K>) {
++                    quantize_a_row_i8  = spacemit_kernels::ime1::quantize_a_row_i8q4_k;
++                    quantize_a_4row_i8 = spacemit_kernels::ime1::quantize_a_4row_i8q4_k;
++                    block_stride_a    = spacemit_kernels::ime1::q4_k_activation_block_size;
++                    gemm_kernel = spacemit_kernels::ime1::gemm_kernel_i8q4_k;
++                    if (gemm_m == 1) {
++                        quantize_a_row_i8 = spacemit_kernels::ime1::quantize_a_row_i8;
++                        block_stride_a   = spacemit_kernels::q8_blk_size(a_blk_len);
++                        gemm_kernel      = spacemit_kernels::ime1::gemm_kernel_i8q4_k_decode;
++                    }
++                } else {
++                    gemm_kernel = spacemit_kernels::ime1::gemm_kernel_i8i4;
++                }
+                 set_kernel_impl = true;
+             }
+         }
+@@ -340,6 +453,13 @@
+ 
+         void *        tcm_buffer      = ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer;
+         const int64_t tcm_buffer_size = ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer_size;
++        if constexpr (std::is_same_v<BLOC_TYPE, block_q4_K> && NB_COLS == 16) {
++            // Pair-pipelined TCM requires matching iteration counts for both
++            // workers. Tail columns/odd teams use the uniform DRAM/IME path.
++            if (nth % 2 != 0 || gemm_n % (2 * NB_COLS) != 0) {
++                tcm_buffer = nullptr;
++            }
++        }
+ 
+         auto * quant_a_buffer = reinterpret_cast<uint8_t *>(ws_ptr);
+ 
+@@ -620,7 +740,13 @@
+ 
+             if constexpr (std::is_same_v<BLOC_TYPE, block_q4_0> || std::is_same_v<BLOC_TYPE, block_q4_1> ||
+                           std::is_same_v<BLOC_TYPE, block_q4_K>) {
+-                gemm_kernel     = spacemit_kernels::ime1::gemm_kernel_i8i4;
++                if constexpr (std::is_same_v<BLOC_TYPE, block_q4_K>) {
++                    quantize_a_row_i8 = spacemit_kernels::ime1::quantize_a_row_i8q4_k;
++                    block_stride_a   = spacemit_kernels::ime1::q4_k_activation_block_size;
++                    gemm_kernel = spacemit_kernels::ime1::gemm_kernel_i8q4_k;
++                } else {
++                    gemm_kernel = spacemit_kernels::ime1::gemm_kernel_i8i4;
++                }
+                 set_kernel_impl = true;
+             }
+         }
+@@ -1392,6 +1518,28 @@
+     return nullptr;
+ }
+ 
++static bool ggml_riscv64_spacemit_has_cpu_copy(const ggml_tensor * tensor) {
++#if defined(RISCV64_SPACEMIT_IME1)
++    static const bool enabled = []() {
++        const char * value = std::getenv("SPACEMIT_Q4K_CPU_DECODE");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    return enabled && tensor->type == GGML_TYPE_Q4_K && !tensor->view_src &&
++           ggml_n_dims(tensor) == 2 && ggml_is_contiguous(tensor) &&
++           ggml_riscv64_spacemit_get_optimal_repack_type(tensor) ==
++               &ggml::cpu::riscv64_spacemit::q4_k_16x32_q8_0;
++#else
++    GGML_UNUSED(tensor);
++    return false;
++#endif
++}
++
++static bool ggml_riscv64_spacemit_cpu_decode(const ggml_tensor * op) {
++    return op->op == GGML_OP_MUL_MAT && ggml_nrows(op->src[1]) == 1 &&
++           op->src[1]->type == GGML_TYPE_F32 &&
++           ggml_riscv64_spacemit_has_cpu_copy(op->src[0]);
++}
++
+ static enum ggml_status ggml_backend_riscv64_spacemit_buffer_init_tensor(ggml_backend_buffer_t buffer,
+                                                                          ggml_tensor *         tensor) {
+     tensor->extra =
+@@ -1427,7 +1575,16 @@
+                                                                size_t                offset,
+                                                                size_t                size) {
+     GGML_ASSERT(tensor);
+-    memset((char *) tensor->data + offset, value, size);
++    if (ggml_riscv64_spacemit_has_cpu_copy(tensor)) {
++        const size_t raw_size = ggml_nbytes(tensor);
++        GGML_ASSERT(offset <= raw_size && size <= raw_size - offset);
++        void * raw = ggml_riscv64_spacemit_cpu_copy(tensor);
++        memset((char *) raw + offset, value, size);
++        auto traits = (ggml::cpu::riscv64_spacemit::tensor_traits_base *) tensor->extra;
++        GGML_ASSERT(traits && traits->repack(tensor, raw, raw_size) == 0);
++    } else {
++        memset((char *) tensor->data + offset, value, size);
++    }
+ 
+     GGML_UNUSED(buffer);
+ }
+@@ -1452,6 +1609,9 @@
+     if (tensor_traits) {
+         auto OK = tensor_traits->repack(tensor, data, size);
+         GGML_ASSERT(OK == 0);
++    }
++    if (ggml_riscv64_spacemit_has_cpu_copy(tensor)) {
++        std::memmove(ggml_riscv64_spacemit_cpu_copy(tensor), data, size);
+     }
+ 
+     GGML_UNUSED(buffer);
+@@ -1493,14 +1653,12 @@
+     GGML_UNUSED(buft);
+ }
+ 
+-static size_t ggml_backend_cpu_riscv64_spacemit_nbytes(ggml_backend_buffer_type_t buft, const ggml_tensor * tensor) {
++static size_t ggml_riscv64_spacemit_packed_nbytes(const ggml_tensor * tensor) {
+     for (int i = 0; i < GGML_MAX_DIMS; ++i) {
+         if (tensor->ne[i] <= 0) {
+             return 0;
+         }
+     }
+-
+-    GGML_UNUSED(buft);
+ 
+     const auto plain_nbytes = [&]() {
+         size_t total = ggml_type_size(tensor->type);
+@@ -1540,7 +1698,13 @@
+     size_t nbytes = row_nbytes;
+     switch (tensor->type) {
+         case GGML_TYPE_Q4_K:
+-            nbytes = remap_block_nbytes(sizeof(block_q4_K), sizeof(block_q4_1) * 8);
++            if (ggml_riscv64_spacemit_get_optimal_repack_type(tensor) ==
++                &ggml::cpu::riscv64_spacemit::q4_k_16x32_q8_0) {
++                nbytes = remap_block_nbytes(sizeof(block_q4_K),
++                    sizeof(spacemit_kernels::ime1::block_q4_k_x16) / 16 * 8);
++            } else {
++                nbytes = remap_block_nbytes(sizeof(block_q4_K), sizeof(block_q4_1) * 8);
++            }
+             break;
+         case GGML_TYPE_Q6_K:
+             nbytes = remap_block_nbytes(sizeof(block_q6_K), sizeof(block_q8_0) * 8, 32);
+@@ -1572,6 +1736,18 @@
+     }
+ 
+     return nbytes;
++}
++
++static size_t ggml_backend_cpu_riscv64_spacemit_nbytes(ggml_backend_buffer_type_t buft, const ggml_tensor * tensor) {
++    GGML_UNUSED(buft);
++    const size_t packed = ggml_riscv64_spacemit_packed_nbytes(tensor);
++    if (!packed || !ggml_riscv64_spacemit_has_cpu_copy(tensor)) {
++        return packed;
++    }
++    const size_t raw = ggml_nbytes(tensor);
++    const size_t max = std::numeric_limits<size_t>::max();
++    GGML_ASSERT(packed <= max - 63 && GGML_PAD(packed, 64) <= max - raw);
++    return GGML_PAD(packed, 64) + raw;
+ }
+ 
+ namespace ggml::cpu::riscv64_spacemit {
+@@ -1688,6 +1864,7 @@
+ }
+ 
+ void ggml_backend_cpu_riscv64_spacemit_set_numa_thread_affinity(int thread_n) {
++    static ggml::cpu::riscv64_spacemit::k1_tcm_workspace_pool workspace_pool;
+     int cpu_id = sched_getcpu();
+     if (ggml::cpu::riscv64_spacemit::global_spine_env_info.use_ime2 &&
+         !((1 << cpu_id) & ggml::cpu::riscv64_spacemit::global_spine_env_info.cpu_mask)) {
+@@ -1712,11 +1889,17 @@
+         }
+ 
+         int ai_cpu_id = perfer_cpu_id - ggml::cpu::riscv64_spacemit::global_spine_env_info.aicpu_id_offset;
+-        ggml::cpu::riscv64_spacemit::tls_context.cpu_id = ai_cpu_id;
+-        ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer =
+-            ggml::cpu::riscv64_spacemit::spine_mem_pool_tcm_mem_get(ai_cpu_id);
+-        ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer_size =
+-            ggml::cpu::riscv64_spacemit::global_spine_env_info.tcm_blk_size;
++        if (workspace_pool.enabled) {
++            ggml::cpu::riscv64_spacemit::tls_context.cpu_id = workspace_pool.blocks[thread_n];
++            ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer = workspace_pool.slices[thread_n];
++            ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer_size = workspace_pool.slice_bytes;
++        } else {
++            ggml::cpu::riscv64_spacemit::tls_context.cpu_id = ai_cpu_id;
++            ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer =
++                ggml::cpu::riscv64_spacemit::spine_mem_pool_tcm_mem_get(ai_cpu_id);
++            ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer_size =
++                ggml::cpu::riscv64_spacemit::global_spine_env_info.tcm_blk_size;
++        }
+     }
+ 
+     if (ggml::cpu::riscv64_spacemit::tls_context.tcm_buffer != nullptr) {
+--- a/ggml/src/ggml-cpu/spacemit/ime1_kernels.cpp
++++ b/ggml/src/ggml-cpu/spacemit/ime1_kernels.cpp
+@@ -5,6 +5,7 @@
+ 
+ #include <algorithm>
+ #include <cmath>
++#include <cstring>
+ #include <stdexcept>
+ 
+ #if !defined(__riscv_v) || !defined(__riscv_v_intrinsic)
+@@ -150,11 +151,32 @@
+             : [SRC] "+r"(SRC)
+             : [DST] "r"(DST), [BlkLen] "r"(BlkLen), [OFFSET] "r"(offset), [STRIDE] "r"(stride), [CountK] "r"(CountK),
+               [FONE] "f"(fone), [RMAXREC] "f"(range_max_reciprocal)
+-            : "cc", "t0", "t1", "t2", "t3", "a1", "s1", "s2", "f10", "f11");
++            : "cc", "t0", "t1", "t2", "t3", "a1", "s1", "s2", "f10", "f11", "memory",
++              "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13",
++              "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25",
++              "v26", "v27", "v28", "v29", "v30", "v31");
+     }
+ }
+ 
+-void quantize_a_row_i8(size_t BlkLen, const float * A, size_t CountK, uint8_t * QuantA) {
++// The decode path writes its sum directly alongside already-quantized bytes.
++// Avoid a separate expansion/copy pass for each single-token activation row.
++#define Q4_K_CACHE_M1_SUM(VREG, PTR)                  \
++    ".if %[CACHE_SUM]                         \n\t" \
++    "vsetvli t0, zero, e16, m2                 \n\t" \
++    "vsext.vf2 v0, " VREG "                   \n\t" \
++    "vmv.v.i v2, 0                            \n\t" \
++    "vredsum.vs v2, v0, v2                    \n\t" \
++    "vmv.x.s t0, v2                           \n\t" \
++    "fcvt.s.w f14, t0                         \n\t" \
++    "flw f15, -4(" PTR ")                    \n\t" \
++    "fmul.s f14, f14, f15                     \n\t" \
++    "fsw f14, 32(" PTR ")                    \n\t" \
++    "vsetvli t0, zero, e8, m1                  \n\t" \
++    ".endif                                   \n\t"
++
++template <bool CacheSum>
++static void quantize_a_row_i8_impl(size_t BlkLen, const float * A, size_t CountK, uint8_t * QuantA) {
++    constexpr size_t stride = CacheSum ? q4_k_activation_block_size : sizeof(float) + 32;
+     const float *   SRC                  = A;
+     uint8_t *       DST                  = QuantA;
+     constexpr float range_max_reciprocal = 1.0f / ((1 << 7) - 1);
+@@ -172,9 +194,9 @@
+         "addi         a4, %[SRC], 384         \n\t"
+ 
+         "addi         s1, %[DST], 0           \n\t"
+-        "addi         s2, %[DST], 36          \n\t"
+-        "addi         s3, %[DST], 72          \n\t"
+-        "addi         s4, %[DST], 108         \n\t"
++        "addi         s2, %[DST], %[ASTRIDE]   \n\t"
++        "addi         s3, %[DST], %[ASTRIDE2]  \n\t"
++        "addi         s4, %[DST], %[ASTRIDE3]  \n\t"
+         "blt          %[K], t3, LOOP_K%=      \n\t"
+         "blt          %[K], t2, TAIL%=        \n\t"
+ 
+@@ -250,13 +272,17 @@
+         "vnclip.wx    v24, v24, zero          \n\t"
+         "vnclip.wx    v28, v28, zero          \n\t"
+         "vse8.v       v16, (s1)               \n\t"
+-        "addi         s1, s1, 140             \n\t"
++        Q4_K_CACHE_M1_SUM("v16", "s1")
++        "addi         s1, s1, %[AMAIN]        \n\t"
+         "vse8.v       v20, (s2)               \n\t"
+-        "addi         s2, s2, 140             \n\t"
++        Q4_K_CACHE_M1_SUM("v20", "s2")
++        "addi         s2, s2, %[AMAIN]        \n\t"
+         "vse8.v       v24, (s3)               \n\t"
+-        "addi         s3, s3, 140             \n\t"
++        Q4_K_CACHE_M1_SUM("v24", "s3")
++        "addi         s3, s3, %[AMAIN]        \n\t"
+         "vse8.v       v28, (s4)               \n\t"
+-        "addi         s4, s4, 140             \n\t"
++        Q4_K_CACHE_M1_SUM("v28", "s4")
++        "addi         s4, s4, %[AMAIN]        \n\t"
+         "bge          %[K], t3, LOOP_MAIN%=   \n\t"
+         "blt          %[K], t2, TAIL%=        \n\t"
+         "LOOP_K%=:                            \n\t"
+@@ -284,7 +310,8 @@
+         "vsetvli      t0, zero, e8, m1        \n\t"
+         "vnclip.wx    v16, v16, zero          \n\t"
+         "vse8.v       v16, (s1)               \n\t"
+-        "addi         s1, s1, 32              \n\t"
++        Q4_K_CACHE_M1_SUM("v16", "s1")
++        "addi         s1, s1, %[ANEXT]        \n\t"
+         "bge          %[K], t2, LOOP_K%=      \n\t"
+         "TAIL%=:                              \n\t"
+         "blez         %[K], END%=             \n\t"
+@@ -294,13 +321,73 @@
+         "jal          x0, LOOP_K%=            \n\t"
+         "END%=:                               \n\t"
+         : [K] "+r"(CountK)
+-        : [FONE] "f"(fone), [RMAXREC] "f"(range_max_reciprocal), [SRC] "r"(SRC), [DST] "r"(DST)
+-        : "cc", "t3", "t2", "t1", "t0", "a1", "a2", "a3", "a4", "s1", "s2", "s3", "s4", "f10", "f11", "f12", "f13");
++        : [FONE] "f"(fone), [RMAXREC] "f"(range_max_reciprocal), [SRC] "r"(SRC), [DST] "r"(DST),
++          [CACHE_SUM] "i"(CacheSum), [ASTRIDE] "i"(stride), [ASTRIDE2] "i"(stride * 2), [ASTRIDE3] "i"(stride * 3),
++          [AMAIN] "i"(stride * 4 - sizeof(float)), [ANEXT] "i"(stride - sizeof(float))
++        : "cc", "t3", "t2", "t1", "t0", "a1", "a2", "a3", "a4", "s1", "s2", "s3", "s4", "f10", "f11", "f12", "f13", "f14", "f15", "memory",
++          "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13",
++          "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25",
++          "v26", "v27", "v28", "v29", "v30", "v31");
+ }
+ 
++void quantize_a_row_i8(size_t blk_len, const float * a, size_t count_k, uint8_t * quant_a) {
++    quantize_a_row_i8_impl<false>(blk_len, a, count_k, quant_a);
++}
++
++// Expand backwards in the caller's operation-local scratch buffer. The
++// vendor quantizers (and thus all int8 values/scales) remain unchanged.
++// Cached sums are never reused across operations, tokens or model layers.
++static void cache_q4_k_activation_sums(uint8_t * quant_a, size_t count_k, size_t rows) {
++    const size_t blocks = count_k / 32;
++    const size_t old_stride = rows * (sizeof(float) + 32);
++    const size_t new_stride = rows * q4_k_activation_block_size;
++    for (size_t block = blocks; block-- > 0;) {
++        uint8_t * src = quant_a + block * old_stride;
++        uint8_t * dst = quant_a + block * new_stride;
++        float sums[4];
++        for (size_t row = 0; row < rows; row++) {
++            float scale;
++            std::memcpy(&scale, src + row * sizeof(float), sizeof(float));
++            int32_t sum = 0;
++            for (size_t p = 0; p < 32; p++) {
++                const size_t index = rows == 4 ? (p / 8) * 32 + row * 8 + p % 8 : p;
++                sum += static_cast<int8_t>(src[rows * sizeof(float) + index]);
++            }
++            sums[row] = scale * static_cast<float>(sum);
++        }
++        std::memmove(dst, src, old_stride);
++        std::memcpy(dst + old_stride, sums, rows * sizeof(float));
++    }
++}
++
++void quantize_a_row_i8q4_k(size_t blk_len, const float * a, size_t count_k, uint8_t * quant_a) {
++    GGML_ASSERT(blk_len == 32 && count_k % 32 == 0);
++    quantize_a_row_i8_impl<true>(blk_len, a, count_k, quant_a);
++}
++
++void quantize_a_4row_i8q4_k(size_t blk_len, const float * a, size_t count_k, uint8_t * quant_a) {
++    GGML_ASSERT(blk_len == 32 && count_k % 32 == 0);
++    quantize_a_4row_i8(blk_len, a, count_k, quant_a);
++    cache_q4_k_activation_sums(quant_a, count_k, 4);
++}
++
+ }  // namespace ime1
+ 
+ namespace {
++
++// Keep the previously validated decode reduction. Caching pays off in
++// prefill here, but the measured single-token path did not benefit from it.
++#define Q4_K_SUM_M1_ROW                            \
++    "vsetvli t0, zero, e8, m1              \n\t" \
++    "vle8.v v0, (s5)                      \n\t" \
++    "vsetvli t0, zero, e16, m2             \n\t" \
++    "vsext.vf2 v2, v0                     \n\t" \
++    "vmv.v.i v4, 0                        \n\t" \
++    "vredsum.vs v4, v2, v4                \n\t" \
++    "vmv.x.s t0, v4                       \n\t" \
++    "fcvt.s.w f2, t0                      \n\t" \
++    "fmul.s f2, f2, f1                    \n\t"
++
+ #define SQ4BIT_KERNEL_COMP_1x8x2_4X8X4          \
+     "vmadot       v16, v14, v0            \n\t" \
+     "vmadot       v18, v14, v1            \n\t" \
+@@ -583,7 +670,7 @@
+     "vrgather.vv  v15, v11, v1            \n\t" \
+     "vadd.vi      v1, v1, -12             \n\t"
+ 
+-template <bool HasZeroPoint>
++template <bool HasZeroPoint, bool HasFloatOffset = false>
+ void SQ4BitGemmM4Kernel_CompInt8_ScaleFp16_Impl(size_t          BlkLen,
+                                                 const uint8_t * QuantA,
+                                                 const uint8_t * QuantBData,
+@@ -690,7 +777,7 @@
+             size_t    NBLKS         = (CountN - n) > 16 ? 16 : CountN - n;
+             uint8_t * QuantBDataPtr = (uint8_t *) QuantBData +             //
+                                       n * BlockCountK * BlkLen / 2 +       // b data
+-                                      n * BlockCountK * sizeof(_Float16);  // scale
++                                      n * BlockCountK * (HasFloatOffset ? 2 * sizeof(float) : sizeof(_Float16));
+             float * CPtr = C + n;
+             if (NBLKS < 16) {
+                 CPtr = tmp;
+@@ -705,7 +792,11 @@
+                 "addi               s1, %[B], 0                 \n\t"
+                 "BLOCK_COUNTK_LOOP%=:                           \n\t"
+                 "addi               s5, s1, 0                   \n\t"
++                ".if %[FP32]                                   \n\t"
++                "addi               s1, s5, 128                \n\t"
++                ".else                                         \n\t"
+                 "addi               s1, s5, 32                  \n\t"
++                ".endif                                        \n\t"
+                 "addi               s2, s1, 32                  \n\t"
+                 "addi               s3, s1, 32*2                \n\t"
+                 "addi               s4, s1, 32*3                \n\t"
+@@ -717,6 +808,12 @@
+                 "flw                f3, 8(a1)                   \n\t"
+                 "flw                f4, 12(a1)                  \n\t"
+                 "addi               a1, a1, 16                  \n\t"
++                ".if %[FP32]                                   \n\t"
++                "flw f5, 128(a1)                               \n\t"
++                "flw f6, 132(a1)                               \n\t"
++                "flw f7, 136(a1)                               \n\t"
++                "flw f8, 140(a1)                               \n\t"
++                ".endif                                        \n\t"
+                 "addi               t2, %[INNER], 0             \n\t"
+                 "BLOCK_INNER_LOOP%=:                            \n\t"
+ 
+@@ -741,11 +838,26 @@
+                 "addi               t2, t2, -1                  \n\t"
+                 "bnez               t2, BLOCK_INNER_LOOP%=      \n\t"
+ 
++                ".if %[FP32]                                   \n\t"
++                "addi a1, a1, 16                               \n\t"
++                LOAD_SCALE_4x16
++                ".else                                         \n\t"
+                 LOAD_SCALE_4x16_FP16
++                ".endif                                        \n\t"
+ 
+                 "vsetvli            t0, zero, e32, m8           \n\t"
+                 "vfcvt.f.x.v        v16, v16                    \n\t"
+                 "vfmacc.vv          v24, v16, v8                \n\t"
++                ".if %[FP32]                                   \n\t"
++                "addi s5, s5, 64                               \n\t"
++                "fmv.s f1, f5                                  \n\t"
++                "fmv.s f2, f6                                  \n\t"
++                "fmv.s f3, f7                                  \n\t"
++                "fmv.s f4, f8                                  \n\t"
++                LOAD_SCALE_4x16
++                "vsetvli t0, zero, e32, m8                     \n\t"
++                "vfadd.vv v24, v24, v8                         \n\t"
++                ".endif                                        \n\t"
+                 "addi               t3, t3, -1                  \n\t"
+                 "bnez               t3, BLOCK_COUNTK_LOOP%=     \n\t"
+                 "RESULT_SAVE%=:                                 \n\t"
+@@ -754,14 +866,23 @@
+ 
+                 :
+                 : [INNER] "r"(INNER), [A] "r"(QuantA), [B] "r"(QuantBDataPtr), [LDC] "r"(LDC),
+-                  [BlockCountK] "r"(BlockCountK), [C] "r"(CPtr)
+-                : "cc", "t0", "t1", "t2", "t3", "a1", "a2", "a3", "a4", "f1", "f2", "f3", "f4", "s1", "s2", "s3", "s4",
+-                  "s5", "s6");
++                  [BlockCountK] "r"(BlockCountK), [C] "r"(CPtr), [FP32] "i"(HasFloatOffset)
++                : "cc", "t0", "t1", "t2", "t3", "a1", "a2", "a3", "a4", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "s1", "s2", "s3", "s4",
++                  "s5", "s6", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7",
++                  "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19",
++                  "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31");
++            if constexpr (HasFloatOffset) {
++                if (NBLKS < 16) {
++                    for (size_t r = 0; r < 4; r++) {
++                        std::memcpy(C + r * ldc + n, tmp + r * 16, NBLKS * sizeof(float));
++                    }
++                }
++            }
+         }
+     }
+ }
+ 
+-template <bool HasZeroPoint>
++template <bool HasZeroPoint, bool HasFloatOffset = false, bool CachedActivation = true>
+ void SQ4BitGemmM1Kernel_CompInt8_ScaleFp16_Impl(size_t          BlkLen,
+                                                 const uint8_t * QuantA,
+                                                 const uint8_t * QuantBData,
+@@ -894,7 +1015,7 @@
+             size_t    nblks         = (CountN - n) > 16 ? 16 : CountN - n;
+             uint8_t * QuantBDataPtr = (uint8_t *) QuantBData +             //
+                                       n * BlockCountK * BlkLen / 2 +       // b data
+-                                      n * BlockCountK * sizeof(_Float16);  // scale
++                                      n * BlockCountK * (HasFloatOffset ? 2 * sizeof(float) : sizeof(_Float16));
+             float * CPtr = C + n;
+             size_t  cnt  = BlockCountK;
+ 
+@@ -902,13 +1023,32 @@
+                 "vsetvli      t0, zero, e32, m4       \n\t"
+                 "vxor.vv      v28, v28, v28           \n\t"
+                 "addi         s1, %[B], 0             \n\t"
++                ".if %[FP32]                                   \n\t"
++                "addi         s2, %[B], 16                     \n\t"
++                "addi         s3, %[B], 32                     \n\t"
++                "addi         s4, %[B], 48                     \n\t"
++                ".else                                         \n\t"
+                 "addi         s2, %[B], 8             \n\t"
+                 "addi         s3, %[B], 16            \n\t"
+                 "addi         s4, %[B], 24            \n\t"
++                ".endif                                        \n\t"
+ 
+                 "addi         s5, %[A], 0             \n\t"
+                 "addi         s6, %[A], 12            \n\t"
+                 "LOOP_K%=:                            \n\t"
++                ".if %[FP32]                                   \n\t"
++                "vsetvli      t0, zero, e32, mf2               \n\t"
++                "vle32.v      v8, (s1)                         \n\t"
++                "addi         s1, s1, 128                      \n\t"
++                "vle32.v      v9, (s2)                         \n\t"
++                "addi         s2, s2, 144                      \n\t"
++                "vle32.v      v10, (s3)                        \n\t"
++                "addi         s3, s3, 160                      \n\t"
++                "vle32.v      v11, (s4)                        \n\t"
++                "addi         s4, s4, 176                      \n\t"
++                "flw          f1, (s5)                         \n\t"
++                "addi         s5, s5, 4                        \n\t"
++                ".else                                         \n\t"
+                 "vsetvli      t0, zero, e16, mf4      \n\t"
+                 "vle16.v      v4, (s1)                \n\t"
+                 "addi         s1, s1, 32              \n\t"
+@@ -927,6 +1067,7 @@
+                 "vfwcvt.f.f.v v11, v7                 \n\t"
+                 "vsetvli      t0, zero, e32, mf2      \n\t"
+ 
++                ".endif                                        \n\t"
+                 "addi         t5, %[INNER], 0         \n\t"
+                 "vxor.vv      v16, v16, v16           \n\t"
+                 "vxor.vv      v18, v18, v18           \n\t"
+@@ -937,6 +1078,13 @@
+                 "vfmul.vf     v26, v10, f1            \n\t"
+                 "vfmul.vf     v27, v11, f1            \n\t"
+                 "addi         %[CNT], %[CNT], -1      \n\t"
++                ".if %[FP32]                                   \n\t"
++                ".if %[CACHED_A]                               \n\t"
++                "flw f2, 32(s5)                                \n\t"
++                ".else                                         \n\t"
++                Q4_K_SUM_M1_ROW
++                ".endif                                        \n\t"
++                ".endif                                        \n\t"
+                 "vsetvli      t0, zero, e8, m1        \n\t"
+                 "LOOP_INNER%=:                        \n\t"
+ 
+@@ -956,7 +1104,26 @@
+                 "bnez         t5, LOOP_INNER%=        \n\t"
+                 "vsetvli      t0, zero, e32, mf2      \n\t"
+ 
++                ".if %[FP32]                                   \n\t"
++                ".if %[CACHED_A]                               \n\t"
++                "addi s5, s5, 4                                \n\t"
++                ".endif                                        \n\t"
++                SQ4BIT_KERNEL_ACC_1X4X4
++                "addi s7, s1, -320                             \n\t"
++                "vle32.v v8, (s7)                              \n\t"
++                "addi s7, s7, 16                               \n\t"
++                "vle32.v v9, (s7)                              \n\t"
++                "addi s7, s7, 16                               \n\t"
++                "vle32.v v10, (s7)                             \n\t"
++                "addi s7, s7, 16                               \n\t"
++                "vle32.v v11, (s7)                             \n\t"
++                "vfmacc.vf v28, f2, v8                         \n\t"
++                "vfmacc.vf v29, f2, v9                         \n\t"
++                "vfmacc.vf v30, f2, v10                        \n\t"
++                "vfmacc.vf v31, f2, v11                        \n\t"
++                ".else                                         \n\t"
+                 SQ4BIT_KERNEL_ACC_F16_1X4X4
++                ".endif                                        \n\t"
+ 
+                 "bnez         %[CNT], LOOP_K%=        \n\t"
+                 "addi         t3, zero, 16            \n\t"
+@@ -986,14 +1153,29 @@
+                 "END%=:                               \n\t"
+ 
+                 : [CNT] "+r"(cnt), [NBLKS] "+r"(nblks)
+-                : [INNER] "r"(INNER), [A] "r"(QuantA), [B] "r"(QuantBDataPtr), [C] "r"(CPtr)
+-                : "cc", "t0", "t5", "t3", "f1", "s1", "s2", "s3", "s4", "s5", "s6");
++                : [INNER] "r"(INNER), [A] "r"(QuantA), [B] "r"(QuantBDataPtr), [C] "r"(CPtr), [FP32] "i"(HasFloatOffset),
++                  [CACHED_A] "i"(CachedActivation)
++                : "cc", "t0", "t5", "t3", "f1", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "f2", "memory",
++                  "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13",
++                  "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25",
++                  "v26", "v27", "v28", "v29", "v30", "v31");
+         }
+     }
+ }
+ }  // namespace
+ 
+ namespace ime1 {
++size_t gemm_kernel_i8q4_k_decode(size_t blk_len, const uint8_t * quant_a_ptr,
++                               const uint8_t * quant_b_data, const uint8_t * quant_b_zp,
++                               float * c_ptr, size_t count_m, size_t count_n,
++                               size_t k_blks, size_t ldc) {
++    GGML_ASSERT(blk_len == 32 && count_m == 1);
++    GGML_UNUSED(quant_b_zp);
++    SQ4BitGemmM1Kernel_CompInt8_ScaleFp16_Impl<false, true, false>(
++        blk_len, quant_a_ptr, quant_b_data, c_ptr, count_n, k_blks, ldc);
++    return 1;
++}
++
+ size_t gemm_kernel_i8i4(size_t          blk_len,
+                         const uint8_t * quant_a_ptr,
+                         const uint8_t * quant_b_data,
+@@ -1023,5 +1205,22 @@
+         return 1;
+     }
+ }
++
++size_t gemm_kernel_i8q4_k(size_t blk_len, const uint8_t * quant_a_ptr,
++                        const uint8_t * quant_b_data, const uint8_t * /* quant_b_zp */,
++                        float * c_ptr, size_t count_m, size_t count_n,
++                        size_t k_blks, size_t ldc) {
++    GGML_ASSERT(blk_len == 32 && k_blks > 0 && count_m > 0);
++    const size_t rows = count_m >= 4 ? 4 : 1;
++    if (rows == 4) {
++        SQ4BitGemmM4Kernel_CompInt8_ScaleFp16_Impl<false, true>(
++            blk_len, quant_a_ptr, quant_b_data, c_ptr, count_n, k_blks, ldc);
++    } else {
++        SQ4BitGemmM1Kernel_CompInt8_ScaleFp16_Impl<false, true>(
++            blk_len, quant_a_ptr, quant_b_data, c_ptr, count_n, k_blks, ldc);
++    }
++    // Affine correction is fused into the IME1 block loop above.
++    return rows;
++}
+ }  // namespace ime1
+ }  // namespace spacemit_kernels
+--- a/ggml/src/ggml-cpu/spacemit/ime_kernels.h
++++ b/ggml/src/ggml-cpu/spacemit/ime_kernels.h
+@@ -69,6 +69,32 @@
+     size_t(size_t, const uint8_t **, const uint8_t *, const uint8_t *, float **, size_t, size_t, size_t, size_t)>;
+ 
+ namespace ime1 {
++// Original Q4_K subblock parameters: w = d*(q-8) + m.
++// Keep fp32 scale/offset and the existing IME1 16-row nibble interleave.
++struct block_q4_k_x16 {
++    float   d[16];
++    float   m[16];
++    uint8_t qs[256];
++};
++static_assert(sizeof(block_q4_k_x16) == 384, "unexpected Q4_K IME1 block padding");
++
++// Q4_K-specific activations: fp32 scales, the unchanged int8 interleave,
++// then one fp32 scaled sum per row. M1/M4 blocks are 40/160 bytes.
++constexpr size_t q4_k_activation_block_size = 2 * sizeof(float) + 32;
++void quantize_a_row_i8q4_k(size_t blk_len, const float * a_ptr, size_t count_k, uint8_t * quant_a_ptr);
++void quantize_a_4row_i8q4_k(size_t blk_len, const float * a_ptr, size_t count_k, uint8_t * quant_a_ptr);
++
++size_t gemm_kernel_i8q4_k(size_t blk_len, const uint8_t * quant_a_ptr,
++                        const uint8_t * quant_b_data, const uint8_t * quant_b_zp,
++                        float * c_ptr, size_t count_m, size_t count_n,
++                        size_t k_blks, size_t ldc);
++
++// Dense single-token decode retains the original 36-byte activation layout.
++size_t gemm_kernel_i8q4_k_decode(size_t blk_len, const uint8_t * quant_a_ptr,
++                               const uint8_t * quant_b_data, const uint8_t * quant_b_zp,
++                               float * c_ptr, size_t count_m, size_t count_n,
++                               size_t k_blks, size_t ldc);
++
+ size_t gemm_kernel_i8i4(size_t          blk_len,
+                         const uint8_t * quant_a_ptr,
+                         const uint8_t * quant_b_data,
+--- a/ggml/src/ggml-cpu/spacemit/repack.cpp
++++ b/ggml/src/ggml-cpu/spacemit/repack.cpp
+@@ -242,11 +242,12 @@
+ 
+     constexpr int nrows_interleaved = 16;
+ 
+-    block_q4_1x16 *    dst = (block_q4_1x16 *) t->data;
++    auto * dst = (spacemit_kernels::ime1::block_q4_k_x16 *) t->data;
+     const block_q4_K * src = (const block_q4_K *) data;
+-    block_q4_1         dst_tmp[16];
+     int                nrow    = ggml_nrows(t);
+     int                nblocks = t->ne[0] / QK_K;
++
++    GGML_ASSERT(data_size == size_t(nrow) * nblocks * sizeof(block_q4_K));
+ 
+     if (t->ne[1] % nrows_interleaved != 0 || t->ne[0] % QK_K != 0) {
+         return -1;
+@@ -264,22 +265,19 @@
+                     const float d1 = d * sc;
+                     const float m1 = min * m;
+ 
+-                    dst_tmp[i].GGML_COMMON_AGGR_U.GGML_COMMON_AGGR_S.d = GGML_FP32_TO_FP16(d1);
+-                    dst_tmp[i].GGML_COMMON_AGGR_U.GGML_COMMON_AGGR_S.m = GGML_FP32_TO_FP16(-m1);
+-                    // src -> [b0, b32] [b1, b33] ... [b31, b63]
+-                    // dst -> [b0, b16] [b1, b17] ... [b15, b31] [b32, b48] [b33, b49] ... [b47, b63]
+-                    const uint8_t * q                                  = src[x + i * nblocks].qs + (j / 2) * QK4_1;
+-                    if (j % 2 == 0) {
+-                        for (int ii = 0; ii < 16; ii++) {
+-                            dst_tmp[i].qs[ii] = (q[ii] & 0x0F) | ((q[ii + 16] & 0x0F) << 4);
+-                        }
+-                    } else {
+-                        for (int ii = 0; ii < 16; ii++) {
+-                            dst_tmp[i].qs[ii] = ((q[ii] & 0xF0) >> 4) | (q[ii + 16] & 0xF0);
+-                        }
+-                    }
+-                }
+-                *dst++ = make_block_q4_1x16(dst_tmp, interleave_block);
++                    dst->d[i] = d1;
++                    dst->m[i] = 8.0f * d1 - m1;
++                    // Preserve every original nibble; only change its layout.
++                    const uint8_t * q = src[x + i * nblocks].qs + (j / 2) * QK4_1;
++                    const int shift = (j % 2) * 4;
++                    for (int p = 0; p < 8; p++) {
++                        dst->qs[i * 8 + p] = ((q[p] >> shift) & 15) |
++                            (((q[p + 8] >> shift) & 15) << 4);
++                        dst->qs[128 + i * 8 + p] = ((q[p + 16] >> shift) & 15) |
++                            (((q[p + 24] >> shift) & 15) << 4);
++                    }
++                }
++                dst++;
+             }
+         }
+         src += nrows_interleaved * nblocks;
+--- a/ggml/src/ggml-cpu/CMakeLists.txt
++++ b/ggml/src/ggml-cpu/CMakeLists.txt
+@@ -467,6 +467,13 @@
+                 ggml-cpu/spacemit/rvv_kernels.cpp
+                 ggml-cpu/spacemit/rvv_kernels.h
+             )
++            # Native K1 compilers can support IME1 but not the A100 IME2 ISA.
++            if (NOT "RISCV64_SPACEMIT_IME1" IN_LIST RISCV64_SPACEMIT_IME_SPEC)
++                list(REMOVE_ITEM GGML_CPU_SOURCES ggml-cpu/spacemit/ime1_kernels.cpp)
++            endif()
++            if (NOT "RISCV64_SPACEMIT_IME2" IN_LIST RISCV64_SPACEMIT_IME_SPEC)
++                list(REMOVE_ITEM GGML_CPU_SOURCES ggml-cpu/spacemit/ime2_kernels.cpp)
++            endif()
+         endif()
+         if(NOT GGML_CPU_ALL_VARIANTS)
+             set(MARCH_STR "rv64gc")
+--- a/ggml/src/ggml-cpu/arch/riscv/quants.c
++++ b/ggml/src/ggml-cpu/arch/riscv/quants.c
+@@ -2004,18 +2004,19 @@
+                 vl = 16;
+ 
+                 vint32m2_t vaux_0 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_0, 0), scale[is+0], vl);
+-                vint32m2_t vaux_1 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_0, 1), scale[is+1], vl);
+-                vint32m2_t vaux_2 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_1, 0), scale[is+2], vl);
+-                vint32m2_t vaux_3 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_1, 1), scale[is+3], vl);
+-                vint32m2_t vaux_4 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_2, 0), scale[is+4], vl);
+-                vint32m2_t vaux_5 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_2, 1), scale[is+5], vl);
+-                vint32m2_t vaux_6 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_3, 0), scale[is+6], vl);
+-                vint32m2_t vaux_7 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_3, 1), scale[is+7], vl);
+-
+-                vint32m1_t isum0 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_0, vaux_1, vl), vzero, vl);
+-                vint32m1_t isum1 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_2, vaux_3, vl), isum0, vl);
+-                vint32m1_t isum2 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_4, vaux_5, vl), isum1, vl);
+-                vint32m1_t isum3 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_6, vaux_7, vl), isum2, vl);
++                vint32m2_t vaux_1 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_1, 0), scale[is+2], vl);
++                vint32m2_t vaux_2 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_2, 0), scale[is+4], vl);
++                vint32m2_t vaux_3 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_3, 0), scale[is+6], vl);
++
++                vaux_0 = __riscv_vwmacc_vx_i32m2(vaux_0, scale[is+1], __riscv_vget_v_i16m2_i16m1(va_q_0, 1), vl);
++                vaux_1 = __riscv_vwmacc_vx_i32m2(vaux_1, scale[is+3], __riscv_vget_v_i16m2_i16m1(va_q_1, 1), vl);
++                vaux_2 = __riscv_vwmacc_vx_i32m2(vaux_2, scale[is+5], __riscv_vget_v_i16m2_i16m1(va_q_2, 1), vl);
++                vaux_3 = __riscv_vwmacc_vx_i32m2(vaux_3, scale[is+7], __riscv_vget_v_i16m2_i16m1(va_q_3, 1), vl);
++
++                vint32m1_t isum0 = __riscv_vredsum_vs_i32m2_i32m1(vaux_0, vzero, vl);
++                vint32m1_t isum1 = __riscv_vredsum_vs_i32m2_i32m1(vaux_1, isum0, vl);
++                vint32m1_t isum2 = __riscv_vredsum_vs_i32m2_i32m1(vaux_2, isum1, vl);
++                vint32m1_t isum3 = __riscv_vredsum_vs_i32m2_i32m1(vaux_3, isum2, vl);
+ 
+                 sum_t += __riscv_vmv_x_s_i32m1_i32(isum3);
+ 
+--- a/ggml/src/ggml-cpu/arch/riscv/repack.cpp
++++ b/ggml/src/ggml-cpu/arch/riscv/repack.cpp
+@@ -23,6 +23,88 @@
+ #endif
+ 
+ #define UNUSED GGML_UNUSED
++
++#define GGML_RVV_Q6_K_ACCUMULATE(BLOCK, Q8_AT, SUMI) do {                                      \
++    constexpr int N_COLS = 16;                                                                  \
++    for (int half = 0; half < 2; ++half) {                                                      \
++        for (int group = 0; group < 2; ++group) {                                               \
++            const int scale_base = half * (QK_K / 32) + group;                                  \
++            const vint16m1_t scale_0 = __riscv_vwcvt_x_x_v_i16m1(                               \
++                __riscv_vle8_v_i8mf2(&(BLOCK).scales[scale_base * N_COLS], N_COLS), N_COLS);    \
++            const vint16m1_t scale_1 = __riscv_vwcvt_x_x_v_i16m1(                               \
++                __riscv_vle8_v_i8mf2(                                                           \
++                    &(BLOCK).scales[(scale_base + 2) * N_COLS], N_COLS), N_COLS);               \
++            const vint16m1_t scale_2 = __riscv_vwcvt_x_x_v_i16m1(                               \
++                __riscv_vle8_v_i8mf2(                                                           \
++                    &(BLOCK).scales[(scale_base + 4) * N_COLS], N_COLS), N_COLS);               \
++            const vint16m1_t scale_3 = __riscv_vwcvt_x_x_v_i16m1(                               \
++                __riscv_vle8_v_i8mf2(                                                           \
++                    &(BLOCK).scales[(scale_base + 6) * N_COLS], N_COLS), N_COLS);               \
++                                                                                                 \
++            for (int chunk = 0; chunk < 2; ++chunk) {                                           \
++                vint16m1_t dot_0 = __riscv_vmv_v_x_i16m1(0, N_COLS);                            \
++                vint16m1_t dot_1 = __riscv_vmv_v_x_i16m1(0, N_COLS);                            \
++                vint16m1_t dot_2 = __riscv_vmv_v_x_i16m1(0, N_COLS);                            \
++                vint16m1_t dot_3 = __riscv_vmv_v_x_i16m1(0, N_COLS);                            \
++                                                                                                 \
++                for (int ii = 0; ii < 8; ++ii) {                                                \
++                    const int i = group * N_COLS + chunk * (N_COLS / 2) + ii;                   \
++                    const vuint8mf2_t ql_0 = __riscv_vle8_v_u8mf2(                              \
++                        &(BLOCK).ql[(half * (QK_K / 4) + i) * N_COLS], N_COLS);                  \
++                    const vuint8mf2_t ql_1 = __riscv_vle8_v_u8mf2(                              \
++                        &(BLOCK).ql[(half * (QK_K / 4) + QK_K / 8 + i) * N_COLS], N_COLS);       \
++                    const vuint8mf2_t qh = __riscv_vle8_v_u8mf2(                                \
++                        &(BLOCK).qh[(half * (QK_K / 8) + i) * N_COLS], N_COLS);                  \
++                                                                                                 \
++                    const vuint8mf2_t q0 = __riscv_vor_vv_u8mf2(                               \
++                        __riscv_vand_vx_u8mf2(ql_0, 0x0f, N_COLS),                              \
++                        __riscv_vsll_vx_u8mf2(                                                 \
++                            __riscv_vand_vx_u8mf2(qh, 0x03, N_COLS), 4, N_COLS), N_COLS);       \
++                    const vuint8mf2_t q1 = __riscv_vor_vv_u8mf2(                               \
++                        __riscv_vand_vx_u8mf2(ql_1, 0x0f, N_COLS),                              \
++                        __riscv_vsll_vx_u8mf2(                                                  \
++                            __riscv_vand_vx_u8mf2(                                              \
++                                __riscv_vsrl_vx_u8mf2(qh, 2, N_COLS), 0x03, N_COLS),             \
++                            4, N_COLS), N_COLS);                                                \
++                    const vuint8mf2_t q2 = __riscv_vor_vv_u8mf2(                               \
++                        __riscv_vsrl_vx_u8mf2(ql_0, 4, N_COLS),                                \
++                        __riscv_vsll_vx_u8mf2(                                                  \
++                            __riscv_vand_vx_u8mf2(                                              \
++                                __riscv_vsrl_vx_u8mf2(qh, 4, N_COLS), 0x03, N_COLS),             \
++                            4, N_COLS), N_COLS);                                                \
++                    const vuint8mf2_t q3 = __riscv_vor_vv_u8mf2(                               \
++                        __riscv_vsrl_vx_u8mf2(ql_1, 4, N_COLS),                                \
++                        __riscv_vsll_vx_u8mf2(                                                 \
++                            __riscv_vsrl_vx_u8mf2(qh, 6, N_COLS), 4, N_COLS), N_COLS);          \
++                                                                                                 \
++                    const vint8mf2_t w0 = __riscv_vsub_vx_i8mf2(                               \
++                        __riscv_vreinterpret_v_u8mf2_i8mf2(q0), 32, N_COLS);                    \
++                    const vint8mf2_t w1 = __riscv_vsub_vx_i8mf2(                               \
++                        __riscv_vreinterpret_v_u8mf2_i8mf2(q1), 32, N_COLS);                    \
++                    const vint8mf2_t w2 = __riscv_vsub_vx_i8mf2(                               \
++                        __riscv_vreinterpret_v_u8mf2_i8mf2(q2), 32, N_COLS);                    \
++                    const vint8mf2_t w3 = __riscv_vsub_vx_i8mf2(                               \
++                        __riscv_vreinterpret_v_u8mf2_i8mf2(q3), 32, N_COLS);                    \
++                                                                                                 \
++                    const int pos = half * (QK_K / 2) + i;                                      \
++                    dot_0 = __riscv_vwmacc_vx_i16m1(                                            \
++                        dot_0, (int8_t) Q8_AT(pos), w0, N_COLS);                                 \
++                    dot_1 = __riscv_vwmacc_vx_i16m1(                                            \
++                        dot_1, (int8_t) Q8_AT(pos + QK_K / 8), w1, N_COLS);                      \
++                    dot_2 = __riscv_vwmacc_vx_i16m1(                                            \
++                        dot_2, (int8_t) Q8_AT(pos + QK_K / 4), w2, N_COLS);                      \
++                    dot_3 = __riscv_vwmacc_vx_i16m1(                                            \
++                        dot_3, (int8_t) Q8_AT(pos + 3 * QK_K / 8), w3, N_COLS);                  \
++                }                                                                                \
++                                                                                                 \
++                (SUMI) = __riscv_vwmacc_vv_i32m2((SUMI), scale_0, dot_0, N_COLS);                \
++                (SUMI) = __riscv_vwmacc_vv_i32m2((SUMI), scale_1, dot_1, N_COLS);                \
++                (SUMI) = __riscv_vwmacc_vv_i32m2((SUMI), scale_2, dot_2, N_COLS);                \
++                (SUMI) = __riscv_vwmacc_vv_i32m2((SUMI), scale_3, dot_3, N_COLS);                \
++            }                                                                                    \
++        }                                                                                        \
++    }                                                                                            \
++} while (0)
+ 
+ void ggml_quantize_mat_q8_0_4x8(const float * GGML_RESTRICT x, void * GGML_RESTRICT vy, int64_t k) {
+     assert(QK8_0 == 32);
+@@ -110,6 +192,113 @@
+     ggml_quantize_mat_q8_0_4x8_generic(x, vy, k);
+ #endif
+ }
++
++void ggml_gemv_q6_K_16x1_q8_K(
++        int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx,
++        const void * GGML_RESTRICT vy, int nr, int nc) {
++    constexpr int N_COLS = 16;
++
++    assert(n % QK_K == 0);
++    assert(nr == 1);
++    assert(nc % N_COLS == 0);
++
++    UNUSED(bs);
++    UNUSED(nr);
++
++    const int nb = n / QK_K;
++    const block_q8_K * a_ptr = (const block_q8_K *) vy;
++
++    for (int x = 0; x < nc / N_COLS; ++x) {
++        const block_q6_Kx16 * b_ptr = (const block_q6_Kx16 *) vx + x * nb;
++        vfloat32m2_t sumf = __riscv_vfmv_v_f_f32m2(0.0f, N_COLS);
++
++        for (int l = 0; l < nb; ++l) {
++            vint32m2_t sumi = __riscv_vmv_v_x_i32m2(0, N_COLS);
++
++#define GGML_Q8_AT(index) a_ptr[l].qs[(index)]
++            GGML_RVV_Q6_K_ACCUMULATE(b_ptr[l], GGML_Q8_AT, sumi);
++#undef GGML_Q8_AT
++
++            const vfloat32m2_t d = __riscv_vfmul_vf_f32m2(
++                __riscv_vfwcvt_f_f_v_f32m2(
++                    __riscv_vle16_v_f16m1((const _Float16 *) b_ptr[l].d, N_COLS), N_COLS),
++                a_ptr[l].d, N_COLS);
++            sumf = __riscv_vfmacc_vv_f32m2(
++                sumf, __riscv_vfcvt_f_x_v_f32m2(sumi, N_COLS), d, N_COLS);
++        }
++
++        __riscv_vse32_v_f32m2(s + x * N_COLS, sumf, N_COLS);
++    }
++}
++
++void ggml_gemm_q6_K_16x1_q8_K(
++        int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx,
++        const void * GGML_RESTRICT vy, int nr, int nc) {
++    constexpr int N_ROWS = 4;
++    constexpr int N_COLS = 16;
++
++    assert(n % QK_K == 0);
++    assert(nr % N_ROWS == 0);
++    assert(nc % N_COLS == 0);
++
++    const int nb = n / QK_K;
++
++    for (int y = 0; y < nr / N_ROWS; ++y) {
++        const block_q8_Kx4 * a_ptr = (const block_q8_Kx4 *) vy + y * nb;
++
++        for (int x = 0; x < nc / N_COLS; ++x) {
++            const block_q6_Kx16 * b_ptr = (const block_q6_Kx16 *) vx + x * nb;
++            vfloat32m2_t sumf_0 = __riscv_vfmv_v_f_f32m2(0.0f, N_COLS);
++            vfloat32m2_t sumf_1 = __riscv_vfmv_v_f_f32m2(0.0f, N_COLS);
++            vfloat32m2_t sumf_2 = __riscv_vfmv_v_f_f32m2(0.0f, N_COLS);
++            vfloat32m2_t sumf_3 = __riscv_vfmv_v_f_f32m2(0.0f, N_COLS);
++
++            for (int l = 0; l < nb; ++l) {
++                const vfloat32m2_t b_d = __riscv_vfwcvt_f_f_v_f32m2(
++                    __riscv_vle16_v_f16m1((const _Float16 *) b_ptr[l].d, N_COLS), N_COLS);
++
++                vint32m2_t sumi_0 = __riscv_vmv_v_x_i32m2(0, N_COLS);
++#define GGML_Q8_AT(index) a_ptr[l].qs[(index) * N_ROWS + 0]
++                GGML_RVV_Q6_K_ACCUMULATE(b_ptr[l], GGML_Q8_AT, sumi_0);
++#undef GGML_Q8_AT
++                sumf_0 = __riscv_vfmacc_vv_f32m2(
++                    sumf_0, __riscv_vfcvt_f_x_v_f32m2(sumi_0, N_COLS),
++                    __riscv_vfmul_vf_f32m2(b_d, a_ptr[l].d[0], N_COLS), N_COLS);
++
++                vint32m2_t sumi_1 = __riscv_vmv_v_x_i32m2(0, N_COLS);
++#define GGML_Q8_AT(index) a_ptr[l].qs[(index) * N_ROWS + 1]
++                GGML_RVV_Q6_K_ACCUMULATE(b_ptr[l], GGML_Q8_AT, sumi_1);
++#undef GGML_Q8_AT
++                sumf_1 = __riscv_vfmacc_vv_f32m2(
++                    sumf_1, __riscv_vfcvt_f_x_v_f32m2(sumi_1, N_COLS),
++                    __riscv_vfmul_vf_f32m2(b_d, a_ptr[l].d[1], N_COLS), N_COLS);
++
++                vint32m2_t sumi_2 = __riscv_vmv_v_x_i32m2(0, N_COLS);
++#define GGML_Q8_AT(index) a_ptr[l].qs[(index) * N_ROWS + 2]
++                GGML_RVV_Q6_K_ACCUMULATE(b_ptr[l], GGML_Q8_AT, sumi_2);
++#undef GGML_Q8_AT
++                sumf_2 = __riscv_vfmacc_vv_f32m2(
++                    sumf_2, __riscv_vfcvt_f_x_v_f32m2(sumi_2, N_COLS),
++                    __riscv_vfmul_vf_f32m2(b_d, a_ptr[l].d[2], N_COLS), N_COLS);
++
++                vint32m2_t sumi_3 = __riscv_vmv_v_x_i32m2(0, N_COLS);
++#define GGML_Q8_AT(index) a_ptr[l].qs[(index) * N_ROWS + 3]
++                GGML_RVV_Q6_K_ACCUMULATE(b_ptr[l], GGML_Q8_AT, sumi_3);
++#undef GGML_Q8_AT
++                sumf_3 = __riscv_vfmacc_vv_f32m2(
++                    sumf_3, __riscv_vfcvt_f_x_v_f32m2(sumi_3, N_COLS),
++                    __riscv_vfmul_vf_f32m2(b_d, a_ptr[l].d[3], N_COLS), N_COLS);
++            }
++
++            __riscv_vse32_v_f32m2(s + (y * N_ROWS + 0) * bs + x * N_COLS, sumf_0, N_COLS);
++            __riscv_vse32_v_f32m2(s + (y * N_ROWS + 1) * bs + x * N_COLS, sumf_1, N_COLS);
++            __riscv_vse32_v_f32m2(s + (y * N_ROWS + 2) * bs + x * N_COLS, sumf_2, N_COLS);
++            __riscv_vse32_v_f32m2(s + (y * N_ROWS + 3) * bs + x * N_COLS, sumf_3, N_COLS);
++        }
++    }
++}
++
++#undef GGML_RVV_Q6_K_ACCUMULATE
+ 
+ void ggml_gemv_q4_0_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+     const int qk = QK8_0;
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -3135,6 +3135,36 @@
+     return out;
+ }
+ 
++static block_q6_Kx16 make_block_q6_Kx16(const block_q6_K * in, unsigned int blck_size_interleave) {
++    GGML_ASSERT(blck_size_interleave == 1);
++
++    block_q6_Kx16 out;
++
++    for (int col = 0; col < 16; ++col) {
++        out.d[col] = in[col].d;
++    }
++
++    for (int i = 0; i < QK_K / 2; ++i) {
++        for (int col = 0; col < 16; ++col) {
++            out.ql[i * 16 + col] = in[col].ql[i];
++        }
++    }
++
++    for (int i = 0; i < QK_K / 4; ++i) {
++        for (int col = 0; col < 16; ++col) {
++            out.qh[i * 16 + col] = in[col].qh[i];
++        }
++    }
++
++    for (int i = 0; i < QK_K / 16; ++i) {
++        for (int col = 0; col < 16; ++col) {
++            out.scales[i * 16 + col] = in[col].scales[i];
++        }
++    }
++
++    return out;
++}
++
+ static block_q2_Kx16 make_block_q2_Kx16(const block_q2_K * in, unsigned int blck_size_interleave) {
+     block_q2_Kx16 out;
+     constexpr int N_COLS = 16;
+@@ -3443,6 +3473,37 @@
+         }
+         src += nrows_interleaved * nblocks;
+     }
++    return 0;
++}
++
++static int repack_q6_K_to_q6_K_16_bl(
++        struct ggml_tensor * t, int interleave_block, const void * GGML_RESTRICT data, size_t data_size) {
++    GGML_ASSERT(t->type == GGML_TYPE_Q6_K);
++    GGML_ASSERT(interleave_block == 1);
++    constexpr int nrows_interleaved = 16;
++
++    block_q6_Kx16 * dst = (block_q6_Kx16 *)t->data;
++    const block_q6_K * src = (const block_q6_K *) data;
++    block_q6_K dst_tmp[nrows_interleaved];
++    int nrow = ggml_nrows(t);
++    int nblocks = t->ne[0] / QK_K;
++
++    GGML_ASSERT(data_size == nrow * nblocks * sizeof(block_q6_K));
++
++    if (t->ne[1] % nrows_interleaved != 0 || t->ne[0] % QK_K != 0) {
++        return -1;
++    }
++
++    for (int b = 0; b < nrow; b += nrows_interleaved) {
++        for (int64_t x = 0; x < nblocks; x++) {
++            for (int i = 0; i < nrows_interleaved; i++) {
++                dst_tmp[i] = src[x + i * nblocks];
++            }
++            *dst++ = make_block_q6_Kx16(dst_tmp, interleave_block);
++        }
++        src += nrows_interleaved * nblocks;
++    }
++
+     return 0;
+ }
+ 
+@@ -3954,6 +4015,10 @@
+ template <> int repack<block_q2_K, 1, 16>(struct ggml_tensor * t, const void * data, size_t data_size) {
+     return repack_q2_K_to_q2_K_16_bl(t, 1, data, data_size);
+ }
++
++template <> int repack<block_q6_K, 1, 16>(struct ggml_tensor * t, const void * data, size_t data_size) {
++    return repack_q6_K_to_q6_K_16_bl(t, 1, data, data_size);
++}
+ #endif
+ 
+ // gemv
+@@ -4051,6 +4116,10 @@
+ template <> void gemv<block_q2_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemv_q2_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
+ }
++
++template <> void gemv<block_q6_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_q6_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
++}
+ #endif
+ 
+ // gemm
+@@ -4147,6 +4216,10 @@
+ 
+ template <> void gemm<block_q2_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemm_q2_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
++}
++
++template <> void gemm<block_q6_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemm_q6_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
+ }
+ #endif
+ 
+@@ -4568,6 +4641,7 @@
+     static const ggml::cpu::repack::tensor_traits<block_iq4_nl, 1, 16, GGML_TYPE_Q8_0> iq4_nl_16x1_q8_0;
+     static const ggml::cpu::repack::tensor_traits<block_q8_0, 1, 16, GGML_TYPE_Q8_0> q8_0_16x1_q8_0;
+     static const ggml::cpu::repack::tensor_traits<block_q2_K, 1, 16, GGML_TYPE_Q8_K> q2_K_16x1_q8_K;
++    static const ggml::cpu::repack::tensor_traits<block_q6_K, 1, 16, GGML_TYPE_Q8_K> q6_K_16x1_q8_K;
+ #endif
+ 
+     if (cur->type == GGML_TYPE_Q4_0) {
+@@ -4662,6 +4736,17 @@
+             if (cur->ne[1] % 8 == 0) {
+                 return &q6_K_8x4_q8_K;
+             }
++        }
++        if (ggml_cpu_has_riscv_v()) {
++            #if defined __riscv_zvfh
++            switch (__riscv_vlenb() * 8) {
++                case 128:  { break; }
++                case 256:  { if (cur->ne[1] % 16 == 0) { return &q6_K_16x1_q8_K; } break; }
++                case 512:  { break; }
++                case 1024: { break; }
++                default:   { return nullptr; }
++            }
++            #endif
+         }
+     } else if (cur->type == GGML_TYPE_IQ4_NL) {
+         if (ggml_cpu_has_avx2()) {
+--- a/ggml/src/ggml-cpu/repack.h
++++ b/ggml/src/ggml-cpu/repack.h
+@@ -92,6 +92,15 @@
+ 
+ static_assert(sizeof(block_q6_Kx8) == sizeof(ggml_half) * 8 + QK_K / 16 * 8 + 3 * QK_K / 4 * 8,
+               "wrong q6_K block size/padding");
++
++struct block_q6_Kx16 {
++    ggml_half d[16];
++    int8_t    scales[QK_K / 16 * 16];
++    uint8_t   ql[QK_K / 2 * 16];
++    uint8_t   qh[QK_K / 4 * 16];
++};
++
++static_assert(sizeof(block_q6_Kx16) == sizeof(block_q6_K) * 16, "wrong q6_Kx16 block size/padding");
+ 
+ struct block_q8_Kx4 {
+     float d[4];              // delta
+@@ -181,11 +190,13 @@
+ void ggml_gemv_iq4_nl_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemv_q8_0_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemv_q2_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemv_q6_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_iq4_nl_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q8_0_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q2_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemm_q6_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ #endif
+ 
+ // Native implementations

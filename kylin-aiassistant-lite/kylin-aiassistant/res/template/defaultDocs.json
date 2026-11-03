@@ -1,0 +1,197 @@
+{
+    "templates": 
+    [
+        {
+            "templateCount": 1,
+            "templateName": "自由写作",
+            "templateOutline": "",
+            "templatePrompt": "帮我写一篇文章关于[主题]。",
+            "templateTone": "默认",
+            "templateTip": "随心创作，无拘形式与风格",
+            "templateProperty": "一气呵成",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "简单润色",
+            "templateOutline": "",
+            "templatePrompt": "请帮我润色以下内容，使表达更流畅：[原文]。",
+            "templateTone": "默认",
+            "templateTip": "优化语句表达提升可读性",
+            "templateProperty": "一气呵成",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": false
+        },
+        {
+            "templateCount": 1,
+            "templateName": "文本扩写",
+            "templateOutline": "",
+            "templatePrompt": "请根据以下内容进行扩写，保持原意一致：[原文]。",
+            "templateTone": "默认",
+            "templateTip": "丰富内容细节补充完整性",
+            "templateProperty": "一气呵成",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": false
+        },
+        {
+            "templateCount": 1,
+            "templateName": "文本缩写",
+            "templateOutline": "",
+            "templatePrompt": "请将以下内容压缩成更精炼的版本：[原文]。",
+            "templateTone": "默认",
+            "templateTip": "精简篇幅提炼核心要点",
+            "templateProperty": "一气呵成",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": false
+        },
+        {
+            "templateCount": 1,
+            "templateName": "中英互译",
+            "templateOutline": "",
+            "templatePrompt": "请将以下内容翻译成目标语言：[原文]。",
+            "templateTone": "默认",
+            "templateTip": "双语互转保持语义准确",
+            "templateProperty": "一气呵成",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": false
+        },
+        {
+            "templateCount": 1,
+            "templateName": "总结概括",
+            "templateOutline": "",
+            "templatePrompt": "请为以下内容撰写结构化摘要：[原文]。",
+            "templateTone": "默认",
+            "templateTip": "提炼要点突出核心信息",
+            "templateProperty": "一气呵成",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": false
+        },
+        {
+            "templateCount": 1,
+            "templateName": "风格改写",
+            "templateOutline": "",
+            "templatePrompt": "请将以下内容改写为指定风格：[风格说明 + 原文]。",
+            "templateTone": "默认",
+            "templateTip": "调整语气适配不同场景",
+            "templateProperty": "一气呵成",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": false
+        },
+        {
+            "templateCount": 1,
+            "templateName": "商业合作协议",
+            "templateOutline": "# 合作协议\n## 一、合作双方\n### 1.1 甲方信息\n### 1.2 乙方信息\n## 二、合作内容\n### 2.1 合作范围\n### 2.2 合作方式\n## 三、权利义务\n### 3.1 甲方权利与义务\n### 3.2 乙方权利与义务\n## 四、合作期限\n## 五、费用与结算\n## 六、保密条款\n## 七、违约责任\n## 八、争议解决\n## 九、其他条款\n## 十、签署",
+            "templatePrompt": "请根据以下合作信息生成一份合作协议：[合作要点]。",
+            "templateTone": "默认",
+            "templateTip": "规范条款明确权责关系",
+            "templateProperty": "步骤写作",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "会议议程",
+            "templateOutline": "# 会议议程\n## 一、会议基本信息\n### 1.1 会议主题\n### 1.2 会议时间\n### 1.3 会议地点\n### 1.4 参会人员\n## 二、会议议程\n### 2.1 议题一\n### 2.2 议题二\n### 2.3 议题三\n## 三、讨论事项\n## 四、决议事项\n## 五、后续安排",
+            "templatePrompt": "请根据以下信息生成会议议程：[会议主题与要点]。",
+            "templateTone": "默认",
+            "templateTip": "安排议题把控会议节奏",
+            "templateProperty": "步骤写作",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "会议谈参",
+            "templateOutline": "# 会议谈参\n## 一、会议背景\n### 1.1 会议目的\n### 1.2 会议背景\n## 二、核心议题\n### 2.1 议题一\n### 2.2 议题二\n## 三、关键信息\n### 3.1 数据支撑\n### 3.2 政策依据\n## 四、建议方案\n## 五、风险提示\n## 六、预期效果",
+            "templatePrompt": "请根据以下背景整理会议谈参要点：[会议背景]。",
+            "templateTone": "默认",
+            "templateTip": "提供背景辅助沟通决策",
+            "templateProperty": "步骤写作",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "会议纪要",
+            "templateOutline": "# 会议纪要\n## 一、会议基本信息\n## 二、会议背景与目的\n## 三、会议主要内容\n### 议题一：【议题名称】\n### 议题二：【议题名称】\n## 四、会议结论与共识\n## 五、行动项（To-Do）\n## 六、需后续跟进事项",
+            "templatePrompt": "请根据以下内容生成会议纪要：[会议讨论内容]。",
+            "templateTone": "默认",
+            "templateTip": "记录要点跟踪待办事项",
+            "templateProperty": "步骤写作",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "领导致辞",
+            "templateOutline": "# 在【场合 / 活动名称】上的致辞\n## 开场与背景\n## 阶段性成果或现实意义\n## 核心观点与工作要求\n## 未来展望与目标\n## 结束语",
+            "templatePrompt": "请根据以下场景与主题撰写领导致辞：[场景 + 核心信息]。",
+            "templateTone": "默认",
+            "templateTip": "体现高度传递核心精神",
+            "templateProperty": "步骤写作",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "产品水牌",
+            "templateOutline": "# 产品水牌\n## 一、产品名称\n## 二、产品简介\n## 三、核心特点\n### 3.1 特点一\n### 3.2 特点二\n### 3.3 特点三\n## 四、技术参数\n## 五、应用场景\n## 六、联系方式",
+            "templatePrompt": "请根据以下产品信息生成展示水牌文案：[产品要点]。",
+            "templateTone": "默认",
+            "templateTip": "简明展示产品关键信息",
+            "templateProperty": "步骤写作",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "周期报告",
+            "templateOutline": "# 【周期】工作报告（【YYYY.MM.DD – YYYY.MM.DD】）\n## 一、本周期工作概述\n## 二、重点工作完成情况\n### 工作项一：【事项名称】\n### 工作项二：【事项名称】\n## 三、问题与风险\n## 四、经验与改进点\n## 五、下周期工作计划\n## 六、需协调 / 支持事项",
+            "templatePrompt": "请根据以下工作信息生成周期报告：[具体内容]。",
+            "templateTone": "默认",
+            "templateTip": "总结进展规划后续工作",
+            "templateProperty": "步骤写作",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "技术应答偏离表",
+            "templateOutline": "",
+            "templatePrompt": "请根据以下技术偏离项生成对应说明：[偏离项清单]。",
+            "templateTone": "默认",
+            "templateTip": "对比差异明确技术选项",
+            "templateProperty": "逐个填空",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        },
+        {
+            "templateCount": 1,
+            "templateName": "访谈材料",
+            "templateOutline": "",
+            "templatePrompt": "请根据以下信息生成访谈提纲或访谈内容：[访谈对象与主题]。",
+            "templateTone": "默认",
+            "templateTip": "设计问题引导深度交流",
+            "templateProperty": "逐个填空",
+            "isCustom": false,
+            "isReference": true,
+            "isOutline": true
+        }
+    ]
+}

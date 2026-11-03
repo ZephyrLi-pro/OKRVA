@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QWidget" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>288</width>
+    <height>370</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>288</width>
+    <height>370</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>288</width>
+    <height>370</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Voice call</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>24</number>
+   </property>
+   <item>
+    <widget class="QWidget" name="titleWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <layout class="QHBoxLayout" name="titleLayout" stretch="0,0,0">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="leftMargin">
+       <number>7</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>3</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="miniButton">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Compact mode</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="src.qrc">
+          <normaloff>:/image/icon/ukui-mini-symbolic.svg</normaloff>:/image/icon/ukui-mini-symbolic.svg</iconset>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QToolButton {
+    border: none;
+    border-radius: 4px;
+    background-color: transparent;
+}
+QToolButton:hover {
+    background-color: #F2F2F2;
+}
+QToolButton:pressed {
+    background-color: #EBEBEB;
+}</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="closeButton">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Close</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset theme="window-close-symbolic"/>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QToolButton {
+    border: none;
+    border-radius: 4px;
+    background-color: transparent;
+}
+QToolButton:hover {
+    background-color: #E93C3C;
+}
+QToolButton:pressed {
+    background-color: #C43232;
+}</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="stackedWidget_middle">
+     <widget class="QWidget" name="page_listening">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_anmi">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QWidget" name="widget_anmi" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>164</width>
+             <height>164</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>164</width>
+             <height>164</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border-image: url(:/image/icon/listen.png);</string>
+           </property>
+           <widget class="QLabel" name="label_robot_icon">
+            <property name="geometry">
+             <rect>
+              <x>36</x>
+              <y>27</y>
+              <width>92</width>
+              <height>92</height>
+             </rect>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border-image: none; background: transparent;</string>
+            </property>
+            <property name="pixmap">
+             <pixmap resource="src.qrc">:/image/icon/kylin-ai-assistant-new.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_voice">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="VoiceWaveWidget" name="widget_voice_logo" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>44</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>44</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_callback_title">
+           <property name="minimumSize">
+            <size>
+             <width>73</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>73</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="visible">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-family: &quot;Noto Sans CJK SC&quot;;
+font-size: 18px;
+font-weight: 500;
+color: rgba(0, 0, 0, 0.85);</string>
+           </property>
+           <property name="text">
+            <string notr="true">KylinBot</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item alignment="Qt::AlignHCenter">
+        <widget class="QLabel" name="label_tip">
+         <property name="text">
+          <string>Listening</string>
+         </property>
+        </widget>
+       </item>
+       <item alignment="Qt::AlignHCenter">
+        <widget class="QToolButton" name="interruptButton">
+         <property name="visible">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>Interrupt reading</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QToolButton {
+    border-radius: 14px;
+    padding: 4px 12px;
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.85);
+    border: none;
+}
+
+QToolButton:hover {
+    background-color: #F2F2F2;
+}
+
+QToolButton:pressed {
+    background-color: #EBEBEB;
+}</string>
+         </property>
+         <property name="text">
+          <string>Tap to interrupt response</string>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="ChatWidget" name="page_chat"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="MiniPanel" name="bottomWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>48</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ChatWidget</class>
+   <extends>QWidget</extends>
+   <header>chatwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MiniPanel</class>
+   <extends>QWidget</extends>
+   <header>minipanel.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VoiceWaveWidget</class>
+   <extends>QWidget</extends>
+   <header>voicewavewidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="src.qrc"/>
+ </resources>
+ <connections/>
+</ui>

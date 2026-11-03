@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: kylinbot
+  namespace: kylinbot
+  labels:
+    app.kubernetes.io/name: kylinbot
+    app.kubernetes.io/part-of: kylinbot
+spec:
+  to:
+    kind: Service
+    name: kylinbot
+    weight: 100
+  port:
+    targetPort: gateway
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

@@ -1,0 +1,16 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Ai assistant
+Name[zh_CN]=AI 助手
+Name[zh_HK]=AI 助手
+Name[zh_TW]=AI 助手
+Icon=kylin-ai-assistant
+Comment=The ai assistant is an application developed based on the Baidu open source model library Qianfan that is convenient for users to operate quickly.
+Comment[zh_CN]=AI助手（Ai assistant）是基于百度开源模型库Qianfan开发的一款便于用户快捷操作的应用。
+Keywords=aiassistant;
+Exec=/usr/bin/kylin-aiassistant -l
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Utility;kylin-aiassistant;
+X-KDE-Wayland-Interfaces=org_kde_plasma_window_management,org_kde_plasma_activation_feedback,org_kde_kwin_keystate,org_kde_kwin_fake_input,zkde_screencast_unstable_v1

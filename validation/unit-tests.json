@@ -1,0 +1,29 @@
+[
+  {
+    "component": "adapter",
+    "tests": 183,
+    "elapsed_seconds": 21.855,
+    "skipped": 0,
+    "passed": true,
+    "source": "exported source snapshot",
+    "actual_user_system_operations": false
+  },
+  {
+    "component": "system-tools",
+    "tests": 54,
+    "elapsed_seconds": 1.229,
+    "skipped": 0,
+    "passed": true,
+    "source": "exported source snapshot",
+    "actual_user_system_operations": false
+  },
+  {
+    "component": "documents",
+    "tests": 19,
+    "elapsed_seconds": 1.136,
+    "skipped": 1,
+    "passed": true,
+    "source": "exported source snapshot",
+    "actual_user_system_operations": false
+  }
+]

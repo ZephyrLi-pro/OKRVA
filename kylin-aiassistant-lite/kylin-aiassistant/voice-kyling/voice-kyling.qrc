@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/voice-kyling">
+        <file>qml/main.qml</file>
+        <file>qml/AIBall.qml</file>
+    </qresource>
+</RCC>

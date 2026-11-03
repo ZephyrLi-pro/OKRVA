@@ -1,0 +1,27 @@
+[package]
+name = "kart-speech-sys"
+version = "0.1.0"
+edition = "2021"
+authors = ["ZeroClaw Team"]
+license = "MIT OR Apache-2.0"
+description = "Low-level bindings for kylin-coreai-speech SDK"
+repository = "https://github.com/zeroclaw-labs/zeroclaw"
+publish = false
+
+# NOTE: This crate is the ONLY place in ZeroClaw where unsafe code is permitted
+# for this SDK. All unsafe is confined to extern "C" call sites.
+# The public API is fully safe Rust.
+
+[dependencies]
+libloading = "0.8"
+thiserror = "2.0"
+tokio = { version = "1.50", default-features = false, features = ["sync", "time", "rt-multi-thread"] }
+tracing = { version = "0.1", default-features = false }
+
+[build-dependencies]
+bindgen = "0.71"
+
+[features]
+default = []
+# Disable real SDK, use stub for testing without the library
+stub = []

@@ -1,0 +1,9 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon/window">
+<path id="Rectangle 17769" d="M1.5 4.7C1.5 3.57989 1.5 3.01984 1.71799 2.59202C1.90973 2.21569 2.21569 1.90973 2.59202 1.71799C3.01984 1.5 3.57989 1.5 4.7 1.5H7V14.5H4.7C3.57989 14.5 3.01984 14.5 2.59202 14.282C2.21569 14.0903 1.90973 13.7843 1.71799 13.408C1.5 12.9802 1.5 12.4201 1.5 11.3V4.7Z" stroke="#262626" stroke-linejoin="round"/>
+<path id="Vector 69" d="M3.5 5H5" stroke="#262626" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector 70" d="M3.5 8H5" stroke="#262626" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector 71" d="M3.5 11H5" stroke="#262626" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Rectangle 17770" d="M7 1.5L11.3 1.5C12.4201 1.5 12.9802 1.5 13.408 1.71799C13.7843 1.90973 14.0903 2.21569 14.282 2.59202C14.5 3.01984 14.5 3.57989 14.5 4.7V11.3C14.5 12.4201 14.5 12.9802 14.282 13.408C14.0903 13.7843 13.7843 14.0903 13.408 14.282C12.9802 14.5 12.4201 14.5 11.3 14.5H7V1.5Z" stroke="#262626" stroke-linejoin="round"/>
+</g>
+</svg>

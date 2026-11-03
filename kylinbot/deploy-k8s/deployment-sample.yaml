@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kylinbot
+  namespace: kylinbot
+  labels:
+    app.kubernetes.io/name: kylinbot
+    app.kubernetes.io/part-of: kylinbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kylinbot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kylinbot
+        app.kubernetes.io/part-of: kylinbot
+    spec:
+      containers:
+        - name: kylinbot
+          # For production, pin to a version tag (e.g. <TODO-registry>/openkylin/kylinbot:v0.7.1)
+          image: <TODO-registry>/openkylin/kylinbot:latest
+          args: ["daemon"]
+          # Kubernetes Services and probes require TCP; UDS is out of scope here.
+          ports:
+            - name: gateway
+              containerPort: 42617
+              protocol: TCP
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kylinbot-api-key
+                  key: api-key
+            - name: LANG
+              value: "C.UTF-8"
+            - name: HOME
+              value: "/kylinbot-data"
+            - name: KYLINBOT_WORKSPACE
+              value: "/kylinbot-data/workspace"
+            - name: KYLINBOT_GATEWAY_TRANSPORT
+              value: "tcp"
+            - name: KYLINBOT_GATEWAY_PORT
+              value: "42617"
+          volumeMounts:
+            - name: state
+              mountPath: /kylinbot-data/.kylinbot
+            - name: config
+              mountPath: /kylinbot-data/.kylinbot/config.toml
+              subPath: config.toml
+              readOnly: true
+            - name: workspace
+              mountPath: /kylinbot-data/workspace
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "2"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: gateway
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: gateway
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: config
+          configMap:
+            name: kylinbot-config
+        - name: state
+          emptyDir: {}
+        - name: workspace
+          emptyDir: {}

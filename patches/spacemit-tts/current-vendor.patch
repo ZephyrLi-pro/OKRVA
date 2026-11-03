@@ -1,0 +1,86 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -67,6 +67,17 @@
+ # 创建静态库
+ add_library(tts STATIC ${TTS_SOURCES})
+ 
++if(RVAI_MATCHA_BRIDGE_SOURCE)
++    if(NOT TTS_USE_FST)
++        message(FATAL_ERROR "The Adapter Matcha bridge requires TTS_USE_FST=ON")
++    endif()
++    add_library(kylinbot_matcha SHARED ${RVAI_MATCHA_BRIDGE_SOURCE})
++    target_link_libraries(kylinbot_matcha PRIVATE tts)
++    target_include_directories(kylinbot_matcha PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
++    set_target_properties(kylinbot_matcha PROPERTIES OUTPUT_NAME "kylinbot-matcha"
++        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
++endif()
++
+ # Include 目录
+ target_include_directories(tts
+     PUBLIC
+--- a/src/backends/matcha/matcha_backend.cpp
++++ b/src/backends/matcha/matcha_backend.cpp
+@@ -260,6 +260,12 @@
+             std::string actual_provider = use_spacemit_ep ? "spacemit" : "cpu";
+             options.SetIntraOpNumThreads(use_spacemit_ep ? 1 : cpu_threads);
+             options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
++            // Private K1 A/B knob: do not let the idle acoustic/vocoder pools
++            // busy-wait while the other pool or espeak is using the same cores.
++            if (!use_spacemit_ep && getEnvFlag("RVAI_TTS_NO_SPIN")) {
++                options.AddConfigEntry("session.intra_op.allow_spinning", "0");
++                options.AddConfigEntry("session.inter_op.allow_spinning", "0");
++            }
+ 
+ #ifdef USE_SPACEMIT_EP
+             if (use_spacemit_ep) {
+--- a/src/backends/matcha/tts_model_downloader.cpp
++++ b/src/backends/matcha/tts_model_downloader.cpp
+@@ -17,6 +17,13 @@
+ namespace tts {
+ 
+ TTSModelDownloader::TTSModelDownloader() {
++    // Application-owned, pre-populated cache; no dependency on test directories.
++    const char* cache_root = std::getenv("RVAI_TTS_CACHE_ROOT");
++    if (cache_root && cache_root[0]) {
++        base_cache_dir_ = std::string(cache_root) + "/";
++        cache_dir_ = base_cache_dir_ + "models/tts/matcha-tts/";
++        return;
++    }
+     // Set cache directory to ~/.cache/models/tts/matcha-tts/
+     const char* home = std::getenv("HOME");
+     if (home) {
+--- a/src/text/text_normalizer.cpp
++++ b/src/text/text_normalizer.cpp
+@@ -8,6 +8,7 @@
+ #include <filesystem>  // NOLINT(build/c++17)
+ #include <iostream>
+ #include <memory>
++#include <regex>
+ #include <string>
+ #include <vector>
+ 
+@@ -27,6 +28,10 @@
+ 
+ /// @brief 拿 FST 缓存目录 (~/.cache/models/tts/text_norm/v1/zh/)
+ std::string getZhFstDir() {
++    const char* cache_root = std::getenv("RVAI_TTS_CACHE_ROOT");
++    if (cache_root && cache_root[0]) {
++        return std::string(cache_root) + "/models/tts/text_norm/v1/zh/";
++    }
+     const char* home = std::getenv("HOME");
+     std::string base = home ? std::string(home) + "/.cache" : std::string("./.cache");
+     return base + "/models/tts/text_norm/v1/zh/";
+@@ -116,6 +121,13 @@
+ 
+         out += text[i];
+     }
++    // Adapter: the published FSTs do not cover ISO dates or percent signs.
++    // Convert syntax only; leave the actual number pronunciation to the FSTs.
++    static const std::regex iso_date(
++        R"(\b([12][0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\b)");
++    static const std::regex percentage(R"(((?:负|-)?[0-9]+(?:\.[0-9]+)?)[ \t]*(%|％))");
++    out = std::regex_replace(out, iso_date, "$1年$2月$3日");
++    out = std::regex_replace(out, percentage, "百分之$1");
+     return out;
+ }
+ 

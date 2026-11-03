@@ -1,0 +1,27 @@
+[Unit]
+Description=Local SpacemiT Ollama backend for RISC-V AI Adapter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/riscv-ai-adapter/ollama/bin/ollama serve
+Environment=OLLAMA_HOST=127.0.0.1:18085
+Environment=OLLAMA_MODELS=%h/.local/share/riscv-ai-adapter/ollama/models
+Environment=OLLAMA_NUM_PARALLEL=1
+Environment=OLLAMA_MAX_LOADED_MODELS=1
+Environment=OLLAMA_KEEP_ALIVE=-1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+KillMode=control-group
+CPUWeight=1000
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/riscv-ai-adapter/ollama/models
+# The optimized runner selects its own supported CPU set. Do not override
+# CPUAffinity: changing it to cores 4-7 caused SIGILL on the tested device.
+
+[Install]
+WantedBy=default.target

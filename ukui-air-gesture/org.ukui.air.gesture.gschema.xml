@@ -1,0 +1,19 @@
+<schemalist gettext-domain="ukui-air-gesture">
+	<schema id="org.ukui.air-gesture.settings"  path="/org/ukui/air-gesture/settings/">
+        <key name="vertical-scroll-enabled" type="b">
+            <default>false</default>
+            <summary>vertical scroll enabled</summary>
+            <description>enable air gesture vertical scroll</description>
+        </key>
+        <key name="horizontal-scroll-enabled" type="b">
+            <default>false</default>
+            <summary>vertical scroll enabled</summary>
+            <description>enable air gesture horizontal scroll</description>
+        </key>
+        <key name="fist-screenshot-enabled" type="b">
+            <default>false</default>
+            <summary>fist screenshot enabled</summary>
+            <description>enable air gesture fist screenshot</description>
+        </key>
+    </schema>
+</schemalist>

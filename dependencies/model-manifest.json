@@ -1,0 +1,146 @@
+[
+  {
+    "role": "chat-and-planning",
+    "filename": "Qwen3-0.6B-Q4_K_M.gguf",
+    "path": "@HOME@/.cache/models/llm/spacemit-20261010/Qwen3-0.6B-Q4_K_M.gguf",
+    "bytes": 396705344,
+    "sha256": "381f105b617ecf6bea892353cb15865d3feabcb0763642ec1429d48b86768ec1",
+    "source": "SpacemiT Qwen3 GGUF distribution; reading Q4_0 was locally requantized from Qwen3-1.7B-Q8_0",
+    "active": true
+  },
+  {
+    "role": "reading-summary",
+    "filename": "Qwen3-1.7B-Q4_0.gguf",
+    "path": "@HOME@/.cache/models/llm/reading-20261102/Qwen3-1.7B-Q4_0.gguf",
+    "bytes": 1054422688,
+    "sha256": "81ccd6caca30f2a1d0ad1401bd0e3c453049ed7b41a4f327ff9447bf3fc28d25",
+    "source": "SpacemiT Qwen3 GGUF distribution; reading Q4_0 was locally requantized from Qwen3-1.7B-Q8_0",
+    "active": true
+  },
+  {
+    "role": "asr-sensevoice",
+    "filename": "model_quant_optimized.onnx",
+    "path": "@HOME@/.cache/models/asr/sensevoice/model_quant_optimized.onnx",
+    "bytes": 238347869,
+    "sha256": "0b808be086d8e6a74972b0b04cebaeb0a948d528b2b15d6d42074ae101183c8d",
+    "source": "https://archive.spacemit.com/spacemit-ai/model_zoo/asr/sensevoice.tar.gz",
+    "active": true
+  },
+  {
+    "role": "asr-sensevoice",
+    "filename": "tokens.txt",
+    "path": "@HOME@/.cache/models/asr/sensevoice/tokens.txt",
+    "bytes": 399355,
+    "sha256": "d92f88b9ece933daf711e145723a76fd3859aa8a8c3771f1cbb7a721ad067193",
+    "source": "https://archive.spacemit.com/spacemit-ai/model_zoo/asr/sensevoice.tar.gz",
+    "active": true
+  },
+  {
+    "role": "asr-sensevoice",
+    "filename": "am.mvn",
+    "path": "@HOME@/.cache/models/asr/sensevoice/am.mvn",
+    "bytes": 11203,
+    "sha256": "29b3c740a2c0cfc6b308126d31d7f265fa2be74f3bb095cd2f143ea970896ae5",
+    "source": "https://archive.spacemit.com/spacemit-ai/model_zoo/asr/sensevoice.tar.gz",
+    "active": true
+  },
+  {
+    "role": "voice-vad",
+    "filename": "silero_vad.onnx",
+    "path": "@HOME@/.cache/models/asr/sensevoice/silero_vad.onnx",
+    "bytes": 2327524,
+    "sha256": "2623a2953f6ff3d2c1e61740c6cdb7168133479b267dfef114a4a3cc5bdd788f",
+    "source": "Silero VAD through sherpa-onnx",
+    "active": true
+  },
+  {
+    "role": "tts-matcha",
+    "filename": "vocos-16khz-univ.q.onnx",
+    "path": "@HOME@/.local/share/riscv-ai-adapter/tts-matcha-20261016/models/tts/matcha-tts/vocos-16khz-univ.q.onnx",
+    "bytes": 13699115,
+    "sha256": "097157778dde9353bb294a857de2a2a4f9143e86c956c0e97de5135016724d85",
+    "source": "Matcha/Vocos public pretrained artifacts; see models/README.md",
+    "active": true
+  },
+  {
+    "role": "tts-matcha",
+    "filename": "vocab_tts.txt",
+    "path": "@HOME@/.local/share/riscv-ai-adapter/tts-matcha-20261016/models/tts/matcha-tts/matcha-icefall-zh-en/vocab_tts.txt",
+    "bytes": 11302,
+    "sha256": "5da986bcb994f56923ab8e050ecfadbc4e6259004ee21038530066414ca4afe0",
+    "source": "Matcha/Vocos public pretrained artifacts; see models/README.md",
+    "active": true
+  },
+  {
+    "role": "tts-matcha",
+    "filename": "model-steps-3.q.onnx",
+    "path": "@HOME@/.local/share/riscv-ai-adapter/tts-matcha-20261016/models/tts/matcha-tts/matcha-icefall-zh-en/model-steps-3.q.onnx",
+    "bytes": 35049799,
+    "sha256": "1ca8d6d1d251730c21569566c5ee01287052b520be145c7baf911a6ed3738030",
+    "source": "Matcha/Vocos public pretrained artifacts; see models/README.md",
+    "active": true
+  },
+  {
+    "role": "wake-keyword",
+    "filename": "keywords-nihao-kylin.txt",
+    "path": "@HOME@/.cache/models/kws/keywords-nihao-kylin.txt",
+    "bytes": 36,
+    "sha256": "46165d1f563cd99a11cf39489fc2f7d7c950924dc79dfac49a0be7f96fbbc1e4",
+    "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/kws-models",
+    "active": true
+  },
+  {
+    "role": "wake-keyword",
+    "filename": "decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+    "path": "@HOME@/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+    "bytes": 181069,
+    "sha256": "ed83454004d5bd16d831eaf00adcd181ed7734886aab6ef440f3ffa5aa3cfe3b",
+    "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/kws-models",
+    "active": true
+  },
+  {
+    "role": "wake-keyword",
+    "filename": "encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+    "path": "@HOME@/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+    "bytes": 4777666,
+    "sha256": "dd784973fc9d2fabb3b800d6dcd20fc3b0ca84f8e2415afe54b032878e447f4d",
+    "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/kws-models",
+    "active": true
+  },
+  {
+    "role": "wake-keyword",
+    "filename": "joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+    "path": "@HOME@/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+    "bytes": 65242,
+    "sha256": "f79760052b87239e325f0567c752ad3130b30d92effb847d4307743c20c59a24",
+    "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/kws-models",
+    "active": true
+  },
+  {
+    "role": "wake-keyword",
+    "filename": "tokens.txt",
+    "path": "@HOME@/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/tokens.txt",
+    "bytes": 1627,
+    "sha256": "72316508d9119696145abc6f1f8cdc46287535c34e5ce7e595f845cb1499cf2e",
+    "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/kws-models",
+    "active": true
+  },
+  {
+    "role": "gesture-opencv-ort",
+    "filename": "handpose_estimation_mediapipe_2023feb.onnx",
+    "path": "/usr/local/share/ukui-air-gesture/models/handpose_estimation_mediapipe_2023feb.onnx",
+    "bytes": 4099621,
+    "sha256": "db0898ae717b76b075d9bf563af315b29562e11f8df5027a1ef07b02bef6d81c",
+    "source": "https://github.com/opencv/opencv_zoo",
+    "active": true
+  },
+  {
+    "role": "gesture-opencv-ort",
+    "filename": "palm_detection_mediapipe_2023feb.onnx",
+    "path": "/usr/local/share/ukui-air-gesture/models/palm_detection_mediapipe_2023feb.onnx",
+    "bytes": 3905734,
+    "sha256": "78ff51c38496b7fc8b8ebdb6cc8c1abb02fa6c38427c6848254cdaba57fcce7c",
+    "source": "https://github.com/opencv/opencv_zoo",
+    "active": true
+  }
+]

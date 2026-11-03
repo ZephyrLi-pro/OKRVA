@@ -1,0 +1,12 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://gitee.com/openkylin/ukui-air-gesture
+Upstream-Name: ukui-air-gesture
+Upstream-Contact: 韩美霖 <hanmeilin@kylinos.cn>
+
+Files: *
+Copyright: 2026, KylinSoft Co., Ltd.
+License: GPL-3+
+
+Files: debian/*
+Copyright: 2026, KylinSoft Co., Ltd.
+License: GPL-3+

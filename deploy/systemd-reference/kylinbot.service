@@ -1,0 +1,74 @@
+# %h/.config/systemd/user/kylinbot.service
+[Unit]
+Description=KylinBot daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/kylinbot daemon
+Restart=always
+RestartSec=3
+# Ensure HOME is set so headless browsers can create profile/cache dirs.
+Environment=HOME=%h
+# Allow inheriting DISPLAY and XDG_RUNTIME_DIR from the user session
+# so graphical/headless browsers can function correctly.
+PassEnvironment=DISPLAY XDG_RUNTIME_DIR
+
+[Install]
+WantedBy=default.target
+
+# %h/.config/systemd/user/kylinbot.service.d/90-silero-vad.conf
+[Service]
+Environment=KYLINBOT_VAD_BINARY=%h/.local/lib/kylinbot/kylinbot-vad-stream
+Environment=KYLINBOT_VAD_MODEL=%h/.cache/models/asr/sensevoice/silero_vad.onnx
+
+# %h/.config/systemd/user/kylinbot.service.d/asr.conf
+[Unit]
+Requires=kylinbot-asr-sensevoice.service
+After=kylinbot-asr-sensevoice.service pipewire.service wireplumber.service
+
+# %h/.config/systemd/user/kylinbot.service.d/audio-path.conf
+[Service]
+Environment="PATH=%h/.local/lib/kylinbot:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# %h/.config/systemd/user/kylinbot.service.d/kws.conf
+[Service]
+Environment=KYLINBOT_KWS_BINARY=%h/.local/share/kylinbot-asr/sherpa-v1.13.2/bin/sherpa-onnx-keyword-spotter
+Environment=KYLINBOT_KWS_STREAM_BINARY=%h/.local/lib/kylinbot/kylinbot-kws-stream
+Environment=KYLINBOT_KWS_ENCODER=%h/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+Environment=KYLINBOT_KWS_DECODER=%h/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+Environment=KYLINBOT_KWS_JOINER=%h/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+Environment=KYLINBOT_KWS_TOKENS=%h/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/tokens.txt
+Environment=KYLINBOT_KWS_KEYWORDS=%h/.cache/models/kws/keywords-nihao-kylin.txt
+Environment=KYLINBOT_KWS_PROVIDER=cpu
+Environment=KYLINBOT_KWS_THREADS=2
+Environment=KYLINBOT_KWS_SCORE=1.0
+Environment=KYLINBOT_KWS_THRESHOLD=0.25
+
+# %h/.config/systemd/user/kylinbot.service.d/riscv-ai-adapter.conf
+[Unit]
+Requires=riscv-ai-adapter.service
+After=riscv-ai-adapter.service
+
+# %h/.config/systemd/user/kylinbot.service.d/wake-ack.conf
+[Service]
+Environment=KYLINBOT_WAKE_ACK_FILE=%h/.local/share/kylinbot/wake_ack_zh_fast.wav
+
+# %h/.config/systemd/user/kylinbot.service.d/zz-kws-power.conf
+[Unit]
+# Sort after the existing kws.conf so these opt-in overrides actually win.
+Wants=kylinbot-kws-policy.service
+After=kylinbot-kws-policy.service
+
+[Service]
+# Keep the original int8 KWS on its supported cluster, but reduce idle work
+# and pause wake processing while the LLM/TTS is busy. One inference thread
+# matched the two-thread wake timing with substantially less CPU time.
+Environment=KYLINBOT_KWS_STREAM_BINARY=%h/.local/lib/kylinbot/kylinbot-kws-gated
+Environment=KYLINBOT_KWS_ENCODER=%h/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+Environment=KYLINBOT_KWS_DECODER=%h/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+Environment=KYLINBOT_KWS_JOINER=%h/.cache/models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx
+Environment=KYLINBOT_KWS_THREADS=1
+Environment=KYLINBOT_KWS_CPUSET=0-3
+Environment=KYLINBOT_KWS_VAD_GATE=1
+Environment=KYLINBOT_KWS_BUSY_FILE=%t/kylinbot-kws-policy/state

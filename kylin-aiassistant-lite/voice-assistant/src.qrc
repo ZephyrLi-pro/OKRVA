@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/translations">
+        <file>translations/voice_assistant_zh_CN.ts</file>
+        <file>translations/voice_assistant_zh_TW.ts</file>
+    </qresource>
+    <qresource prefix="/">
+        <file alias="image/icon/kylin-ai-assistant-new.png">../kylin-aiassistant/res/icon/kylin-ai-assistant-new.png</file>
+        <file>image/icon/voice.svg</file>
+        <file>image/icon/listen.png</file>
+        <file>image/icon/window-close-symbolic.svg</file>
+        <file>image/icon/window-close-symbolic-white.svg</file>
+        <file>image/icon/ukui-mini-symbolic.svg</file>
+        <file>image/icon/zimu.svg</file>
+        <file>image/icon/ukui-microphone-on-symbolic.svg</file>
+        <file>image/icon/computer-symbolic.svg</file>
+        <file>image/icon/call-stop-symbolic.svg</file>
+        <file>image/icon/computer-symbolic-blue.svg</file>
+        <file>image/icon/zimu-blue.svg</file>
+        <file>image/icon/ukui-microphone-on-symbolic-blue.svg</file>
+        <file>image/icon/stop.svg</file>
+        <file>image/icon/call-start-symbolic.svg</file>
+        <file>image/icon/logo.png</file>
+        <file>image/icon/view-fullscreen-symbolic.svg</file>
+        <file>image/icon/call-stop-symbolic-red.svg</file>
+        <file>image/icon/copy.svg</file>
+    </qresource>
+</RCC>

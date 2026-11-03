@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/AI-Writing.svg</file>
+        <file>translations/peony-menu-plugin-kylin-aiassistant_zh_CN.ts</file>
+    </qresource>
+</RCC>

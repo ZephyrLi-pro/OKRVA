@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/qml/qml">
+        <file alias="WebKBotPage.qml">webengine/WebKBotPage.qml</file>
+    </qresource>
+</RCC>

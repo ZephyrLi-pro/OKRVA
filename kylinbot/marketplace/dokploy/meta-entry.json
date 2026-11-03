@@ -1,0 +1,13 @@
+{
+  "id": "kylinbot",
+  "name": "KylinBot",
+  "version": "0.7.4",
+  "description": "Fast, small, and fully autonomous AI personal assistant infrastructure. Deploy anywhere, swap anything. 100% Rust.",
+  "logo": "kylinbot.png",
+  "links": {
+    "github": "https://gitee.com/openkylin/kylinbot",
+    "website": "https://kylinbot.com/",
+    "docs": "https://gitee.com/openkylin/kylinbot#readme"
+  },
+  "tags": ["ai", "self-hosted"]
+}

@@ -1,0 +1,96 @@
+--- a/ggml/src/ggml-cpu/arch-fallback.h
++++ b/ggml/src/ggml-cpu/arch-fallback.h
+@@ -206,7 +206,6 @@
+ #elif defined(__riscv)
+ // quants.c
+ #define ggml_vec_dot_nvfp4_q8_0_generic ggml_vec_dot_nvfp4_q8_0
+-#define ggml_vec_dot_q2_0_q8_0_generic ggml_vec_dot_q2_0_q8_0
+ // repack.cpp
+ #define ggml_quantize_mat_q8_0_4x1_generic ggml_quantize_mat_q8_0_4x1
+ #define ggml_quantize_mat_q8_0_4x4_generic ggml_quantize_mat_q8_0_4x4
+--- a/ggml/src/ggml-cpu/arch/riscv/quants.c
++++ b/ggml/src/ggml-cpu/arch/riscv/quants.c
+@@ -477,6 +477,83 @@
+     UNUSED(sumf);
+ 
+     ggml_vec_dot_q8_0_q8_0_generic(n, s, bs, vx, bx, vy, by, nrc);
++#endif
++}
++
++#if defined(__riscv_v)
++static NOINLINE void ggml_vec_dot_q2_0_q8_0_vl256(int n, float * GGML_RESTRICT s, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy) {
++    const int qk = QK2_0;
++    const int nb = n / qk;
++
++    assert(n % qk == 0);
++
++    const block_q2_0 * GGML_RESTRICT x = vx;
++    const block_q8_0 * GGML_RESTRICT y = vy;
++
++    static const uint8_t gather_idx[32] = {
++        0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
++        4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7
++    };
++    static const uint8_t shift_idx[32] = {
++        0, 2, 4, 6, 0, 2, 4, 6, 0, 2, 4, 6, 0, 2, 4, 6,
++        0, 2, 4, 6, 0, 2, 4, 6, 0, 2, 4, 6, 0, 2, 4, 6
++    };
++
++    const size_t vl8  = 8;
++    const size_t vl32 = 32;
++
++    const vuint8m1_t v_gather_idx = __riscv_vle8_v_u8m1(gather_idx, vl32);
++    const vuint8m1_t v_shift_idx  = __riscv_vle8_v_u8m1(shift_idx, vl32);
++
++    float sumf = 0.0f;
++
++    for (int i = 0; i < nb; i++) {
++        const float d0 = GGML_CPU_FP16_TO_FP32(x[i].d);
++
++        float sumi = 0.0f;
++
++        for (int k = 0; k < 2; k++) {
++            const block_q8_0 * GGML_RESTRICT yb = &y[i * 2 + k];
++            const float d1 = GGML_CPU_FP16_TO_FP32(yb->d);
++
++            const uint8_t * GGML_RESTRICT qs = &x[i].qs[k * 8];
++            const int8_t  * GGML_RESTRICT qy = yb->qs;
++
++            vuint8m1_t q2_raw = __riscv_vle8_v_u8m1(qs, vl8);
++            q2_raw = __riscv_vrgather_vv_u8m1(q2_raw, v_gather_idx, vl32);
++            q2_raw = __riscv_vand_vx_u8m1(__riscv_vsrl_vv_u8m1(q2_raw, v_shift_idx, vl32), 0x03, vl32);
++            vint8m1_t q2 = __riscv_vsub_vx_i8m1(__riscv_vreinterpret_v_u8m1_i8m1(q2_raw), 1, vl32);
++            vint8m1_t q8 = __riscv_vle8_v_i8m1(qy, vl32);
++
++            vint16m2_t mul = __riscv_vwmul_vv_i16m2(q2, q8, vl32);
++            vint32m1_t zero = __riscv_vmv_v_x_i32m1(0, vl32);
++            vint32m1_t sum = __riscv_vwredsum_vs_i16m2_i32m1(mul, zero, vl32);
++            int32_t sumi_block = __riscv_vmv_x_s_i32m1_i32(sum);
++
++            sumi += d1 * sumi_block;
++        }
++
++        sumf += d0 * sumi;
++    }
++
++    *s = sumf;
++}
++#endif
++
++void ggml_vec_dot_q2_0_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc) {
++#if defined(__riscv_v)
++    assert(nrc == 1);
++
++    switch (__riscv_vlenb() * 8) {
++        case 128:
++            ggml_vec_dot_q2_0_q8_0_generic(n, s, bs, vx, bx, vy, by, nrc);
++            break;
++        default: // 256 and above
++            ggml_vec_dot_q2_0_q8_0_vl256(n, s, vx, vy);
++            break;
++    }
++#else
++    ggml_vec_dot_q2_0_q8_0_generic(n, s, bs, vx, bx, vy, by, nrc);
+ #endif
+ }
+ 

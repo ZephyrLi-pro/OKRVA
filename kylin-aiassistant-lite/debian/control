@@ -1,0 +1,87 @@
+Source: kylin-aiassistant
+Section: utils
+Priority: optional
+Maintainer: zhangzhaohong <zhangzhaohong@kylinos.cn>
+Version: 3.0.0.0-0k3.46
+Build-Depends: debhelper,
+               ccache,
+               qtbase5-dev (>= 5.6),
+               qt5-qmake,
+               qttools5-dev-tools,
+               qttools5-dev,
+               libqt5x11extras5-dev,
+               libkf5windowsystem-dev,
+               libkf5screen-dev,
+               cmake (>= 3.5),
+               pkgconf,
+               libgsettings-qt-dev,
+               libkysdk-qtwidgets-dev (>=1.2.0.0),
+               libkysdk-kabase-dev (>=1.2.0.0),
+               libkysdk-ukenv-dev (>=1.2.0.0),
+               libkysdk-waylandhelper-dev,
+               libkysdk-alm-dev,
+               libqt5websockets5-dev,
+               qtmultimedia5-dev,
+               libqt5svg5-dev,
+               libukui-log4qt-dev,
+               libx11-dev,
+               libxtst-dev,
+               libpeony-dev,
+               libkysdk-datacollect-dev,
+               libgif-dev,
+               libstb-dev,
+               libfreeimage-dev,
+               libfreeimageplus-dev,
+               libcmark-dev,
+               libkf5globalaccel-dev,
+               librsvg2-dev,
+               qtquickcontrols2-5-dev,
+               libkyai-config-dev(>=1.1.0.0-0k0.1),
+               libkysdk-coreai-speech-dev(>=1.1.0.0-0k0.1),
+               libkyai-assistant-dev(>=1.0.0.0-0k0.23),
+               qtdeclarative5-dev,
+               libpolkit-qt5-1-dev,
+               libkysdk-ai-common-dev(>=1.1.0.0-0k0.3),
+               libkysdk-genai-nlp-dev,
+               libkysdk-advanced-ai-dev [amd64],
+               libkysdk-advanced-ai-dev [arm64],
+               libsdl2-dev,
+               qml-module-qt-labs-settings,
+               qml-module-qtquick-dialogs,
+	       libkf5wayland-dev,
+               libqt5webchannel5-dev [amd64 arm64],
+               qtwebengine5-dev [amd64 arm64],
+               librav1e-dev [amd64 arm64]
+
+
+Standards-Version: 4.4.1
+Package: kylin-aiassistant
+Architecture: any
+Depends: qml-module-qt-labs-folderlistmodel,
+	 qml-module-qt-labs-settings,
+	 qml-module-qtquick-dialogs,
+         qml-module-qtwebchannel [amd64 arm64],
+	 poppler-utils,
+	 libreoffice-core,
+	 libreoffice-writer,
+	 libreoffice-impress,
+	${shlibs:Depends},
+	${misc:Depends},
+	libkyai-assistant0(>=1.0.0.0-0k0.23),
+	libkyai-config0(>=1.1.0.0-0k0.1),
+	libkysdk-coreai-speech0(>=1.1.0.0-0k0.1),
+	libkysdk-ai-common(>=1.1.0.0-0k0.3),
+	kylin-bot [!riscv64],
+	ffmpeg,
+        pandoc [amd64],
+        pandoc [arm64],
+        pandoc [armhf],
+        pandoc [i386],
+        qml-module-qtwebengine [amd64 arm64],
+        libqt5webengine5 [amd64 arm64],
+        libqt5webchannel5 [amd64 arm64]
+Description: AI Assistant for Kylin Desktop Environment
+ The Kylin AI assistant can significantly shorten creation time, improve
+ work efficiency, save time and labor costs, and be used for speech-to-text
+ conversion and text-based assisted queries, providing a seamless and
+ efficient user experience.

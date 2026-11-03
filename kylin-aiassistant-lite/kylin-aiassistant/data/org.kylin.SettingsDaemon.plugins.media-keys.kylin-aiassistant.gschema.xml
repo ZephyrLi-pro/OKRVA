@@ -1,0 +1,25 @@
+<schemalist>
+  <schema gettext-domain="ukui-settings-daemon" id="org.ukui.SettingsDaemon.plugins.media-keys.kylin-aiassistant" path="/org/ukui/settings-daemon/plugins/media-keys/kylin-aiassistant/">
+    <key name="shortcutkey-kylin-ai" type="s">
+      <default>'&lt;Win&gt;c'</default>
+      <summary>open ai assisstant</summary>
+      <description>翻译文件必要内容.</description>
+    </key>
+      <key name="translator" type="s">
+        <choices>
+            <choice value = "/usr/share/kylin-aiassistant/translations/"/>
+        </choices>
+      <default>'/usr/share/kylin-aiassistant/translations/'</default>
+      <summary>open ai assisstant</summary>
+      <description>需要根据这个文件拿到翻译文件,找到对应的翻译显示到控制面板页面.</description>
+    </key>
+      <key name="command" type="s">
+        <choices>
+            <choice value = "dbus-send --session --type=method_call --dest=org.ukui.kylin_aiassistant \/org\/ukui\/kylin_aiassistant org.ukui.kylin_aiassistant.showOrHideView"/>
+        </choices>
+      <default>"dbus-send --session --type=method_call --dest=org.ukui.kylin_aiassistant \/org\/ukui\/kylin_aiassistant org.ukui.kylin_aiassistant.showOrHideView"</default>
+      <summary>open ai assisstant</summary>
+      <description>需要执行的命令.</description>
+    </key>
+  </schema>
+</schemalist>

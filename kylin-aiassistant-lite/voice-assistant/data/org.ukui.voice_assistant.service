@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.ukui.voice_assistant
+Exec=/usr/bin/voice-assistant --dbus-activation

@@ -1,0 +1,46 @@
+/*
+ * Copyright (C) 2026, KylinSoft Co., Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef SINGLEAPPLICATION_H
+#define SINGLEAPPLICATION_H
+
+#include "dbusmanager.h"
+#include "pythonprocessmanager.h"
+#include <QApplication>
+
+class SingleApplication : public QApplication
+{
+public:
+    enum class InitResult {
+        Success,
+        AlreadyRunning,
+        DBusFailed,
+        PythonFailed
+    };
+
+    SingleApplication(int &argc, char **argv);
+    ~SingleApplication() = default;
+
+    InitResult getInitResult() const;
+
+private:
+    DBusManager m_dbusManager;
+    PythonProcessManager m_pythonProcessManager;
+    InitResult m_initResult = InitResult::DBusFailed;
+};
+
+#endif // SINGLEAPPLICATION_H

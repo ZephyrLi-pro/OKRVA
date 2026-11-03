@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# 获取操作类型
+action=$1
+path="/.config/kylin-aiassistant/"
+filename="settings.ini"
+# 处理卸载操作
+if [ "$action" = "remove" ]; then
+    # 这里可以添加卸载时要执行的操作，例如删除二进制文件、共享库等
+for user in /home/*
+do
+	if [ -f $user$path$filename ];then
+		echo "删除："$user$path$filename
+		rm $user$path$filename
+	fi
+done
+    echo "Qt 应用程序部分卸载完成。"
+fi
+
+# 处理完全卸载操作
+if [ "$action" = "purge" ]; then
+    # 这里可以添加完全卸载时要执行的操作，例如删除配置文件、用户数据等
+for user in /home/*
+do
+	if [ -f $user$path$filename ];then
+		echo "删除："$user$path$filename
+		rm $user$path$filename
+	fi
+done
+    echo "Qt 应用程序完全卸载完成。"
+fi
+
+exit 0

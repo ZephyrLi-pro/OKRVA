@@ -1,0 +1,1998 @@
+kylin-aiassistant (5.0.0.0-0k1.31) huanghe; urgency=medium
+
+  * BUG: 修复英文模式下指令模板、快问快答与技能页配置文案等仍显示中文的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 快问快答一行放不下时改为 ... 展开，展开项与第一行样式一致
+  * 其他改动影响域: 无
+
+ -- dingcheng <dingcheng@kylinos.cn>  Wed, 02 Sep 2026 14:40:02 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.30) huanghe; urgency=medium
+
+  * BUG: 修复AI输出内容一多助手卡死的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Wed, 27 Aug 2026 15:19:40 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.29) huanghe; urgency=medium
+
+  * BUG: 修复关闭“开机自动加载本地语音模型”后重启 kytensor 仍占用大量内存的问题（IK8E9A 临时方案：去掉开机自启）
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 26 Aug 2026 17:34:40 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.28) huanghe; urgency=medium
+
+  * BUG: 修复 龙芯编译问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangzheng <wangzheng@kylinos.cn>  Wed, 19 Aug 2026 15:49:21 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.27) huanghe; urgency=medium
+
+  * BUG: 修复 X11 环境下从桌面启动 AI 助手无响应的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Thu, 13 Aug 2026 16:10:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.26) huanghe; urgency=medium
+
+  * BUG: 修复侧边栏模式下模型配置弹窗左侧内容被裁剪的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Thu, 13 Aug 2026 11:00:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.25) huanghe; urgency=medium
+
+  * BUG: 修复按钮悬浮时提示文字重复显示的问题，移除自定义 MyToolTip 并统一使用系统 ToolTip
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Thu, 06 Aug 2026 15:06:38 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.24) huanghe; urgency=medium
+
+  * BUG: 修复 Wayland 环境下划词悬浮条位置错误及机器人图标尺寸过大的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Wed, 05 Aug 2026 12:12:18 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.23) huanghe; urgency=medium
+
+  * BUG: 修复语音聊天窗口机器人图标缺少外层信号圆圈的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Wed, 05 Aug 2026 09:52:16 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.22) huanghe; urgency=medium
+
+  * BUG: 修复语音聊天窗口和划词悬浮条仍显示旧图标的问题，统一使用小机器人图标
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Tue, 04 Aug 2026 20:03:01 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.21) huanghe; urgency=medium
+
+  * BUG: 修复 AI 助手启动后显示重复标题栏及移除系统标题栏后窗口无法拖拽缩放的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Mon, 03 Aug 2026 11:35:36 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.20) huanghe; urgency=medium
+
+  * BUG: 修复新手引导/用户协议正文内容仍为旧版麒麟操作系统的问题
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- guo-lisha-ok <guolisha@openkylin.top>  Mon, 03 Aug 2026 09:06:49 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.19) huanghe; urgency=medium
+
+  * BUG: 修复名称和图标
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Thu, 30 Jul 2026 11:22:51 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.18) huanghe; urgency=medium
+
+  * BUG: 修复 AI 助手在 Wayland 环境下启动失败及启动后崩溃
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 完善 Wayland 窗口平台判断和 KWayland 构建依赖，调整 Qt 初始化顺序，并禁用 Wayland 下 WebEngine 后台预加载
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Thu, 30 Jul 2026 10:22:51 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.17) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 调整 AI 子系统版本兼容阈值，>=1.3.0.0-0k0.4 不再弹窗提示
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Fri, 24 Jul 2026 14:35:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.16) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 平台已重编 qtwebengine/ffmpeg/rav1e，移除 rav1e 临时补装逻辑，回退至 k1.9 链接方案
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 16:30:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.15) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 构建时 wget 补装 librav1e0 0.7 并优先链接 so.0 匹配 libavcodec60
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 14:10:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.14) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 回退 rav1e 处理至 k1.9 方案（librav1e-dev + soname 自动选择）
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 13:45:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.13) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 构建阶段改用 wget 安装 librav1e0，修复 Launchpad 无 apt 权限问题
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 11:40:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.12) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 移除 Build-Depends 中不可满足的 librav1e0 约束，改由 rules 从 main 源补装
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 11:25:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.11) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 移除 librav1e-dev 避免拉入 0.8，强制安装 librav1e0 以匹配 libavcodec60
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 11:10:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.10) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 补充 librav1e0 构建依赖，优先链接 librav1e.so.0 以匹配 libavcodec60
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 10:45:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.9) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 修复 Launchpad 链接 rav1e soname 不匹配（0.8 为 librav1e.so.0.8）
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Wed, 8 Jul 2026 10:00:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.8) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 修复 Launchpad 链接阶段 libavcodec/rav1e 未定义引用（Qt WebEngine 依赖）
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Tue, 7 Jul 2026 17:50:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.7) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 移除 OsAssistant::setVersion 调用，兼容 Launchpad 上的 libkyai-assistant-dev SDK
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Tue, 7 Jul 2026 17:35:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.6) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 补全 kylin-aiassistant 缺失的源码与资源文件，修复 Launchpad 编译缺文件
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Tue, 7 Jul 2026 17:25:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.5) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 补全缺失的 i18n 翻译 .ts 文件，修复 Launchpad lrelease 编译失败
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Tue, 7 Jul 2026 17:15:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.4) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: Launchpad 源 npm 包不可用，改为源码包内携带 web_kbot 预构建 dist，移除 nodejs/npm 构建依赖
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Tue, 7 Jul 2026 16:45:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.3) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 修复 Launchpad 构建依赖冲突，约束 npm 版本 >= 9.2.0~ds3-ok0
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Tue, 7 Jul 2026 16:35:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.2) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 将 web_kbot 前端源码纳入 deb 源码包，补充 nodejs/npm 构建依赖
+  * 其他改动影响域: 无
+
+ -- openkylin <openkylin@kylinos.cn>  Tue, 7 Jul 2026 16:20:00 +0800
+
+kylin-aiassistant (5.0.0.0-0k1.1) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 删除编译文件，重新触发编译
+  * 其他改动影响域: 无
+
+ -- wangzheng <wangzheng@kylinos.cn>  Mon, 6 Jul 2026 15:48:21 +0800
+
+kylin-aiassistant (2.0.0-ok5.2) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 删除编译文件，重新触发编译
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Thu, 19 Dec 2024 16:04:21 +0800
+
+kylin-aiassistant (2.0.0-ok5.1) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 在control文件补充libpeony-dev依赖
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Thu, 19 Dec 2024 14:10:31 +0800
+
+kylin-aiassistant (2.0.0-ok5.0) huanghe; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：#396215 发送到AI助手同步到openkylin/huanghe分支
+  * 其他改动说明: 无
+  * 其他改动影响域: 无 
+
+ -- chairui <chairui@kylinos.cn>  Wed, 18 Dec 2024 11:44:42 +0800
+
+kylin-aiassistant (2.0.0-ok4.10) nile; urgency=medium
+
+  * BUG: #I9QV2C【次要】【AI助手】【本地文件处理】处理过的图片右上角两个按钮按钮及放大图片后下方两个按钮悬浮、点击均无加深效果，无tooltips
+         #I9QUZL【次要】【AI助手】【文生图】生成图片右上角两个按钮按钮及放大图片后下方两个按钮悬浮、点击均无加深效果，无tooltips
+         #272813 【优麒麟+AI版】【AI助手】【语音对话】说话过程中切换文本对话，在切换回语音输入，说话按钮状态显示不对
+         #272389 【优麒麟+AI版】【AI助手】【本地文件处理】悬浮已操作过的图片，缺少悬浮文字
+         #272225 【优麒麟+AI版】【AI助手】【本地文件处理】已操作的图片放大后下方显示，缺少悬浮文字 
+         #272193 【优麒麟+AI版】【AI助手】【本地文件处理】点击图片选择图片后，悬浮文字一直显示
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 同步优麒麟AI版本bug的通用改动，修复点击下载按钮显示出文件对话框后，悬浮文字一直显示的问题
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Thu, 17 Oct 2024 14:22:58 +0800
+
+kylin-aiassistant (2.0.0-ok4.9) nile; urgency=medium
+
+  * BUG: #IA7XFN【主要】【需求29308】【AI助手】选中指令后，在文本框中悬浮已选中的指令，部分显示加深，希望整体加深 
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@chairui>  Thu, 29 Aug 2024 14:09:47 +0800
+
+kylin-aiassistant (2.0.0-ok4.8) nile; urgency=medium
+
+  * BUG: #IALTBR【AI助手】【日历】【新建日程】使用新建日程指令无法正常添加日历日程
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 28 Aug 2024 10:31:25 +0800
+
+kylin-aiassistant (2.0.0-ok4.7) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 修复试用默认账号会自动切换成讯飞模型的错误
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Fri, 08 Aug 2024 16:20:41 +0800
+
+kylin-aiassistant (2.0.0-ok4.6) nile; urgency=medium
+
+  * BUG: #IAD20H【需求29308】【AI助手】【端侧】取消朗读后AI助手不会完全暂停朗读，待处理语音完成后仍会朗读文字
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Thu, 25 Jul 2024 18:53:41 +0800
+
+kylin-aiassistant (2.0.0-ok4.5) nile; urgency=medium
+
+  * BUG: #I9QV7H【设计走查】输入框内的指令按钮没有三态
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+  
+ -- ok-cr <ok-cr@ok-cr>  Thu, 25 Jul 2024 11:13:52 +0800
+
+kylin-aiassistant (2.0.0-ok4.4) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 在装机模式下禁止启动划词悬浮条
+  * 其他改动影响域: 无
+
+ --  wangcong <wangcong@kylinos.cn>  Thu, 25 Jul 2024 09:34:29 +0800
+
+kylin-aiassistant (2.0.0-ok4.3) nile; urgency=medium
+
+  * BUG: #IAANGL【设计走查】图片生成结果的对话框内，文字与图片的间距太小
+         #IAB145【低】【AI助手】AI插件-会议助手按钮文字距离按钮下边框过近
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 24 Jul 2024 14:34:29 +0800
+
+kylin-aiassistant (2.0.0-ok4.2) nile; urgency=medium
+
+  * BUG: #I9QXL4 【设计走查】“清除上下文关联”按钮需更新为最新样式 
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Wed, 24 Jul 2024 9:52:06 +0800
+
+kylin-aiassistant (2.0.0-ok4.1) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 修复讯飞星火模型添加时未考虑文声图、语音模型角标失误
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Tue, 23 Jul 2024 17:00:06 +0800
+
+kylin-aiassistant (2.0.0-ok4.0) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 335030 增加对讯飞星火4.0的支持
+  * 需求号：31191 增加对讯飞星火4.0大模型的支持
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Tue, 23 Jul 2024 15:18:21 +0800
+
+kylin-aiassistant (2.0.0-ok3.29) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号：无
+  * 其他改动说明: 修复点击停止回答后，无法切换文本模型的问题
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 17 Jul 2024 11:05:35 +0800
+
+kylin-aiassistant (2.0.0-ok3.28) nile; urgency=medium
+
+  * BUG: #I9QUQ7【主要】【需求29308】【AI助手】删除功能不完全未出现确认弹窗直接可以删除
+         #IA7MT1【次要】【需求29308】【AI助手】在AI助手回答过程中选中模型删除时的提示框内提示语及按钮显示不正确
+         #IA7XGZ【次要】【AI助手】【端侧】使用端侧模型进行对话或记录会议时，AI助手右上角角标一直显示文心大模型，应按实际模型显示
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Mon, 15 Jul 2024 14:10:51 +0800
+
+kylin-aiassistant (2.0.0-ok3.27) nile; urgency=medium
+
+  * BUG: #IA6RIL【次要】【AI助手】【文生图】双击已生成的图片，图片放大但有蓝色蒙层
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Fri, 12 Jul 2024 11:15:00 +0800
+
+kylin-aiassistant (2.0.0-ok3.26) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复点击鼠标，页面跳转到对话框最底部
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Wed, 11 Jul 2024 17:00:00 +0800
+
+kylin-aiassistant (2.0.0-ok3.25) nile; urgency=medium
+
+  * BUG: #IA90OF【设计走查】“添加图片”tooltips 优化 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 10 Jul 2024 15:54:08 +0800
+
+kylin-aiassistant (2.0.0-ok3.24) nile; urgency=medium
+
+  * BUG: #IAB6YF【设计走查】【划词悬浮条】 AI 助手输入框内、对话框内划词后，悬浮条被唤起 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 10 Jul 2024 14:23:49 +0800
+
+kylin-aiassistant (2.0.0-ok3.22) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 看图优化AI插件依赖问题,ai助手同步去掉看图的其他依赖，同时增加对看图插件的版本号限制
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 09 Jul 2024 14:58:14 +0800
+
+kylin-aiassistant (2.0.0-ok3.21) nile; urgency=medium
+
+  * BUG: #IA7DHG【wlcom】【划词悬浮】唤起悬浮后，ctrl + c 无法复制选中内容
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Mon, 08 Jul 2024 17:03:16 +0800
+
+kylin-aiassistant (2.0.0-ok3.20) nile; urgency=medium
+
+  * BUG: #I9QQFG【主要】【需求28267】【AI助手】【会议助手】点击记录进入会议记录过程中/AI助手回答过程中时，添加、切换模型，AI助手闪退，任务栏托盘也消失
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 增加对AI助手回答过程中时，添加、切换模型，AI助手闪退问题的处理
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 03 Jul 2024 09:00:16 +0800
+
+kylin-aiassistant (2.0.0-ok3.19) nile; urgency=medium
+
+  * BUG: #IA72AC【次要】【需求27644】【本地文件处理】导入超过50M大小图片的提示与设计稿不符
+         #IA7RVU【次要】【需求28267】【AI助手】【会议助手】生成的会议记录中，记录原文显示为会议原文
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 02 Jul 2024 11:38:07 +0800
+
+kylin-aiassistant (2.0.0-ok3.18) nile; urgency=medium
+
+  * BUG: #IA6KGK【次要】【需求29308】【AI助手】编辑已有模型的弹窗左上角没有对应的模型提示（类添加模型时左上角提示“添加-NLP语言大模型”)
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复划词总结概括指令不生效的问题
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 02 Jul 2024 10:28:07 +0800
+
+kylin-aiassistant (2.0.0-ok3.17) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复点击标签不发送问题；修复会议助手记录时间混乱问题；
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Mon, 01 Jul 2024 11:11:11 +0800
+
+kylin-aiassistant (2.0.0-ok3.16) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 看图新增librsvg2-dev依赖,ai助手同步增加编译依赖
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Thu, 27 Jun 2024 15:32:31 +0800
+
+kylin-aiassistant (2.0.0-ok3.15) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: sdk destroy接口名称改动,增加对libkylin-ai-base-dev的版本号控制
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Thu, 27 Jun 2024 10:52:38 +0800
+
+kylin-aiassistant (2.0.0-ok3.14) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 增加预置帐号点击用户使用协议跳转对应链接
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 19 Jun 2024 15:23:18 +0800
+
+kylin-aiassistant (2.0.0-ok3.13) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 增加预置帐号对应的模型角标
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 19 Jun 2024 14:39:53 +0800
+
+kylin-aiassistant (2.0.0-ok3.12) nile; urgency=medium
+
+  * BUG: #IA539L 【主要】【需求29308】【AI助手】【wlcom】从覆盖模式换到并列模式，窗口整体向左移动了一下
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Tue, 18 Jun 2024 17:10:00 +0800
+
+kylin-aiassistant (2.0.0-ok3.11) nile; urgency=medium
+
+  * BUG: #I9QVZJ【设计走查】在语音对话，助手进行回答朗读过程中，再次点击“点击对话”，朗读未暂停
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 18 Jun 2024 10:51:59 +0800
+
+kylin-aiassistant (2.0.0-ok3.10) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 预置帐号部分功能
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Mon, 17 Jun 2024 18:00:08 +0800
+
+kylin-aiassistant (2.0.0-ok3.9) nile; urgency=medium
+
+  * BUG: #I9S4JL 【主要】【需求28193】【AI助手】【文本对话】在AI助手回答过程中，在下方输入文字后点击指令，会直接发出，回答界面混乱
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Mon, 17 Jun 2024 17:40:08 +0800
+
+kylin-aiassistant (2.0.0-ok3.8) nile; urgency=medium
+
+  * BUG: #IA54XW 【主要】【需求29308】【AI助手】需从开始菜单中去掉AI助手应用，不再支持固定到任务栏和桌面快捷方式
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Mon, 17 Jun 2024 10:50:08 +0800
+
+kylin-aiassistant (2.0.0-ok3.7) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: fix tooltips occupy issue
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Fri, 14 Jun 2024 10:03:28 +0800
+
+kylin-aiassistant (2.0.0-ok3.6) nile; urgency=medium
+  
+  * BUG: #I9QZSN 【主要】【需求28267】【AI助手】【会议助手】返回后点击继续记录，无法继续生成记录会议内容
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Thu, 13 Jun 2024 14:00:00 +0800
+
+kylin-aiassistant (2.0.0-ok3.5) nile; urgency=medium
+  
+  * BUG: #I9QXL4 【设计走查】“清除上下文关联”按钮需更新为最新样式
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Thu, 13 Jun 2024 10:49:00 +0800
+
+kylin-aiassistant (2.0.0-ok3.4) nile; urgency=medium
+  
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 更新日历新版本dbus session name，优化提取时间部分逻辑
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 12 Jun 2024 17:18:00 +0800
+
+kylin-aiassistant (2.0.0-ok3.3) nile; urgency=medium
+
+  * BUG: #I9NTPT 【次要】【yh】【AI助手】文本框内四个按钮悬浮提示效果未与系统整体悬浮保持一致 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 12 Jun 2024 16:21:33 +0800
+
+kylin-aiassistant (2.0.0-ok3.2) nile; urgency=medium
+
+  * BUG: #I9QXL4 【设计走查】“清除上下文关联”按钮需更新为最新样式
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Tue, 11 Jun 2024 17:06:00 +0800
+
+kylin-aiassistant (2.0.0-ok3.1) nile; urgency=medium
+
+  * BUG: #I9KBPX 【次要】【需求28267】【AI助手】【会议助手】首页生成会议记录显示未与设计稿同步
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Tue, 11 Jun 2024 16:06:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.99) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 同步AI助手新增账号注册的在线帮助文档链接按钮的功能
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 11 Jun 2024 15:30:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.98) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 新增功能：休眠、睡眠时清除所有Session
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Tue, 11 Jun 2024 10:30:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.97) nile; urgency=medium
+
+  * BUG: #I9V031 【主要】【本地文件处理】智能抠图与扫描黑白件生成的图片拖动不能保存到桌面上 
+         #I9UZZX 【次要】【本地文件处理】 选中多张图片拖入AI助手，AI助手窗口显示有深灰色蒙层
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Tue, 11 Jun 2024 10:15:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.96) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复会议记录过程中切换模型点击取消出现的UI问题
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 11 Jun 2024 09:46:09 +0800
+
+kylin-aiassistant (2.0.0-ok2.95) nile; urgency=medium
+
+  * BUG: #I9THXY 【设计走查】【会议助手】首页会议列表无 hover 效果
+         #I9KGVP 【次要】【需求28267】【AI助手】【会议助手】指针点击会议记录时不为click样式 
+         #I9TE3B 【设计走查】【划词悬浮条】更多指令下拉框宽度与悬浮条不一致
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Mon, 10 Jun 2024 16:29:54 +0800
+
+kylin-aiassistant (2.0.0-ok2.94) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复切换分辨率时造成的AI助手不靠左侧问题
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Fri, 07 Jun 2024 09:56:09 +0800
+
+kylin-aiassistant (2.0.0-ok2.93) nile; urgency=medium
+
+  * BUG: #I9QQFG【主要】【需求28267】【AI助手】【会议助手】点击记录进入会议记录过程中/AI助手回答过程中时，添加、切换模型，AI助手闪退，任务栏托盘也消失
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Thu, 06 Jun 2024 23:59:59 +0800
+
+kylin-aiassistant (2.0.0-ok2.92) nile; urgency=medium
+
+  * BUG: #I9QBVK 【不重要】【需求29308】【AI助手】下方会议助手插件按钮没有hover与click显示
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Thu, 06 Jun 2024 15:38:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.91) nile; urgency=medium
+
+  * BUG: #I9QPLK 【不重要】【需求29308】【AI助手】已选中的指令，在下方输入框内悬浮时无加深显示
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Thu, 06 Jun 2024 9:33:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.90) nile; urgency=medium
+
+  * BUG: #I9UQP4 【次要】【需求28267】【AI助手】【会议助手】返回后点击继续记录，说话时文字显示记录在AI助手的对话框内
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Tue, 04 Jun 2024 16:44:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.89) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复文生图保存弹窗显示界面不居中问题，新增阅读部分错误提示
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Wed, 05 Jun 2024 13:26:07 +0800
+
+kylin-aiassistant (2.0.0-ok2.88) nile; urgency=medium
+
+  * BUG: #I9UTVD 【次要】【需求28267】【AI助手】【会议助手】配置不同的speech模型时，AI助手记录会议时右上角角标不会跟随变化 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 05 Jun 2024 11:23:07 +0800
+
+kylin-aiassistant (2.0.0-ok2.87) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: Pluma下划词后焦点未跟随点击，选中后不生效
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 05 Jun 2024 10:56:55 +0800
+
+kylin-aiassistant (2.0.0-ok2.86) nile; urgency=medium
+
+  * BUG:
+        #I9QC7J【次要】【需求29308】【AI助手】首次打开设置-模型配置界面中未默认选中“云端模型”，选中云端模型后选中样式及下方添加按钮样式与设计稿不符
+        #I9UW1Q【次要】【需求29308】【AI助手】模型配置界面“讯飞”模型显示名称不正确，会议助手记录角标未显示“讯飞”
+        #I9UWTG【不重要】【需求29308】【AI助手】模型配置界面“讯飞-图片生成”显示名称多了一横“--”
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 04 Jun 2024 22:31:27 +0800
+
+kylin-aiassistant (2.0.0-ok2.85) nile; urgency=medium
+
+  * BUG: #I9S3BO 【次要】【需求29308】【AI助手】回答中AI助手不显示头像 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Tue, 04 Jun 2024 20:31:57 +0800
+
+kylin-aiassistant (2.0.0-ok2.84) nile; urgency=medium
+
+  * BUG: #I9QH6L 【不重要】【需求28267】【AI助手】【会议助手】“正在生成”按钮与设计稿不符
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Tue, 04 Jun 2024 17:19:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.83) nile; urgency=medium
+
+  * BUG: 无 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复部分电脑发送消息时闪退BUG
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Tue, 04 Jun 2024 16:44:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.82) nile; urgency=medium
+  
+  * BUG: #I9QZIE 【设计走查】【会议助手】点击“暂停”或“停止记录”后，未自定跳转显示提示对话框
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Tue, 04 Jun 2024 15:47:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.81) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修正讯飞模型名称
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 04 Jun 2024 15:35:17 +0800
+
+kylin-aiassistant (2.0.0-ok2.80) nile; urgency=medium
+
+  * BUG: 无 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: Pluma下划词后焦点未跟随点击，选中后不生效 
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Tue, 04 Jun 2024 13:47:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.79) nile; urgency=medium
+
+  * BUG: 无 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: Pluma下划词后焦点未跟随点击，选中后不生效 
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Mon, 03 Jun 2024 17:42:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.78) nile; urgency=medium
+
+  * BUG: #I9QOSL 【次要】【需求29308】【AI助手】配置不同类型的模型时，AI助手回答时右上角角标不会跟随变化，一直显示“由文心大模型4.0模型生成” 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Mon, 03 Jun 2024 17:04:24 +0800
+
+kylin-aiassistant (2.0.0-ok2.77) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修改SPEECH报错信息,更新‘全部按钮’数据埋点处理逻辑
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Mon, 3 Jun 2024 13:53:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.76) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修改NLP报错信息
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Sat, 1 Jun 2024 10:30:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.75) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 会议助手页面横向布局修改
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Fri, 31 May 2024 17:04:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.74) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 会议助手页面布局修改
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Fri, 31 May 2024 16:06:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.73) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 按照设计要求更新文件拖入Ai助手响应逻辑和界面反馈样式
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Fri, 31 May 2024 14:29:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.72) nile; urgency=medium
+
+  * BUG: #I9QWED【设计走查】对话框没有指向性三角标"
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 调整会议助手UI
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Fri, 31 May 2024 10:30:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.71) nile; urgency=medium
+
+  * BUG: #I9QXRC 【设计走查】“添加图片”&“语音对话”的 hover 状态样式与设计稿不符 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Fri, 31 May 2024 09:32:35 +0800
+
+kylin-aiassistant (2.0.0-ok2.70) nile; urgency=medium
+
+  * BUG: #I9QZC2【设计走查】【设置页】模型选中的“✔”图标距离右侧、顶侧的距离与设计稿不符
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Thu, 30 May 2024 17:21:28 +0800
+
+kylin-aiassistant (2.0.0-ok2.69) nile; urgency=medium
+
+  * BUG:
+        #I9R3RX 【设计走查】【划词悬浮条】hover 在 AI 助手图标上时，需要显示“发生至 AI 助手”提示
+        #I9QXTE 【设计走查】【语音对话】“您可以对我说”引导对话按钮与输入框距离太远
+        #I9QW49 【设计走查】全部指令右侧的“更多”按钮，箭头没有与文字居中；没有三态
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Thu, 30 May 2024 15:40:32 +0800
+
+kylin-aiassistant (2.0.0-ok2.68) nile; urgency=medium
+
+  * BUG:
+        #I9R3RS【次要】【需求28267】【AI助手】【会议助手】文件管理器-文档-kylin-aiassistant中有多余的read和dialog文件夹
+        #I9QBGK【次要】【需求29308】【AI助手】焦点不在AI助手内时悬浮标题栏三个按钮均没有悬浮提示
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 29 May 2024 16:47:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.67) nile; urgency=medium
+
+  * BUG: #I9RXDO 【设计走查】【划词悬浮条】悬浮条唤起无过渡效果 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修改划词显示动画的方式
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Thu, 30 May 2024 14:24:44 +0800
+
+kylin-aiassistant (2.0.0-ok2.66) nile; urgency=medium
+
+  * BUG: #I9RXDO 【设计走查】【划词悬浮条】悬浮条唤起无过渡效果 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Thu, 30 May 2024 11:32:02 +0800
+
+kylin-aiassistant (2.0.0-ok2.65) nile; urgency=medium
+
+  * BUG: #I9QXPJ 【设计走查】不支持非图片格式的文档被拖入，拖入后界面未给出不支持的提示 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Fri, 30 May 2024 11:10:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.64) nile; urgency=medium
+
+  * BUG: #I9QBQK 【不重要】【需求29308】【AI助手】AI助手上方图标及会议助手在首页中下方slogan未与设计稿同步
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Fri, 30 May 2024 10:51:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.63) nile; urgency=medium
+
+  * BUG: #I9QX6G 【次要】【本地文件处理】导入不支持本地格式的图片后未做错误提示，仍能拖入AI助手中 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Fri, 30 May 2024 09:37:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.62) nile; urgency=medium
+
+  * BUG:
+        #I9QVKJ 【设计走查】从全部指令内的指令按钮彼此之间的上下左右间距不一致
+        #I9QX6U 【设计走查】AI 助手全部指令展开后，面板无投影
+        #I9QXZT 【设计走查】【语音对话】“您可以对我说”引导对话指令按钮尺寸、文本与文字对话不一致
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 29 May 2024 17:28:09 +0800
+
+kylin-aiassistant (2.0.0-ok2.61) nile; urgency=medium
+
+  * BUG: #I9QW0G 【次要】【AI助手】【本地文件处理】智能操作过图片后双击此图片无法放大
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Wed, 29 May 2024 17:13:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.60) nile; urgency=medium
+
+  * BUG: #I9QX4J 【次要】【AI助手】【本地文件处理】导入超过50M的图片时系统不会做出超限提示 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Wed, 29 May 2024 16:54:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.59) nile; urgency=medium
+
+  * BUG: #I9R5VW【次要】【需求29308】【AI助手】命名超过一行显示后，悬浮时未显示所有名称
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 29 May 2024 16:47:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.58) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修改系统控制关键词，添加小写英文
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Wed, 29 May 2024 16:00:00 +0800 
+
+kylin-aiassistant (2.0.0-ok2.57) nile; urgency=medium
+
+  * BUG: # I9NP02 【不重要】【yh】【AI助手】文本框内指令默认星星图标大小与贴边与设计稿不符 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 29 May 2024 15:47:40 +0800
+
+kylin-aiassistant (2.0.0-ok2.56) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 解决滚动条bug
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Wed, 29 May 2024 15:09:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.55) nile; urgency=medium
+
+  * BUG: #I9R2ST 【次要】【需求28267】【AI助手】【会议助手】会议录制超过2h未有超时限制
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Wed, 29 May 2024 14:44:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.54) nile; urgency=medium
+
+  * BUG: #I9QX55 【设计走查】全部指令展开后，点击空白处，无法将其收起 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 29 May 2024 14:24:46 +0800
+
+kylin-aiassistant (2.0.0-ok2.53) nile; urgency=medium
+
+  * BUG: #I9SCER 【次要】【需求28194】【AI助手】【语音对话】语音对话到30s时直接发出下方未出现提示
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Wed, 29 May 2024 09:45:14 +0800
+
+kylin-aiassistant (2.0.0-ok2.52) nile; urgency=medium
+
+  * BUG: #I9QUZV 【设计走查】AI 助手处于激活状态时，顶部窗口的 标题栏颜色与窗体颜色不一致
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Wed, 29 May 2024 09:30:00 +0800 
+
+kylin-aiassistant (2.0.0-ok2.51) nile; urgency=medium
+
+  * BUG: #I9KGPS 【次要】【需求28267】【AI助手】【会议助手】会 议记录中显示未与设计稿同步
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Tue, 28 May 2024 15:30:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.50) nile; urgency=medium
+
+  * BUG: #I9QZ3G【设计走查】【设置页】模型类型右侧的“添加”按钮无需底色
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 修复图片处理打开所在位置文管报未找到文件的问题
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 28 May 2024 14:51:03 +0800
+
+kylin-aiassistant (2.0.0-ok2.49) nile; urgency=medium
+
+  * BUG: #I9QVM9【设计走查】点击 AI 回答对话框下的“复制”按钮后，界面上无复制成功的提示
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 28 May 2024 11:11:03 +0800
+
+kylin-aiassistant (2.0.0-ok2.48) nile; urgency=medium
+
+  * BUG: #I9HW4X【不重要】【需求28194】【AI助手】【语音对话】“您可以对我说”、“点击说话”、“完成说话”字体不为默认黑体
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Tue, 28 May 2024 10:29:03 +0800
+
+kylin-aiassistant (2.0.0-ok2.47) nile; urgency=medium
+
+  * BUG: #I9SLWA 【次要】【需求28195】【AI助手】【系统控制】AI助手给出的打开回复未带具体应用名
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Tue, 28 May 2024 10:00:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.46) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明:解决对话过程中滚动闪烁问题
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Mon, 27 May 2024 16:35:42 +0800
+
+kylin-aiassistant (2.0.0-ok2.45) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明:AI助手跳过任务栏
+  * 其他改动影响域: 无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Mon, 27 May 2024 16:15:42 +0800
+
+kylin-aiassistant (2.0.0-ok2.44) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明:修改会议助手图标；修改主页留白，改为10%
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Mon, 27 May 2024 15:32:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.43) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复对话发送后显示慢的问题
+  * 其他改动影响域: 无
+
+ -- wangcong <wangcong@kylinos.cn>  Mon, 27 May 2024 15:27:22 +0800
+
+kylin-aiassistant (2.0.0-ok2.42) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 修复【语音对话】在语音对话下方对话框占位有问题，有大面积空白 问题
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Mon, 27 May 2024 10:40:22 +0800
+
+kylin-aiassistant (2.0.0-ok2.41) nile; urgency=medium
+
+  * BUG: 
+        #I9QXWP 【设计走查】【语音对话】无网络时，点击“开始说话”，按钮会一直停留在“识别中...”，无法退出
+        #I9S5KP 【主要】【需求28195】【AI助手】【系统控制】使用命令关闭无线局域网后无法从任务栏再次打开无线局域网 
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 修复清除上下文占位符问题
+  * 其他改动影响域：无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Mon, 27 May 2024 10:15:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.40) nile; urgency=medium
+
+  * BUG: #I9NVIG【次要】【yh】【AI助手】在AI助手应用中打开的子窗口均应居中在屏幕中间而不是应用中间 
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 优化会议文件命名逻辑
+  * 其他改动影响域：无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Sat, 25 May 2024 18:28:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.39) nile; urgency=medium
+
+  * BUG: #I9QWDF 【主要】【AI助手】【本地文件处理】添加图片时可以选中多张，并可以发送至AI助手内
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Sat, 25 May 2024 18:04:56 +0800
+
+kylin-aiassistant (2.0.0-ok2.38) nile; urgency=medium
+
+  * BUG:
+        #I9S3UD【次要】【需求29308】【AI助手】配置speech模型时从讯飞模型切换会百度模型时界面中出现重叠
+        #I9QPBR【不重要】【需求29308】【AI助手】讯飞模型下方语音类型下拉框宽度太小
+        #I9QCQH【不重要】【需求29308】【AI助手】添加模型窗口右下角俩图标偏靠下方位置
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Sat, 25 May 2024 17:48:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.37) nile; urgency=medium
+
+  * BUG: #I9QCCQ 【次要】【需求29308】【AI助手】私有化模型界面和本地模型界面显示与设计稿不符
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Sat, 25 May 2024 17:22:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.36) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 修复代码中拼写错误
+  * 其他改动影响域：无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Sat, 25 May 2024 16:24:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.35) nile; urgency=medium
+
+  * BUG: #I9QX3X 【设计走查】AI 回答对话框下面功能按钮距离底边太远
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Sat, 25 May 2024 15:48:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.34) nile; urgency=medium
+
+  * BUG: #I9QVJ7 【设计走查】从全部指令内选中某个指令后，全部指令面板未收起 
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Sat, 25 May 2024 14:57:01 +0800
+
+kylin-aiassistant (2.0.0-ok2.33) nile; urgency=medium
+
+  * BUG: #I9QV0U 【设计走查】AI 对话框 & 用户对话框有投影效果
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Sat, 25 May 2024 14:12:01 +0800
+
+kylin-aiassistant (2.0.0-ok2.32) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 删除多余代码；修复朗读播放状态异常问题
+  * 其他改动影响域：无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Fri, 24 May 2024 17:51:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.31) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 修改visionSession初始化时机；修复文生图失败错误;
+  * 其他改动影响域：无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Fri, 24 May 2024 17:51:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.30) nile; urgency=medium
+
+  * BUG: #I9R32R 【设计走查】【AI 助手】点击“清除上下文关联”后，后边的占位符错位
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 修复空状态时无法进入会议助手的问题，修复删除vision模型后仍可以生成的问题
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Fri, 24 May 2024 16:51:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.29) nile; urgency=medium
+
+  * BUG:
+        #I9QZ0Z 【主要】【需求28198】【AI助手】【划词悬浮】进入会议助手或关闭AI助手界面时选中文字右键悬浮条最右侧AI助手图标选择“麒思妙想首页”，未跳转至AI助手首页
+        #I9QYNJ 【主要】【设计走查】【划词悬浮条】从后向前划词时，悬浮条遮挡住了原文
+        #I9QYQV 【主要】【设计走查】【划词悬浮条】悬浮条位置出现在距离原文较远的位置 
+        #I9R3RA 【主要】【设计走查】【划词悬浮条】在最右侧 AI 助手图标上唤起右键菜单，菜单第一项名称应该为“AI 助手” 
+        #I9QY7J 【主要】【设计走查】【划词悬浮条】悬浮条唤起逻辑有误 
+        #I9R3PA 【次要】【设计走查】【划词悬浮条】悬浮条右侧的“全部”改成“更多”
+  * 任务号: 无
+  * 需求号: 无
+  * 其他改动说明: 无
+  * 其他改动影响域: 无
+
+ -- chairui <chairui@kylinos.cn>  Fri, 24 May 2024 16:33:17 +0800
+
+kylin-aiassistant (2.0.0-ok2.28) nile; urgency=medium
+
+  * BUG: 		
+        #I9R3AB 【次要】【需求28267】【AI助手】【会议助手】可以同时点开多个用户名框同时修改用户名
+        #I9R2XB 【次要】【需求28267】【AI助手】【会议助手】会议助手首页滚动条hover时未放大
+        #I9R1FG 【次要】【需求28267】【AI助手】【会议助手】修改用户名后使用enter键进行确认
+        #I9R1AL 【次要】【需求28267】【AI助手】【会议助手】删除整个用户名后点击完成用户名位置显示为空
+        #I9R0X5 【不重要】【需求28267】【AI助手】【会议助手】修改用户名的框太细，取消与完成字体显示不对
+        #I9QZX7 【设计走查】对话页内容过多时，右侧滑动条尺寸过小
+        #I9QVTD【主要】【需求29308】【AI助手】【文生图】【本地文件处理】生成图片后，左上角两个按钮及放大图片后下方两个按钮均能拖动，拖动后AI助手唤出本地文件处理的可操作项“扫描黑白件、智能抠图”
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- wangcong <wangcong@kylinos.cn>  Fri, 24 May 2024 16:09:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.27) nile; urgency=medium
+
+  * BUG: #I9R0ZP 【会议助手】【端侧】在会议纪要保存的文件夹下新建txt文件，返回会议助手中查看，该txt文件显示的年月日异常 
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Fri, 24 May 2024 15:51:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.26) nile; urgency=medium
+
+  * BUG:无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 删除功能：未配置NLP模型时弹出配置页面；修改朗读Session的初始化时间;
+  * 其他改动影响域：无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Fri, 24 May 2024 11:08:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.25) nile; urgency=medium
+
+  * BUG:
+        #I9QUV3 【主要】【需求28267】【AI助手】【会议助手】已有对话时，点击会议助手再返回，原先对话全部清空
+        #I9R3TD 【主要】【需求29308】【AI助手】在模型配置界面配置两个语言模型后进行切换模型未生效
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Fri, 24 May 2024 14:09:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.24) nile; urgency=medium
+
+  * BUG:
+        #I9QN63 【主要】【需求28267】【AI助手】【会议助手】语音和语言模式都没配置时进入会议助手未弹出NLP、SPEECH模型配置的提示对话框 
+        #I9QZQ3 【次要】【需求28267】【AI助手】【会议助手】两个发言人切换说话时每次说话的发言人说话开始时间未显示
+        #I9KG9Y 【次要】【需求28267】【AI助手】【会议助手】说话时发言人后的语音时长未实时显示
+        #I9KF3Z 【次要】【需求28267】【AI助手】【会议助手】两人交替说话时会显示发言人1、2、3、4，发言人序号不跟随声音显示
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Fri, 24 May 2024 11:08:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.23) nile; urgency=medium
+
+  * BUG: I9QVTD 【需求29308】【AI助手】【文生图】【本地文件处理】生成图片后，左上角两个按钮及放大图片后下方两个按钮均能拖动，拖动后AI助手唤出本地文件处理的可操作项“扫描黑白件、智能抠图”
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- wangcong <wangcong@kylinos.cn>  Wed, 24 May 2024 10:57:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.22) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 修改会议助手列表样式
+  * 其他改动影响域：无
+
+ -- wangcong <wangcong@kylinos.cn>  Wed, 24 May 2024 10:28:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.21) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 修复在文字聊天界面也会自动朗读以及朗读结束不会发送readend信号的问题
+  * 其他改动影响域：无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Wed, 24 May 2024 9:09:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.20) nile; urgency=medium
+
+  * BUG: I9R3LQ 【AI助手】【会议助手】在meeting文件夹下删除文件或添加文件应在AI助手中实时显示 
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 删除pro.user文件
+  * 其他改动影响域：无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Wed, 23 May 2024 17:45:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.19) nile; urgency=medium
+
+  * BUG: #I9QCV4H 【设计走查】输入框的激活状态下，描边太细
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- wangcong <wangcong@kylinos.cn>  Wed, 23 May 2024 17:05:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.18) nile; urgency=medium
+
+  * BUG: #I9QCRR 【次要】【需求29308】【AI助手】添加模型界面未根据当前模型是否需要显示APPID输入框 
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 23 May 2024 16:08:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.17) nile; urgency=medium
+
+  * BUG: I9J28Y【AI助手】【语音对话】无朗读功能 
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 移除会议记录文件显示时无用的符号
+  * 其他改动影响域：无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Wed, 23 May 2024 13:12:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.16) nile; urgency=medium
+
+  * BUG: #I9QZDX 【设计走查】【会议助手】无记录时，界面上缺失占位图
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Wed, 23 May 2024 15:15:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.15) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 添加gitignore文件
+  * 其他改动影响域：无
+
+ -- dongshuo <dongshuo@kylinos.cn>  Wed, 23 May 2024 14:07:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.14) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 添加编译依赖
+  * 其他改动影响域：无
+
+ -- zhanglei <zhanglei01@kylinos.cn>  Wed, 22 May 2024 20:58:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.13) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 解开看图
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 22 May 2024 20:18:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.12) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 模型添加后的编辑功能实现
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Wed, 22 May 2024 20:06:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.11) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 测试CI构建
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 22 May 2024 17:46:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.10) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 测试CI构建
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 22 May 2024 17:39:02 +0800
+
+kylin-aiassistant (2.0.0-ok2.9) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 测试CI构建
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 22 May 2024 17:33:01 +0800
+
+kylin-aiassistant (2.0.0-ok2.8) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 测试CI构建
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 22 May 2024 17:23:32 +0800
+
+kylin-aiassistant (2.0.0-ok2.7) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 测试CI构建
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 22 May 2024 17:17:55 +0800
+
+kylin-aiassistant (2.0.0-ok2.6) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 测试CI构建
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 22 May 2024 16:42:03 +0800
+
+kylin-aiassistant (2.0.0-ok2.5) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 测试CI构建
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Wed, 22 May 2024 16:27:03 +0800
+
+kylin-aiassistant (2.0.0-ok2.4) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：四轮体测
+  * 其他改动影响域：无
+
+ -- zhanglei01 <zhanglei01@kylinos.cn>  Thu, 16 May 2024 23:59:59 +0800
+
+kylin-aiassistant (2.0.0-ok2.3) nile; urgency=medium
+
+  * BUG: #无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- zhanglei01 <zhanglei01@kylinos.cn>  Wed, 08 May 2024 09:38:27 +0800
+
+kylin-aiassistant (2.0.0-ok2.2) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Thu, 25 Apr 2024 19:30:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.1) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Thu, 17 Apr 2024 11:10:00 +0800
+
+kylin-aiassistant (2.0.0-ok2.0) nile; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Thu, 16 Apr 2024 16:46:39 +0800
+
+kylin-aiassistant (1.0.0.20) v101; urgency=medium
+
+  * BUG: #220310 【需求25271】【AI助手】打开模型配置界面时，AI助手下输入框可以输入文字并发送
+         #220311 【需求25271】【AI助手】控制面板修改用户昵称，AI助手中头像未实时更新
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- chairui <chairui@kylinos.cn>  Mon, 01 Apr 2024 16:46:39 +0800
+
+kylin-aiassistant (1.0.0.19) v101; urgency=medium
+
+  * BUG: #217207 【需求25271】【AI画图】点击画图中的“立即配置”按钮唤出模型配置界面的同时会唤出AI助手
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- zzh <zhangzhaohong@kylinos.cn>  Thu, 21 Mar 2024 17:59:10 +0800
+
+kylin-aiassistant (1.0.0.18) v101; urgency=medium
+
+  * BUG: #215144 【需求25271】【AI助手】模型配置界面右上角“最小化”按钮未生效
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明: 无
+  * 其他改动影响域：无
+
+ -- zhanglei01 <zhanglei01@kylinos.cn>  Fri, 15 Mar 2024 09:45:10 +0800
+
+kylin-aiassistant (1.0.0.17) v101; urgency=medium
+
+  * BUG: #216177 【需求25271】【AI助手】控制面板修改用户头像，AI助手中头像未实时更新
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：增加用户昵称实时更新
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Sat, 15 Mar 2024 9:00:00 +0800
+
+kylin-aiassistant (1.0.0.16) v101; urgency=medium
+
+  * BUG: #216171 【需求25271】【AI助手】对话文本框输入超过5行文本出现滚动条后文字布局出现问题
+         #216170 【需求25271】【AI助手】文本框左侧按钮悬浮提示语不正确
+         #216132 【需求25271】【AI助手】打开应用界面未居中显示
+         #215222 【需求25271】 【Al助手】 首页图标、slogan及下方输入框与左侧清除上下文联系图标显示未与设计稿同步
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Fri, 15 Mar 2024 15:50:23 +0800
+
+kylin-aiassistant (1.0.0.15) v101; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：修复编辑已有模型设置时，添加相同可以失败问题。
+  * 其他改动影响域：无
+
+ -- zhanglei01 <zhanglei01@kylinos.cn>  Fri, 15 Mar 2024 15:00:42 +0800
+
+kylin-aiassistant (1.0.0.14) v101; urgency=medium
+
+  * BUG: #216399 【需求25271】【AI助手】对已配置的模型进行异常编辑操作将复制到wps中的数据再次粘贴到文本框时，点击添加，未提示“添加失败，请重试”
+         #216152 【需求25271】【AI助手】添加模型输入完整的API、Secrect Key后需要输入完点一下输入框外空白处，添加按钮才会变蓝
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- zhanglei01 <zhanglei01@kylinos.cn>  Fri, 15 Mar 2024 13:48:14 +0800
+
+kylin-aiassistant (1.0.0.13) v101; urgency=medium
+
+  * BUG: #216396 【需求25271】【AI助手】对已配置模型类型进行更改模型类型操作后，实际上添加了新的模型，原有模型仍存在
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- chairui <chairui@kylinos.cn>  Fri, 15 Mar 2024 11:24:47 +0800
+
+kylin-aiassistant (1.0.0.12) v101; urgency=medium
+
+  * BUG: #216294 【需求25271】【AI助手】多次添加同一类模型提示语不正确
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- chairui <chairui@kylinos.cn>  Fri, 15 Mar 2024 19:03:14 +0800
+
+kylin-aiassistant (1.0.0.11) v101; urgency=medium
+
+  * BUG: #216319 【需求25271】【AI助手】AI助手打开状态下，重启电脑会提示“AI助手取消了本次操作”，无法重启电脑
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：
+  * 其他改动影响域：
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Thu, 14 Mar 2024 16:06:43 +0800
+
+kylin-aiassistant (1.0.0.10) v101; urgency=medium
+
+  * BUG: #215482 【需求25271】【AI助手】在已唤出模型配置界面的情况下，点击托盘右下角图标，应用界面收到托盘，再次点击托盘唤出应用界面，应用窗口状态前后不一致
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：修改首页slogan
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Mon, 11 Mar 2024 14:09:38 +0800
+
+kylin-aiassistant (1.0.0.9) v101; urgency=medium
+
+  * BUG: 无
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：AI助手二轮单元测试
+  * 其他改动影响域：无
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Sat, 09 Mar 2024 16:59:05 +0800
+
+kylin-aiassistant (1.0.0.8) v101; urgency=medium
+
+  * BUG: #215344 【需求25271】【AI助手】在AI回答问题过程中，删除NLP语言模型，AI助手应用闪退，托盘中也不再显示应用图标
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+ 
+ -- chairui <chairui@kylinos.cn>  Sat, 09 Mar 2024 16:22:20 +0800
+
+kylin-aiassistant (1.0.0.7) v101; urgency=medium
+
+  * BUG: #215416 【需求25271】【AI助手】添加/编辑模型弹窗不为标准版弹窗尺寸，显示过大
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无 
+
+ -- chairui <chairui@kylinos.cn>  Sat, 09 Mar 2024 13:59:30 +0800
+
+kylin-aiassistant (1.0.0.6) v101; urgency=medium
+
+  * BUG: #215149 【需求25271】 【Al助手】 点击应用右上角"三"，未存在"退出"功能
+         #215234 【需求25271】 【Al助手】 点击取消上下文联系按钮后，按钮未置灰，仍能点击多次提示“上下文关联已清除”
+         #215237 【需求25271】 【AI助手】对话框左右两侧*清除上下文"及右侧"发送"按钮悬浮未出现悬浮提示
+         #215335 【需求25271】 【Al助手】 对话输入框输入文字后，右侧发送按钮未进行高亮显示
+         #215398 【需求25271】 【Al助手】 对话文本框写至第二行时就开始显示滚动条
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- chenziying <chenziying@kylinos.cn>  Fri, 08 Mar 2024 13:11:23 +0800
+
+kylin-aiassistant (1.0.0.5) v101; urgency=medium
+
+  * BUG: #215271	【需求25271】【AI助手】多次添加同一类型的模型，无限制提示语，直接覆盖上一次添加的模型信息
+         #215250	【需求25271】【AI助手】错误的APIKey和SecrectKey均可以添加成功，无错误检索提示
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- zhanglei01 <zhanglei01@kylinos.cn>  Thu, 07 Mar 2024 19:16:30 +0800
+
+kylin-aiassistant (1.0.0.4) v101; urgency=medium
+
+  * BUG: #215311 【需求25271】【AI助手】已添加模型后，再次点击添加模型按钮，弹出的是编辑模型窗口，且显示已配置过模型的数据
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- chairui <chairui@kylinos.cn>  Thu, 07 Mar 2024 17:37:14 +0800
+
+kylin-aiassistant (1.0.0.3) v101; urgency=medium
+
+  * BUG: #215315 【需求25271】【AI助手】编辑模型时，模型供应商和模型类型下拉框置灰无法进行点击唤出下拉框及切换
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- chairui <chairui@kylinos.cn>  Thu, 07 Mar 2024 15:33:49 +0800
+
+kylin-aiassistant (1.0.0.2) v101; urgency=medium
+
+  * BUG: #215257 【需求25271】【AI助手】编辑模型提示框下方显示为“确认”，应为“添加”
+         #215154 【需求25271】【AI助手】点击应用右上角“三”，“设置”按钮名称显示为“模型配置”
+         #215211 【需求25271】【AI助手】删除已配置模型时未出现确认弹窗及相关操作功能 
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- chairui <chairui@kylinos.cn>  Thu, 07 Mar 2024 14:54:30 +0800
+
+kylin-aiassistant (1.0.0.1) v101; urgency=medium
+
+  * BUG: #215351 【需求25271】【AI助手】在模型配置界面，输入完API key后点击tab键无法跳转至Secrect Key
+         #215144	【需求25271】【AI助手】模型配置界面右上角“最小化”按钮未生效
+         #215137	【需求25271】【AI助手】模型配置界面，API、SecrectKey输入框不符合设计稿
+         #215133	【需求25271】【AI助手】模型配置界面，API、SecrectKey后信息输入框无显示/隐藏密码功能
+         #215108	【需求25271】【AI助手】未配置模型情况下，打开应用未唤出模型配置界面
+  * 任务号：无
+  * 需求号：无
+  * 其他改动说明：无
+  * 其他改动影响域：无
+
+ -- zhanglei01 <zhanglei01@kylinos.cn>  Thu, 07 Mar 2024 10:36:42 +0800
+
+kylin-aiassistant (1.0.0.0) v101; urgency=medium
+
+  * init
+
+ -- zhangzhaohong <zhangzhaohong@kylinos.cn>  Thu, 23 Mar 2023 11:40:46 +0800

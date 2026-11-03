@@ -1,0 +1,16 @@
+--- a/ggml/src/ggml-cpu/arch/riscv/quants.c
++++ b/ggml/src/ggml-cpu/arch/riscv/quants.c
+@@ -305,11 +305,8 @@
+         vuint8m1_t x_a = __riscv_vand_vx_u8m1(tx, 0x0F, vl);
+         vuint8m1_t x_l = __riscv_vsrl_vx_u8m1(tx, 0x04, vl);
+ 
+-        vint8m1_t v0 = __riscv_vreinterpret_v_u8m1_i8m1(x_a);
+-        vint8m1_t v1 = __riscv_vreinterpret_v_u8m1_i8m1(x_l);
+-
+-        vint16m2_t vec_mul1 = __riscv_vwmul_vv_i16m2(v0, y0, vl);
+-        vint16m2_t vec_mul2 = __riscv_vwmacc_vv_i16m2(vec_mul1, v1, y1, vl);
++        vint16m2_t vec_mul1 = __riscv_vwmulsu_vv_i16m2(y0, x_a, vl);
++        vint16m2_t vec_mul2 = __riscv_vwmaccsu_vv_i16m2(vec_mul1, y1, x_l, vl);
+ 
+         vint32m1_t vec_zero = __riscv_vmv_v_x_i32m1(0, vl);
+         vint32m1_t vs2 = __riscv_vwredsum_vs_i16m2_i32m1(vec_mul2, vec_zero, vl);

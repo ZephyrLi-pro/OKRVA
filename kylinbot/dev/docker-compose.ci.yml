@@ -1,0 +1,26 @@
+name: kylinbot-local-ci
+# Local CI compose uses TCP when a gateway is started; UDS is only the Linux
+# desktop single-host default.
+
+services:
+    local-ci:
+        build:
+            context: ..
+            dockerfile: dev/ci/Dockerfile
+        container_name: kylinbot-local-ci
+        working_dir: /workspace
+        environment:
+            - CARGO_TERM_COLOR=always
+            - PATH=/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+            - CARGO_TARGET_DIR=/ci-target
+            - KYLINBOT_GATEWAY_TRANSPORT=tcp
+        volumes:
+            - ..:/workspace
+            - cargo-registry:/usr/local/cargo/registry
+            - cargo-git:/usr/local/cargo/git
+            - ci-target:/ci-target
+
+volumes:
+    cargo-registry:
+    cargo-git:
+    ci-target:

@@ -1,0 +1,52 @@
+{
+  "upstream": "https://github.com/spacemit-com/llama.cpp",
+  "base_revision": "17ce6aa07bd38057040ca43da8660ee496c3cb6d",
+  "files": [
+    {
+      "path": "ggml/src/ggml-cpu/spacemit/ime.cpp",
+      "before_sha256": "9b594e2b71eecc91d4bb12c2e22fccb6d82f50f61877d559470ec8095e449c2e",
+      "after_sha256": "cafc4b16f2cbeb22ec5264ece2714d92f792553de8e90abcb1e7b6bbb2a229ef"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/spacemit/ime1_kernels.cpp",
+      "before_sha256": "ea1170753bdaca75d629001d7e820ec315bbd54511c37d1ed4c9347eda67bc46",
+      "after_sha256": "84a045ac8cd2458260d14e95109ff0dd6598ce35ea8336cccee254991634e110"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/spacemit/ime_kernels.h",
+      "before_sha256": "84da9984cab8de6430cb99088a1ae85443678e98f99ab09b050804f907deabb2",
+      "after_sha256": "a7d3c155d3ffba6ef325e5a9bf782bec39046822bd6d033de688ae36db2ee7fe"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/spacemit/repack.cpp",
+      "before_sha256": "65a3e0359ebc9949bac6ea6f9b4b44af811a8160464f394a659e5c4f39cf5a2d",
+      "after_sha256": "a86a647c1b6c3676b32de4fb8f24ebeef959e7305654ac1bd3c2522a3d1844e0"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/CMakeLists.txt",
+      "before_sha256": "804e47a409c8465adb79877a27df62052944e9775e8c23fa4b9408fd9cb80c58",
+      "after_sha256": "d53123e8b9fef8362ee634441f73d9a1faf776141a36d0be651a91b69b632e6a"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/arch/riscv/quants.c",
+      "before_sha256": "d1da203f44f812669a6c60d4604298acd7e676b7b6e037af38a9f1184fb85a19",
+      "after_sha256": "62a8fdf806039d68f476c490f6255627f072880d2cdfb7feee51b03ba2779e58"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/arch/riscv/repack.cpp",
+      "before_sha256": "57b1362562ec0dfe8475e49a639783468da3ddbf7a5f009adcd01a7e4ed61fbf",
+      "after_sha256": "687b1c29adbc6be93f82e3f30a295650e73dd1ed5570348b82b83a3ff4dde8fc"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/repack.cpp",
+      "before_sha256": "b3a1d6953fc61f2a4088337384166fb5102db617afe37a4b92f7cf07992a9f8a",
+      "after_sha256": "6ca69027f9e455dc026a5c9a56b9c1774cb57546888366527b77c70ab5a60d39"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/repack.h",
+      "before_sha256": "fe472315b4106400d7890fca308659c74bcdedad1b011a9ba60c02dcd5bef57b",
+      "after_sha256": "947edc8e537e669013e8d094a6938fc486b764e882c955e96753f9a8a758b8cc"
+    }
+  ],
+  "download": "https://github.com/spacemit-com/llama.cpp/archive/17ce6aa07bd38057040ca43da8660ee496c3cb6d.tar.gz"
+}

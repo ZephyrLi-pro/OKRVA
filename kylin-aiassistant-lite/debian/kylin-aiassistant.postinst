@@ -1,0 +1,5 @@
+#!/bin/bash
+glib-compile-schemas /usr/share/glib-2.0/schemas
+
+# IK8E9A 临时方案：升级后清理旧版开机自启项，避免登录仍拉起助手。
+rm -f /etc/xdg/autostart/kylin-aiassistant-autostart.desktop

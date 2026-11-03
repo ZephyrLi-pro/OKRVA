@@ -1,0 +1,22 @@
+--- a/ggml/src/ggml-cpu/arch/riscv/quants.c
++++ b/ggml/src/ggml-cpu/arch/riscv/quants.c
+@@ -2166,13 +2166,12 @@
+             vint16m4_t v0 = __riscv_vwmul_vv_i16m4(q5_m1, q8_y1, vl);
+             vint16m4_t v1 = __riscv_vwmul_vv_i16m4(q5_m2, q8_y2, vl);
+ 
+-            vint32m8_t vs1 = __riscv_vwmul_vx_i32m8(v0, scales[is++], vl);
+-            vint32m8_t vs2 = __riscv_vwmul_vx_i32m8(v1, scales[is++], vl);
+-
+-            vint32m1_t vacc1 = __riscv_vredsum_vs_i32m8_i32m1(vs1, vzero, vl);
+-            vint32m1_t vacc2 = __riscv_vredsum_vs_i32m8_i32m1(vs2, vacc1, vl);
+-
+-            aux32 += __riscv_vmv_x_s_i32m1_i32(vacc2);
++            vint32m8_t vs = __riscv_vwmul_vx_i32m8(v0, (int16_t) scales[is++], vl);
++            vs = __riscv_vwmacc_vx_i32m8(vs, (int16_t) scales[is++], v1, vl);
++
++            vint32m1_t vacc = __riscv_vredsum_vs_i32m8_i32m1(vs, vzero, vl);
++
++            aux32 += __riscv_vmv_x_s_i32m1_i32(vacc);
+             q5 += 32;    q8 += 64;
+         }
+ 

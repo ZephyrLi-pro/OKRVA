@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "known_credential_matches": 0,
+  "excluded_executable_or_model_files": 0,
+  "python_files_syntax_checked": 56,
+  "operator_branches": 15,
+  "deployed_llama_changed_files": 9,
+  "tts_changed_files": 4,
+  "toml_templates_parse": true,
+  "formal_services": {
+    "riscv-ai-adapter": "active",
+    "kylinbot": "active",
+    "kylinbot-asr-sensevoice": "active",
+    "kylinbot-tts": "active",
+    "kylinbot-kws-policy": "active",
+    "ukui-air-gesture": "active"
+  },
+  "packaging_changed_live_sources": false,
+  "packaging_installed_backend": false
+}

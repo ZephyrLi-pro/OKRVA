@@ -1,0 +1,23 @@
+[Desktop Entry]
+X-Kaiming=cn.kylin.kylin-aiassistant
+NoDisplay=true
+Encoding=UTF-8
+Name=Qi Ling
+Name[zh_CN]=小K
+Name[zh_HK]=麒靈
+Name[zh_TW]=麒靈
+Name[bo_CN]=ཆི་ལིང་
+Name[mn_MN]=ᠴᠢ ᠯᠢᠩ
+Name[ug_CN]=چى لىڭ
+Name[kk_KZ]=چى لىڭ
+Name[ky_KG]=چى لىڭ
+Icon=kylin-ai-assistant
+Comment=Qi Ling voice chat
+Comment[zh_CN]=小K语音聊天
+Keywords=aiassistant;voice;
+Exec=/opt/kaiming-tools/bin/kaiming run --command=/usr/bin/voice-assistant cn.kylin.kylin-aiassistant --
+StartupWMClass=voice-assistant
+# StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Utility;kylin-aiassistant;

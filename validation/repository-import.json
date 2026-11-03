@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "source_snapshot_date": "2026-11-03",
+  "repository": "https://github.com/ZephyrLi-pro/OKRVA",
+  "component_map": {
+    "riscv-ai-adapter": "riscv-ai-adapter",
+    "kylin-aiassistant-lite": "kylin-aiassistant-lite",
+    "kylinbot-k1": "kylinbot",
+    "ukui-air-gesture-bianbu": "ukui-air-gesture",
+    "system-tools": "system-tools",
+    "asr-service": "asr-service",
+    "runtime-integration": "runtime-integration"
+  },
+  "component_source_files": 2556,
+  "component_source_bytes_unchanged": true,
+  "nested_git_repositories": false,
+  "submodules": false,
+  "archive_files_included": false
+}

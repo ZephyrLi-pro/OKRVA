@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+#export DH_VERBOSE = 1
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	# web_kbot 前端：Launchpad 源中 npm 包存在依赖冲突，使用源码包内预构建 dist/
+	test -f kylin-aiassistant/web_kbot/dist/index.html || (echo "ERROR: web_kbot/dist not found, run 'npm run build' in web_kbot first" && exit 1)
+	# Build kylin-aiassistant Qt project
+	dh_auto_build
+
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info

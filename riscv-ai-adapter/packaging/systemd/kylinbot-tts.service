@@ -1,0 +1,21 @@
+[Unit]
+Description=Local Chinese-English TTS for RISC-V AI Adapter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/riscv-ai-adapter/scripts/tts_server.py --binary %h/.local/share/kylinbot-asr/sherpa-v1.13.2/bin/sherpa-onnx-offline-tts --model-dir %h/.cache/models/tts/vits-melo-tts-zh_en --model-file model.int8.onnx --profile melo-zh-en --extra-lexicon %h/riscv-ai-adapter/scripts/tts_melo_lexicon.txt --native-bridge %h/riscv-ai-adapter/scripts/libkylinbot-tts.so --threads 2
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+UMask=0077
+MemoryMax=768M
+TasksMax=64
+
+[Install]
+WantedBy=default.target

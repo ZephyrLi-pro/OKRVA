@@ -1,0 +1,105 @@
+[server]
+host = "127.0.0.1"
+port = 18080
+request_limit_bytes = 33554432
+token_env = ""
+allow_remote = false
+
+# The competition path is sequential (ASR -> KylinBot -> LLM), so one request
+# per inference class keeps memory usage and latency predictable on K1.
+[resource_groups]
+heavy_inference = 1
+speech_pipeline = 1
+
+[[backends]]
+name = "k1-qwen3-llama"
+capability = "chat"
+enabled = true
+required = true
+url = "http://127.0.0.1:18082/v1/chat/completions"
+health_url = "http://127.0.0.1:18082/health"
+models = ["qwen-local"]
+upstream_model = "Qwen3-0.6B-Q4_0.gguf"
+# These tools cover the five competition scenarios while avoiding KylinBot's
+# full ~12k-token tool catalog on every request.
+allowed_tools = [
+  "shell",
+  "file_read",
+  "file_write",
+  "glob_search",
+]
+# KylinBot 0.7.4's Gateway Agent path can bypass its own prompt-size setting.
+# Enforce the K1 budget again at the model boundary.
+max_system_prompt_chars = 1500
+system_prompt_override = """你是 KylinBot 在 Bianbu LXQt RISC-V 电脑上的本地系统助手。严格执行用户的当前请求。凡是执行系统操作、查询真实系统状态或读写查找文件，必须调用提供的函数工具，绝对不能猜测或伪造工具结果。shell 用于安全的系统命令，file_read 用于读取已知文件，file_write 用于保存结果，glob_search 用于查找文件。收到工具结果后，用用户的语言简短回答。回答路径、数值或文件名时必须逐字复制工具输出，不得改写、省略或猜测。除非用户明确要求，不要生成示例任务或待办事项。"""
+timeout_seconds = 600
+health_timeout_seconds = 3
+max_concurrency = 1
+acquire_timeout_seconds = 10
+priority = 50
+resource_group = "heavy_inference"
+managed = true
+command = [
+  "/usr/bin/llama-server",
+  "-m", "${HOME}/.cache/models/llm/Qwen3-0.6B-Q4_0.gguf",
+  "-t", "4",
+  "--host", "127.0.0.1",
+  "--port", "18082",
+  "--ctx-size", "8192",
+  "--n-gpu-layers", "0",
+  "--batch-size", "512",
+  "--parallel", "1",
+  "--metrics",
+  "--cache-ram", "0",
+  "--no-mmap",
+  "--reasoning", "off",
+]
+restart_on_failure = true
+restart_backoff_seconds = 3
+max_restarts = 5
+
+[[backends]]
+name = "k1-sherpa-asr"
+capability = "transcription"
+enabled = true
+required = true
+url = "http://127.0.0.1:18081/v1/audio/transcriptions"
+health_url = "http://127.0.0.1:18081/health"
+models = ["paraformer-zh-small"]
+api_key_env = "KYLINBOT_ASR_TOKEN"
+timeout_seconds = 300
+health_timeout_seconds = 3
+max_concurrency = 1
+acquire_timeout_seconds = 10
+priority = 90
+resource_group = "speech_pipeline"
+
+# TTS is not required by the first competition milestone. Enable this entry
+# after a local speech synthesis worker is deployed on port 18083.
+[[backends]]
+name = "k1-sherpa-tts"
+capability = "speech"
+enabled = false
+required = false
+url = "http://127.0.0.1:18083/v1/audio/speech"
+health_url = "http://127.0.0.1:18083/health"
+models = ["vits-zh"]
+timeout_seconds = 300
+max_concurrency = 1
+priority = 70
+resource_group = "speech_pipeline"
+
+# OCR/VLM are deliberately outside the first milestone. Native document text
+# and current-page context go directly to KylinBot; image OCR can be added here.
+[[backends]]
+name = "k1-onnx-ocr"
+capability = "ocr"
+enabled = false
+required = false
+url = "http://127.0.0.1:18084/v1/ocr"
+health_url = "http://127.0.0.1:18084/health"
+models = ["ppocr-mobile"]
+timeout_seconds = 120
+max_concurrency = 1
+priority = 20
+resource_group = "heavy_inference"

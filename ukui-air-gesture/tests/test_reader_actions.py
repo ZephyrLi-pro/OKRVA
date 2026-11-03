@@ -1,0 +1,34 @@
+import json
+import sys
+import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'app/python'))
+from dbus_next import MessageType,MessageFlag
+from reader_actions import ReaderDBusActions
+
+
+class ReaderActionTests(unittest.IsolatedAsyncioTestCase):
+    async def test_missing_reader_fails_without_falling_back_to_global_keys(self):
+        bus=SimpleNamespace(call=AsyncMock(return_value=SimpleNamespace(message_type=MessageType.ERROR,body=['reader closed'])))
+        client=ReaderDBusActions()
+        client._get_bus=AsyncMock(return_value=bus)
+        with self.assertRaises(RuntimeError):await client._navigate('left')
+        self.assertEqual(bus.call.await_count,1)
+        request=bus.call.call_args.args[0]
+        self.assertEqual(request.destination,'org.riscv.AIReader')
+        self.assertEqual(request.member,'Navigate')
+        self.assertEqual(request.flags,MessageFlag.NO_AUTOSTART)
+
+    async def test_only_confirmed_reader_state_is_accepted(self):
+        bus=SimpleNamespace(call=AsyncMock(return_value=SimpleNamespace(message_type=MessageType.METHOD_RETURN,body=[json.dumps({'active':True,'page':13})])))
+        client=ReaderDBusActions()
+        client._get_bus=AsyncMock(return_value=bus)
+        self.assertEqual((await client._navigate('right'))['page'],13)
+        bus.call.return_value.body=[json.dumps({'active':False,'page':0})]
+        with self.assertRaises(RuntimeError):await client._navigate('right')
+
+
+if __name__=='__main__':unittest.main()

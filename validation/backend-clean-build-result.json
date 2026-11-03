@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "fresh_object_build": true,
+  "uses_historical_objects": false,
+  "source_files_verified": 9,
+  "elapsed_seconds": 903.2543919060263,
+  "library_sha256": "92665be9d08c42d072989bc4249d939a516b249319c3885961bea3ab5eca1182",
+  "installed": false,
+  "live_services_restarted": false
+}

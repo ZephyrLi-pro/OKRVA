@@ -1,0 +1,34 @@
+--- a/ggml/src/ggml-cpu/arch/riscv/quants.c
++++ b/ggml/src/ggml-cpu/arch/riscv/quants.c
+@@ -2489,18 +2489,19 @@
+             vl = 16;
+ 
+             vint32m2_t vaux_0 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_0, 0), scale[is+0], vl);
+-            vint32m2_t vaux_1 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_0, 1), scale[is+1], vl);
+-            vint32m2_t vaux_2 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_1, 0), scale[is+2], vl);
+-            vint32m2_t vaux_3 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_1, 1), scale[is+3], vl);
+-            vint32m2_t vaux_4 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_2, 0), scale[is+4], vl);
+-            vint32m2_t vaux_5 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_2, 1), scale[is+5], vl);
+-            vint32m2_t vaux_6 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_3, 0), scale[is+6], vl);
+-            vint32m2_t vaux_7 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_3, 1), scale[is+7], vl);
+-
+-            vint32m1_t isum0 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_0, vaux_1, vl), vzero, vl);
+-            vint32m1_t isum1 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_2, vaux_3, vl), isum0, vl);
+-            vint32m1_t isum2 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_4, vaux_5, vl), isum1, vl);
+-            vint32m1_t isum3 = __riscv_vredsum_vs_i32m2_i32m1(__riscv_vadd_vv_i32m2(vaux_6, vaux_7, vl), isum2, vl);
++            vint32m2_t vaux_1 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_1, 0), scale[is+2], vl);
++            vint32m2_t vaux_2 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_2, 0), scale[is+4], vl);
++            vint32m2_t vaux_3 = __riscv_vwmul_vx_i32m2(__riscv_vget_v_i16m2_i16m1(va_q_3, 0), scale[is+6], vl);
++
++            vaux_0 = __riscv_vwmacc_vx_i32m2(vaux_0, scale[is+1], __riscv_vget_v_i16m2_i16m1(va_q_0, 1), vl);
++            vaux_1 = __riscv_vwmacc_vx_i32m2(vaux_1, scale[is+3], __riscv_vget_v_i16m2_i16m1(va_q_1, 1), vl);
++            vaux_2 = __riscv_vwmacc_vx_i32m2(vaux_2, scale[is+5], __riscv_vget_v_i16m2_i16m1(va_q_2, 1), vl);
++            vaux_3 = __riscv_vwmacc_vx_i32m2(vaux_3, scale[is+7], __riscv_vget_v_i16m2_i16m1(va_q_3, 1), vl);
++
++            vint32m1_t isum0 = __riscv_vredsum_vs_i32m2_i32m1(vaux_0, vzero, vl);
++            vint32m1_t isum1 = __riscv_vredsum_vs_i32m2_i32m1(vaux_1, isum0, vl);
++            vint32m1_t isum2 = __riscv_vredsum_vs_i32m2_i32m1(vaux_2, isum1, vl);
++            vint32m1_t isum3 = __riscv_vredsum_vs_i32m2_i32m1(vaux_3, isum2, vl);
+ 
+             sum_t += __riscv_vmv_x_s_i32m1_i32(isum3);
+ 

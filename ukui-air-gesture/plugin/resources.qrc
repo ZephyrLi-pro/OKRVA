@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>data/gif/上下滑动.gif</file>
+        <file>data/gif/握拳截图.gif</file>
+        <file>data/gif/左右滑动.gif</file>
+        <file>data/picture/滑动内容.svg</file>
+        <file>data/picture/banner1.png</file>
+        <file>data/picture/banner2.png</file>
+        <file>data/picture/banner3.png</file>
+        <file alias="data/hand-palm-up-24-symbolic.svg">../data/hand-palm-up-24-symbolic.svg</file>
+        <file alias="data/hand-palm-right-24-symbolic.svg">../data/hand-palm-right-24-symbolic.svg</file>
+        <file alias="data/hand-back-left-24-symbolic.svg">../data/hand-back-left-24-symbolic.svg</file>
+        <file alias="data/hand-back-down-24-symbolic.svg">../data/hand-back-down-24-symbolic.svg</file>
+    </qresource>
+</RCC>

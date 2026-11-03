@@ -1,0 +1,28 @@
+[package]
+name = "kart-embedding-sys"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Low-level bindings for libkysdk-coreai-embedding (Kylin on-device text embedding SDK)"
+repository.workspace = true
+publish = false
+
+# NOTE: This crate is the ONLY place in KylinBot where unsafe code is permitted
+# for the coreai-embedding SDK. All unsafe is confined to extern "C" call sites.
+# The public API is fully safe Rust.
+
+[dependencies]
+libloading = "0.8"
+thiserror = "2.0"
+tracing = { version = "0.1", default-features = false }
+
+[build-dependencies]
+bindgen = "0.71"
+
+[features]
+default = []
+# Disable real SDK lookup and bindgen; use a stub so the crate compiles on
+# hosts without libkylin-coreai-embedding-dev installed (CI, non-Kylin dev
+# machines). The public API still exists but every call returns
+# `KylinEmbeddingError::LibraryNotFound`.
+stub = []

@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=ukui-air-gesture
+Name[zh_CN]=隔空手势
+Name[zh_HK]=隔空手勢
+Comment=ukui-air-gesture
+Comment[zh_CN]=隔空手势
+Exec=/usr/local/bin/ukui-air-gesture
+Terminal=false
+Type=Application
+Icon=ukui-air-gesture
+X-UKUI-AutoRestart=true
+OnlyShowIn=UKUI;LXQt;
+X-UKUI-Autostart-Phase=Application
+NoDisplay=true
+DBusActivatable=true

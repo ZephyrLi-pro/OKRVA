@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kylinbot-config
+  namespace: kylinbot
+  labels:
+    app.kubernetes.io/name: kylinbot
+    app.kubernetes.io/part-of: kylinbot
+data:
+  config.toml: |
+    workspace_dir = "/kylinbot-data/workspace"
+    config_path = "/kylinbot-data/.kylinbot/config.toml"
+    default_provider = "anthropic"
+    default_model = "claude-sonnet-4-20250514"
+    default_temperature = 0.7
+
+    [gateway]
+    # Kubernetes Services are TCP network abstractions; UDS is not supported here.
+    transport = "tcp"
+    port = 42617
+    host = "[::]"
+    allow_public_bind = true
+    require_pairing = true
+    web_dist_dir = "/kylinbot-data/web/dist"
+
+    [autonomy]
+    level = "supervised"
+    auto_approve = ["file_read", "file_write", "file_edit", "memory_recall", "memory_store", "web_search_tool", "web_fetch", "calculator", "glob_search", "content_search", "image_info", "weather", "git_operations"]

@@ -1,0 +1,44 @@
+# Local secrets and runtime data
+.env
+.env.*
+!.env.example
+!*.env.example
+settings.ini
+*.pro.user*
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.pem
+*.key
+# Models, packages and archives are fetched as external dependencies
+*.gguf
+*.onnx
+*.tflite
+*.pt
+*.pth
+*.deb
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.mp3
+*.mp4
+*.wav
+!assets/wake/wake_ack_zh.wav
+# Build and interpreter output
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+target/
+build/
+build-*/
+cmake-build-*/
+dist/
+*.o
+*.a
+*.so
+*.so.*
