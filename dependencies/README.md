@@ -30,3 +30,5 @@ TTS还需要`models/tts/text_norm/v1/zh/{date,phone,number}.fst`和cpp-pinyin词
 发布资源可能发生变更；下载后必须核对本包记录的文件SHA。若不一致，先查版本，不要绕过校验。模型及第三方软件的许可应按各原始发行来源保留。
 
 组件源码基线见`source-versions.json`。这些版本记录用于复现当前方案，不保存旧源码或备份。
+
+手势使用的Python ORT绑定由`python3-spacemit-ort`提供，当前版本记录为`onnxruntime 1.24.0+spacemit.a3`；OpenCV由`python3-opencv`提供，NumPy为1.26.4，dbus-next为0.2.3。它与ASR/TTS原生组件链接的ORT库应按各自来源区分；不要把未使用的MediaPipe/JAX requirements拿来安装。

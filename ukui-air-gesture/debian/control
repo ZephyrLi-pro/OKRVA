@@ -7,33 +7,24 @@ Build-Depends:
  cmake,
  build-essential,
  qtbase5-dev,
- qttools5-dev-tools,
- qttools5-dev,
- libkysdk-waylandhelper-dev,
- libgsettings-qt-dev,
- python3-pip,
- python3-venv,
- wayland-scanner++,
- waylandpp-dev,
+ python3,
  libevdev-dev,
- libwayland-dev,
- libukcc-dev,
- libkysdk-qtwidgets-dev,
- libkysdk-widgetutils-dev,
- libukui-log4qt-dev,
  pkg-config
 Standards-Version: 4.6.2
-Homepage: https://gitee.com/openkylin/ukui-air-gesture
-#Vcs-Browser: https://salsa.debian.org/debian/ukui-air-gesture
-#Vcs-Git: https://salsa.debian.org/debian/ukui-air-gesture.git
+Homepage: https://github.com/ZephyrLi-pro/OKRVA
 
 Package: ukui-air-gesture
-Architecture: amd64 arm64
+Architecture: riscv64
 Multi-Arch: foreign
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- v4l2loopback-dkms,
- ffmpeg,
-Description: <insert up to 60 chars description>
- <Insert long description, indented with spaces.>
+ python3,
+ python3-opencv,
+ python3-numpy,
+ python3-dbus-next,
+ python3-spacemit-ort
+Description: Hand gesture recognition for Bianbu LXQt on K1
+ Standalone Qt service with OpenCV Zoo hand models and ONNX Runtime.
+ Provides current reading gestures, desktop hand feedback and scoped
+ navigation through the local reader D-Bus interface.

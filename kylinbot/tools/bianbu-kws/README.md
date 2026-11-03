@@ -7,7 +7,7 @@
 构建时使用设备匹配的sherpa-onnx C API头文件和库：
 
 ```sh
-cc -O2 -std=c11 -Wall -Wextra -Werror -I/path/to/sherpa/include   kylinbot-kws-stream.c -L/path/to/sherpa/lib   -Wl,-rpath,/path/to/sherpa/lib -lsherpa-onnx-c-api -o kylinbot-kws-gated
+cc -O2 -std=c11 -Wall -Wextra -Werror -I../bianbu-vad/include   kylinbot-kws-stream.c -L/path/to/sherpa/lib   -Wl,-rpath,/path/to/sherpa/lib -lsherpa-onnx-c-api -o kylinbot-kws-gated
 python3 -B -m unittest -v test_policy
 ```
 
