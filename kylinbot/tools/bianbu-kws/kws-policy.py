@@ -11,6 +11,26 @@ import subprocess
 import threading
 import time
 import urllib.request
+import urllib.error
+
+MODEL_PORTS = frozenset({'18082', '18084'})
+
+
+def managed_llm_command(argv):
+    return any(a == '--port' and i + 1 < len(argv) and argv[i + 1] in MODEL_PORTS
+               for i, a in enumerate(argv))
+
+
+def adapter_busy(payload):
+    if not isinstance(payload, dict) or not isinstance(payload.get('scheduler'), dict):
+        return None
+    group = payload['scheduler'].get('group:heavy_inference')
+    if not isinstance(group, dict):
+        return None
+    active, queued = group.get('active'), group.get('queued')
+    if any(type(v) is not int or v < 0 for v in (active, queued)):
+        return None
+    return active > 0 or queued > 0
 
 
 def llm_busy(payload):
@@ -48,9 +68,9 @@ class BusyLatch:
         self.until = 0.0
         self.cooldown = cooldown
 
-    def update(self, now, model, ui, cpu=None):
+    def update(self, now, model, ui, cpu=None, scheduler=None):
         # Lost endpoints must never leave voice wake permanently disabled.
-        if model is True or ui is True or cpu is True:
+        if model is True or ui is True or cpu is True or scheduler is True:
             self.until = now + self.cooldown
             return True
         return now < self.until
@@ -91,8 +111,7 @@ class CpuGuard:
                     if (path / 'exe').resolve(strict=True).name != 'llama-server':
                         continue
                     argv = (path / 'cmdline').read_bytes().decode().strip('\0').split('\0')
-                    if any(a == '--port' and i + 1 < len(argv) and argv[i + 1] == '18082'
-                           for i, a in enumerate(argv)):
+                    if managed_llm_command(argv):
                         matches.append(int(path.name))
                 except (OSError, ValueError):
                     continue
@@ -162,6 +181,21 @@ def read_ui():
         return None
 
 
+def read_adapter():
+    try:
+        try:
+            response = urllib.request.urlopen('http://127.0.0.1:18080/health', timeout=0.3)
+        except urllib.error.HTTPError as error:
+            if error.code != 503:
+                return None
+            response = error
+        with response:
+            data = response.read(65537)
+        return adapter_busy(json.loads(data)) if len(data) <= 65536 else None
+    except (OSError, ValueError):
+        return None
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--state', type=Path, required=True)
@@ -170,12 +204,12 @@ def main():
     for signum in (signal.SIGINT, signal.SIGTERM):
         signal.signal(signum, lambda *_: stop.set())
     state.write(False)
-    print('KWS policy watcher ready (LLM gauges/CPU + UI playback state)', flush=True)
+    print('KWS policy watcher ready (both managed LLMs + Adapter activity + UI playback)', flush=True)
     try:
         while not stop.is_set():
             started = time.monotonic()
             model, ui = read_model(), read_ui()
-            busy = latch.update(time.monotonic(), model, ui, cpu.read())
+            busy = latch.update(time.monotonic(), model, ui, cpu.read(), read_adapter())
             state.write(busy)
             stop.wait(max(0.01, 0.25 - (time.monotonic() - started)))
     finally:

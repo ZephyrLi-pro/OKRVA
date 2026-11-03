@@ -28,5 +28,5 @@
   "patch_applies_and_matches_overrides": true,
   "runtime_provider": "CPU",
   "runtime_model": "matcha-icefall-zh-en",
-  "note": "Includes all device-side source delta, including optional Kokoro/Melo frontend work. Only the Matcha profile is currently deployed."
+  "note": "Current Matcha CPU bridge and frontend adaptation; no legacy deployment artifacts."
 }

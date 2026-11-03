@@ -1,0 +1,25 @@
+[Unit]
+Description=Local Chinese-English TTS for RISC-V AI Adapter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/riscv-ai-adapter/scripts/tts_server.py --model-dir %h/.local/share/riscv-ai-adapter/tts-matcha-20261016/models/tts/matcha-tts --model-file matcha-icefall-zh-en/model-steps-3.q.onnx --profile matcha-zh-en --native-bridge %h/.local/lib/riscv-ai-adapter/tts-matcha-20261016/libkylinbot-matcha.so --threads 4
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+UMask=0077
+MemoryMax=768M
+TasksMax=64
+Environment="RVAI_TTS_CACHE_ROOT=%h/.local/share/riscv-ai-adapter/tts-matcha-20261016"
+Environment="PATH=%h/.local/lib/riscv-ai-adapter/tts-matcha-20261016/bin:/usr/local/bin:/usr/bin:/bin"
+CPUAffinity=0-3
+CPUWeight=400
+
+[Install]
+WantedBy=default.target

@@ -1,6 +1,6 @@
 # 外部依赖和模型
 
-`system-packages.tsv`是本机相关已安装软件的版本快照，不是可直接跨发行版执行的apt安装列表。`platform.json`保存Bianbu和CPU信息。Python/Qt/Rust依赖还需分别遵循各项目清单。
+`system-packages.tsv`是本机相关已安装软件的版本版本记录，不是可直接跨发行版执行的apt安装列表。`platform.json`保存Bianbu和CPU信息。Python/Qt/Rust依赖还需分别遵循各项目清单。
 
 ## 框架来源
 
@@ -28,3 +28,5 @@
 TTS还需要`models/tts/text_norm/v1/zh/{date,phone,number}.fst`和cpp-pinyin词典、espeak-ng资源。完整缓存布局见`riscv-ai-adapter/scripts/README-MATCHA.md`。这些是外部前端数据依赖，不应遗漏后仅凭“能出声音”判定复现成功。
 
 发布资源可能发生变更；下载后必须核对本包记录的文件SHA。若不一致，先查版本，不要绕过校验。模型及第三方软件的许可应按各原始发行来源保留。
+
+组件源码基线见`source-versions.json`。这些版本记录用于复现当前方案，不保存旧源码或备份。

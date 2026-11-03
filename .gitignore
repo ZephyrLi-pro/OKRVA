@@ -27,6 +27,7 @@ settings.ini
 *.mp4
 *.wav
 !assets/wake/wake_ack_zh.wav
+!assets/wake/wake_ack_zh_fast.wav
 # Build and interpreter output
 __pycache__/
 *.pyc
@@ -42,3 +43,16 @@ dist/
 *.a
 *.so
 *.so.*
+
+# Do not commit local backup/experiment material
+*.bak
+*.orig
+*.before
+*~
+**/baseline-files/
+/backups/
+/backup/
+/archive/
+/experiments/
+/work/
+/outputs/

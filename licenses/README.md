@@ -12,4 +12,4 @@
 | Adapter/独立工具/桥接 | 文件内已有SPDX按原样保留；未有根级许可证的自有代码，本包不擅自补成另一许可证。若比赛需要统一开源授权，应由作者另行决定适用范围 |
 | 模型、ORT/EP、sherpa、Qt/LibreOffice | 不打包其二进制/权重；按原来源和发行许可获取 |
 
-补丁同时包含少量原始基线文件供校验，其原许可不变。算子分支的原始仓库为`https://github.com/ZephyrLi-pro/llama.cpp`，详细commit见`optimizations/rvv/branches.json`。独立补丁是源代码成果，性能数字不作为许可证或原创范围依据。
+当前修改后的源码和补丁保留各自原有版权头，第三方基线通过固定commit获取。当前使用的Q6优化位于`patches/spacemit-llama`；不在本仓库复制未采用的算子分支。
