@@ -61,7 +61,7 @@ static QString errorTextFromGatewayPayload(const QString &payload)
 GatewayChatClient::GatewayChatClient(QObject *parent)
     : QObject(parent)
     , m_webSocket(new UnixSocketWebSocket(this))
-    , m_sessionId(QUuid::createUuid().toString(QUuid::WithoutBraces))
+    , m_sessionId(QStringLiteral("voice-assistant-") + QUuid::createUuid().toString(QUuid::WithoutBraces))
 {
     QString socketPath = loadSocketPathFromConfig();
     if (!socketPath.isEmpty()) {

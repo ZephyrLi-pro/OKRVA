@@ -1,0 +1,18 @@
+[Unit]
+Description=SmallK native desktop frontend
+After=kylinbot.service
+Requires=kylinbot.service
+
+[Service]
+Type=simple
+Environment=QT_QPA_PLATFORM=wayland
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=DISPLAY=:0
+ExecStartPre=/usr/bin/python3 %h/.local/libexec/okrva-wait-ready.py
+ExecStartPre=-/usr/bin/python3 %h/.local/libexec/okrva-clear-conversation-history.py text
+ExecStart=/usr/bin/kylin-aiassistant --silence
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=135
+ExecStopPost=-/usr/bin/python3 %h/.local/libexec/okrva-clear-conversation-history.py text
+TimeoutStopSec=35

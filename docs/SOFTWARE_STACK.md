@@ -26,7 +26,7 @@ Adapter承担模型服务适配和受限规划/上下文约束；KylinBot仍执�
 
 | 层 | 采用的组件 | 本项目的改动/组合 |
 |---|---|---|
-| 前端 | 麒麟AI助手Lite，Qt5/QML/C++ | RISC-V拆开WebEngine加载；文档原生文本替代metadata；语音历史、9秒追问、连续分句播报、焦点修复 |
+| 前端 | 麒麟AI助手Lite，Qt5/QML/C++ | RISC-V拆开WebEngine加载；文档原生文本替代metadata；语音历史保留、单轮唤醒、连续分句播报、焦点修复 |
 | 智能体 | openKylin KylinBot fork | 适配Adapter、语音唤醒/捕获与本机MCP；上游Agent、Provider、工具框架完整保留 |
 | 适配服务 | `riscv-ai-adapter`，Python3.11+ | OpenAI兼容接口、模型语义规划约束、真实工具结果校验、流式输出、上下文、调度/取消/模型轮换 |
 | 普通对话/规划 | Qwen3-0.6B-Q4_K_M | 原外部GGUF；4线程；模型结合schema和任务边界生成参数，再由原生工具执行 |

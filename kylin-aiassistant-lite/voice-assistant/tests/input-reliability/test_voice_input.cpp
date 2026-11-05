@@ -1,4 +1,7 @@
 #include <QApplication>
+#include <QSettings>
+#include <QDir>
+#include <QUuid>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QPointer>
@@ -255,7 +258,48 @@ class VoiceInputRegression {
     }
 
 public:
+    static void disabledFollowup() {
+        MainWindow window(nullptr, false);
+        require(window.prepareExternalListening() == QStringLiteral("ready"), "wake works with follow-up disabled");
+        window.finishExternalCapture();
+        window.m_showChatPage = true;
+        ChatWidget *chat = window.findChild<ChatWidget *>(QStringLiteral("page_chat"));
+        require(chat, "disabled follow-up history fixture exists");
+        chat->addAIBubble();
+        chat->setLatestAIBubbleText(QStringLiteral("retained answer"));
+        window.updateMiddlePage();
+        QStackedWidget *pages = window.findChild<QStackedWidget *>(QStringLiteral("stackedWidget_middle"));
+        QWidget *history = pages->currentWidget();
+        window.m_followupRequested = true;
+        window.setState(MainWindow::Reading);
+        window.m_synthesisController->readingFinished();
+        require(!window.m_followupRequested && !window.m_followupElapsed.isValid()
+                && !window.m_followupTimer->isActive() && window.m_state == MainWindow::Idle,
+                "default disabled mode settles Idle without opening a follow-up window");
+        window.m_synthesisController->m_readingActive = true;
+        require(window.prepareFollowupListening() == QStringLiteral("off"), "disabled follow-up immediately releases wake loop during playback");
+        window.m_synthesisController->m_readingActive = false;
+        require(window.prepareFollowupListening() == QStringLiteral("off") && !window.m_externalCaptureActive,
+                "answer completion does not claim another microphone capture");
+        bool retained = false;
+        for (QLabel *label : history->findChildren<QLabel *>()) retained |= label->text() == QStringLiteral("retained answer");
+        require(retained && pages->currentWidget() == history, "disabled follow-up retains visible answer history");
+        require(window.prepareExternalListening() == QStringLiteral("ready"), "next explicit wake still starts a new capture");
+        window.finishExternalCapture();
+        qInfo() << "PASS: follow-up disabled by default, no timer or automatic capture, retained history, fresh wake";
+    }
+
     static void run() {
+        disabledFollowup();
+        QSettings settings(QDir::homePath() + "/.config/kylin-aiassistant/settings.ini", QSettings::IniFormat);
+        settings.setValue(QStringLiteral("voice-followup-enabled"), true);
+        settings.sync(); // Existing opt-in follow-up fixtures retain coverage.
+        GatewayChatClient firstVoice, secondVoice;
+        const QString voicePrefix=QStringLiteral("voice-assistant-");
+        require(firstVoice.sessionId().startsWith(voicePrefix)
+                && !QUuid(firstVoice.sessionId().mid(voicePrefix.size())).isNull()
+                && firstVoice.sessionId()!=secondVoice.sessionId(),
+                "voice session ownership survives absent Gateway display name and each process starts fresh");
         QByteArray softSpeech;
         for (int i=0;i<16000;++i) { softSpeech.append(char(24));softSpeech.append(char(0)); }
         const QByteArray paddedSpeech=QByteArray(32000,'\0')+softSpeech+QByteArray(19200,'\0');
@@ -354,6 +398,10 @@ public:
         QJsonObject pageSource = QJsonDocument::fromJson(pageInput.context.toUtf8()).object();
         require(pageSource.value(QStringLiteral("text")).toString() == QStringLiteral("current page source")
                 && pageSource.value(QStringLiteral("page")).toInt() == 2, "page reference remains complete and selected");
+        window.onSubmitExternalText(QStringLiteral("你是谁？"));
+        waitFor([&]() { return window.m_externalVoiceQueue.frontReady(); });
+        require(!window.m_externalVoiceQueue.take().context.contains(QStringLiteral("current page source")),
+                "ordinary chat cannot inherit a live reader page");
         window.setReadingContext(QString(), QString(), 0);
         window.onSubmitExternalText(QStringLiteral("这一页主要讲了什么？"));
         require(window.m_externalVoiceQueue.frontReady(), "closed page context resolves explicitly");

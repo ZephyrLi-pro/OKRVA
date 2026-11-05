@@ -53,6 +53,13 @@ namespace {
 const int kAsrRestartDelayMs = 2100;
 const int kFollowupWindowMs = 9000;
 
+bool followupEnabled()
+{
+    QSettings settings(QDir::homePath() + "/.config/kylin-aiassistant/settings.ini",
+                       QSettings::IniFormat);
+    return settings.value(QStringLiteral("voice-followup-enabled"), false).toBool();
+}
+
 void trackEvent(const char *eventCode, const char *pageName = "voiceChatPage")
 {
     KTrackData *node = kdk_dia_data_init(KEVENTSOURCE_DESKTOP, KEVENT_CLICK);
@@ -364,7 +371,7 @@ MainWindow::MainWindow(QWidget *parent, bool autoStartRecognition) :
 
         resumeRecognitionAfterPlayback();
         // An earlier stream segment may already have cleared the resume flag.
-        // Always record final playback completion for the follow-up deadline.
+        // Always settle final playback state and any opt-in follow-up deadline.
         maybeOfferFollowup();
     });
     connect(m_synthesisController, &SpeechSynthesisController::errorOccurred, this, [this](const QString &message) {
@@ -1348,7 +1355,7 @@ void MainWindow::handleAiReplyFinished(const QString &fullResponse)
         return;
     }
 
-    m_followupRequested = m_externalRecognitionMode && m_externalConversationEnabled && !m_muted && isVisible()
+    m_followupRequested = followupEnabled() && m_externalRecognitionMode && m_externalConversationEnabled && !m_muted && isVisible()
             && !textToRead.trimmed().isEmpty();
     if (!textToRead.trimmed().isEmpty()) {
         if (!isVisible()) {
@@ -1875,6 +1882,15 @@ void MainWindow::cancelFollowup()
 
 void MainWindow::maybeOfferFollowup()
 {
+    if (!followupEnabled()) {
+        cancelFollowup();
+        // Completion still releases Reading even when an earlier audio packet
+        // has already cleared the recognition-resume flag.
+        if (m_externalRecognitionMode && !m_shuttingDown && !m_waitingGatewayReply
+                && !m_externalCaptureActive && m_externalVoiceQueue.isEmpty()
+                && !m_synthesisController->isReadingActive()) setState(Idle);
+        return;
+    }
     if (!m_followupRequested || !m_externalConversationEnabled || m_followupElapsed.isValid() || m_shuttingDown
             || !m_externalRecognitionMode || !isVisible() || m_muted
             || m_waitingGatewayReply || m_externalCaptureActive
@@ -1886,7 +1902,7 @@ void MainWindow::maybeOfferFollowup()
 
 QString MainWindow::prepareFollowupListening()
 {
-    if (m_shuttingDown || !m_externalRecognitionMode || !m_externalConversationEnabled || !isVisible() || m_muted) {
+    if (!followupEnabled() || m_shuttingDown || !m_externalRecognitionMode || !m_externalConversationEnabled || !isVisible() || m_muted) {
         cancelFollowup();
         return QStringLiteral("off");
     }
@@ -1963,10 +1979,12 @@ void MainWindow::requestExternalContext(quint64 inputId, const QString &question
     request.setAutoStartService(false);
     auto *watcher = new QDBusPendingCallWatcher(
             QDBusConnection::sessionBus().asyncCall(request, 1500), this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher, inputId, reading]() {
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher, inputId]() {
         const QDBusMessage reply = watcher->reply();
         watcher->deleteLater();
-        QString context = reading;
+        // The reader snapshot belongs only to an explicit page question above.
+        // Merely keeping a presentation open must not attach its body to chat.
+        QString context;
         bool truncated = false;
         if (reply.type() != QDBusMessage::ErrorMessage) {
             const QByteArray bytes = reply.arguments().value(0).toString().toUtf8();

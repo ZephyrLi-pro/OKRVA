@@ -20,6 +20,9 @@ from reading_feedback import ReadingFeedback
 
 def run():
     import cv2
+    # ORT owns the model's configured worker threads. Small camera transforms
+    # do not need another eight-worker OpenCV pool competing with those workers.
+    cv2.setNumThreads(1)
     from gesture_recognition import (
         HandTracker, configure_camera_capture, get_hand_landmarks_from_frame,
         resolve_model_path, PALM_DETECTION_SCORE_THRESHOLD)
@@ -95,6 +98,7 @@ def run():
             cap.release()
 
     def infer():
+        trace_stream=None
         try:
             palm_threads = int(os.environ.get('AIR_GESTURE_PALM_THREADS', '4'))
             pose_threads = int(os.environ.get('AIR_GESTURE_POSE_THREADS', '4'))
@@ -117,14 +121,23 @@ def run():
             if target == 'reader':
                 from queued_reading import QueuedReadingDispatcher
                 def confirmed(event, **data):
-                    if event == 'action_candidate':
+                    if event == 'gesture_recognized':
                         with lock:
                             counts['horizontal:'+data['direction']] += 1
                     emit(event, **data)
-                dispatcher = QueuedReadingDispatcher(actions.horizontal, confirmed)
+                dispatcher = QueuedReadingDispatcher(actions, confirmed)
             else:
                 dispatcher = ReadingDispatcher(actions.horizontal, emit)
-            emit('model_thread_config', palm_threads=palm_threads, pose_threads=pose_threads)
+            emit('model_thread_config', palm_threads=palm_threads, pose_threads=pose_threads,
+                 opencv_threads=cv2.getNumThreads())
+            trace_path=os.environ.get('AIR_GESTURE_TRACE_LANDMARKS')
+            if trace_path:
+                try:
+                    fd=os.open(trace_path,os.O_WRONLY|os.O_CREAT|os.O_APPEND,0o600)
+                    trace_stream=os.fdopen(fd,'a',encoding='utf8')
+                    emit('landmark_trace_started',path=trace_path,records_camera_frames=False)
+                except OSError as error:
+                    emit('landmark_trace_error',error=str(error))
             sequence, last_log, last_key = 0, 0., None
             while not stopped.is_set():
                 latest = mailbox.wait_after(sequence)
@@ -150,7 +163,25 @@ def run():
                     palm_center_y=features[1] if features else None,
                     frame_time=timestamp, inference_seconds=time.monotonic()-start,
                     source_age_seconds=age, reading_counts=current_counts)
+                snapshot.update(palm_model_runs=tracker.palm_runs,
+                                pose_model_runs=tracker.pose_runs,
+                                palm_search_skips=tracker.search_skips)
                 snapshot.update(dispatcher.controller.diagnostics(timestamp))
+                if hasattr(dispatcher,'diagnostics'):
+                    snapshot.update(dispatcher.diagnostics())
+                    if snapshot.get('page_navigation_busy') and snapshot.get('requested_page'):
+                        snapshot['reading_reason']+='；正在翻到第'+str(snapshot['requested_page'])+'页'
+                if trace_stream is not None:
+                    row=dict(event='count_sample',time=datetime.datetime.now().isoformat(timespec='milliseconds'),
+                        frame_time=timestamp,aspect=aspect,source_age=age,
+                        landmarks=[dict(x=p.x,y=p.y,z=p.z) for p in landmarks] if landmarks is not None else None,
+                        feature=features,phase=dispatcher.controller.phase,message=dispatcher.controller.reason,
+                        fixed_counts=dict(dispatcher.controller.accepted_counts))
+                    try:
+                        trace_stream.write(json.dumps(row,ensure_ascii=False)+'\n');trace_stream.flush()
+                    except OSError as error:
+                        trace_stream.close();trace_stream=None
+                        emit('landmark_trace_error',error=str(error))
                 with lock:
                     shared['snapshot'] = dict(snapshot, landmarks=landmarks)
                 key = (snapshot['hand_present'], snapshot['reading_reason'])
@@ -161,6 +192,7 @@ def run():
         except Exception as error:
             fail(error)
         finally:
+            if trace_stream is not None:trace_stream.close()
             if 'dispatcher' in locals() and hasattr(dispatcher, 'close'):
                 dispatcher.close()
 
@@ -171,7 +203,7 @@ def run():
         preview = ReadingPreview()
     capture_thread = threading.Thread(target=capture, daemon=True, name='reading-capture')
     infer_thread = threading.Thread(target=infer, daemon=True, name='reading-inference')
-    emit('preview_started', mode='reading', reading_algorithm_revision='navigation_v6_relative_home',
+    emit('preview_started', mode='reading', reading_algorithm_revision='navigation_v11_stationary_home_recovery',
          camera=camera, records_camera_frames=False, executes_desktop_actions=True)
     capture_thread.start()
     infer_thread.start()

@@ -13,11 +13,11 @@ class ReadingDispatchTests(unittest.TestCase):
         actions, events = [], []
         dispatcher = ReadingDispatcher(actions.append,
             lambda event, **data: events.append((event, data)))
-        for index, x in enumerate([.5,.42,.34,.28,.4,.5,.58,.66,.72,.6,.5]):
+        for index, x in enumerate([.5,.5,.5,.42,.34,.28,.4,.5,.5,.58,.66,.72,.6,.5]):
             dispatcher.process(pose(x), index*.25)
         self.assertEqual(actions, ['left', 'right'])
         self.assertEqual([event for event, data in events],
-                         ['action_candidate', 'action_candidate'])
+                         ['gesture_recognized','action_candidate','gesture_recognized','action_candidate'])
 
     def test_failed_action_is_reported_and_never_automatically_replayed(self):
         calls, events = [], []
@@ -26,19 +26,21 @@ class ReadingDispatchTests(unittest.TestCase):
             raise RuntimeError('native receiver unavailable')
         dispatcher = ReadingDispatcher(fail,
             lambda event, **data: events.append((event, data)))
-        for index, x in enumerate([.5,.42,.34,.28,.28,.28,.4,.5]):
+        for index, x in enumerate([.5,.5,.5,.42,.34,.28,.28,.28,.4,.5]):
             self.assertIsNone(dispatcher.process(pose(x), index*.25))
         self.assertEqual(calls, ['left'])
-        self.assertEqual(events[0][0], 'action_error')
-        self.assertFalse(events[0][1]['automatic_retry'])
+        errors=[data for event,data in events if event=='action_error']
+        self.assertEqual(len(errors),1)
+        self.assertFalse(errors[0]['automatic_retry'])
 
     def test_stale_camera_result_cannot_execute_or_join_a_trace(self):
         actions = []
         dispatcher = ReadingDispatcher(actions.append, lambda *a, **kw: None)
         dispatcher.process(pose(.5), 0.)
-        dispatcher.process(pose(.42), .25)
-        dispatcher.process(pose(.34), .5, age=.9)
-        dispatcher.process(pose(.28), .75)
+        dispatcher.process(pose(.5), .25)
+        dispatcher.process(pose(.47), .5)
+        dispatcher.process(pose(.34), .75, age=1.01)
+        dispatcher.process(pose(.28), 1.)
         self.assertEqual(actions, [])
 
     def test_camera_mailbox_drops_old_frames_instead_of_queuing(self):

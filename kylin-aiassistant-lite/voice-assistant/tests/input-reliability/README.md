@@ -54,3 +54,15 @@ recordings are part of this work.
 
 Compilation and device deployment status are recorded separately in the final
 report. Offline tests do not establish real microphone wake/recognition accuracy.
+
+## 当前页资料选择修复（2026-11-04）
+
+只有明确提到这一页、这页、当前页或本页的语音问题才携带阅读器快照。普通问题只查询主聊天框草稿，不能因为PPT保持打开就自动携带其正文，也不能把PPT正文和日志草稿拼成一份资料。`test_voice_input.cpp`新增PPT仍打开时询问身份、不得附带当前页正文的回归检查。
+
+## 单轮唤醒模式（2026-11-05）
+
+默认关闭回答后的自动追问：播报结束保留回答历史，状态回到“等待唤醒”，再次提问需说唤醒词。
+`~/.config/kylin-aiassistant/settings.ini` 的 `[General]` 下
+`voice-followup-enabled=false` 控制此行为；未配置时同样关闭。
+关闭模式下 `PrepareFollowupListening` 直接返回 `off`，不启动9秒定时器、不自动认领录音。
+测试覆盖流式播报的提前结束信号、历史保留及再次显式唤醒，同时保留显式启用追问时的原有测试。

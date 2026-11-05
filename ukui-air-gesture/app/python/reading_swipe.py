@@ -9,7 +9,7 @@ import math
 COOLDOWN_SECONDS = .5
 
 
-def palm_sample_info(landmarks, aspect=.75):
+def palm_sample_info(landmarks, aspect=.75, *, allow_edge=False):
     if landmarks is None or len(landmarks) != 21:
         return None, '未检测到完整的手部关键点'
     points = [(float(p.x), float(p.y), float(p.z)) for p in landmarks]
@@ -18,8 +18,14 @@ def palm_sample_info(landmarks, aspect=.75):
     # All motion anchors must be visible. Unused wrist/thumb predictions may
     # leave the frame while the palm and extended fingers remain observable.
     ids = (5,9,13,17)
-    if any(not (.02 <= points[i][0] <= .98 and .02 <= points[i][1] <= .98) for i in ids):
-        return None, '手掌主体靠近边缘，请移回画面中央'
+    visible_anchors=sum(.02<=points[i][0]<=.98 and .02<=points[i][1]<=.98 for i in ids)
+    if visible_anchors<4:
+        # Only a controller with a very recent fully visible hand may request
+        # this continuation. Keep two visible palm anchors and fingers, and
+        # permit at most a small prediction margin beyond the frame.
+        if (not allow_edge or visible_anchors<2 or any(
+                not (-.05<=points[i][0]<=1.05 and .02<=points[i][1]<=.98) for i in ids)):
+            return None, '手掌主体靠近边缘，请移回画面中央'
     span = max(points[i][0] for i in ids)-min(points[i][0] for i in ids)
     if not .04 <= span <= .85:
         return None, '手部尺寸不稳定，请调整与镜头的距离'
@@ -33,9 +39,10 @@ def palm_sample_info(landmarks, aspect=.75):
         return math.degrees(math.acos(max(-1.,min(1.,sum(x*y for x,y in zip(va,vb))/norm))))
 
     fingers = [(5,6,7,8),(9,10,11,12),(13,14,15,16),(17,18,19,20)]
+    finger_left,finger_right=(0.,1.) if allow_edge else (.01,.99)
     visible = [finger for finger in fingers if all(
-        .01 <= points[i][0] <= .99 and .01 <= points[i][1] <= .99 for i in finger)]
-    if len(visible) < 3:
+        finger_left <= points[i][0] <= finger_right and .01 <= points[i][1] <= .99 for i in finger)]
+    if len(visible) < (2 if allow_edge else 3):
         return None, '可见手指不足，请让手掌和手指进入画面'
     openness = sum((angle(m,p,d)+angle(p,d,t))/2 for m,p,d,t in visible)/len(visible)
     return (1-sum(points[i][0] for i in ids)/len(ids),
@@ -47,10 +54,14 @@ def palm_sample(landmarks, aspect=.75):
 
 
 class ReadingSwipeDetector:
-    def __init__(self, minimum_distance=.12):
+    def __init__(self, minimum_distance=.12, vertical_tolerance=0., vertical_ratio=.5):
         if not .03 <= minimum_distance <= .2:
             raise ValueError('Invalid horizontal stroke distance')
         self.minimum_distance = float(minimum_distance)
+        if not 0<=vertical_tolerance<=.1:raise ValueError('Invalid vertical tolerance')
+        self.vertical_tolerance=float(vertical_tolerance)
+        if not .3<=vertical_ratio<=.8:raise ValueError('Invalid vertical ratio')
+        self.vertical_ratio=float(vertical_ratio)
         self.history = deque()
         self.last_time = None
         self.last_point = None
@@ -172,7 +183,8 @@ class ReadingSwipeDetector:
             self.gate = 'small_distance'
             self.reason = f'水平幅度{distance*100:.0f}% / {self.minimum_distance*100:.0f}%，请继续同向移动'
             return None
-        if abs(dy) > distance*.5 or y_range > max(.06,distance*.55):
+        if (abs(dy) > max(self.vertical_tolerance,distance*self.vertical_ratio)
+                or y_range > max(.06,distance*max(.55,self.vertical_ratio))):
             self.gate = 'vertical_motion'
             self.reason = '上下偏移较大，请尽量横向挥动'
             return None

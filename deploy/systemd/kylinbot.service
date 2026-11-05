@@ -1,6 +1,8 @@
 [Unit]
 Description=KylinBot daemon
-After=network.target kylinbot-asr-sensevoice.service pipewire.service wireplumber.service riscv-ai-adapter.service kylinbot-kws-policy.service
+After=network.target kylinbot-asr-sensevoice.service pipewire.service wireplumber.service riscv-ai-adapter.service kylinbot-kws-policy.service pipewire-pulse.service
+# Audio daemon restarts invalidate the persistent wake capture stream.
+PartOf=pipewire.service pipewire-pulse.service
 Requires=kylinbot-asr-sensevoice.service riscv-ai-adapter.service
 Wants=kylinbot-kws-policy.service
 

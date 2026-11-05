@@ -259,6 +259,20 @@ def validate_catalog(plan, catalog):
                 raise ValueError('Caller schema enum violated')
 
 
+def _conversation_binding(model, catalog, history):
+    return hashlib.sha256(json.dumps([model, catalog, history],
+        sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
+def _history_bindings(model, catalog, prefix):
+    # The Gateway can discard only a leading part of old history while a
+    # native tool chain runs. Keep the current user exact and store hashes
+    # of all permitted suffixes, rather than copies of conversation text.
+    history = [m for m in prefix if m.get('role') != 'system']
+    return tuple(_conversation_binding(model, catalog, history[offset:])
+                 for offset in range(len(history)))
+
+
 @dataclass
 class PlanState:
     binding: str
@@ -266,6 +280,8 @@ class PlanState:
     expires: float
     issued: set = field(default_factory=set)
     failed: bool = False
+    history_bindings: tuple = ()
+    history_offset: int = 0
 
 
 class SemanticPlanner:
@@ -296,8 +312,8 @@ class SemanticPlanner:
             start = starts[-1]
             prefix, tail = messages[:start + 1], messages[start + 1:]
             catalog = permitted_catalog(value, allowed)
-            binding = hashlib.sha256(json.dumps([model, catalog, [m for m in prefix if m.get('role') != 'system']],
-                                     sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+            binding = _conversation_binding(model, catalog,
+                [m for m in prefix if m.get('role') != 'system'])
             if tail:
                 # Non-planner tools/ordinary chats keep their original model path.
                 ids = [c.get('id', '') for m in tail for c in m.get('tool_calls', []) if isinstance(c, dict)]
@@ -331,7 +347,8 @@ class SemanticPlanner:
                 if len(self.states) >= self.capacity:
                     raise ValueError('Planner capacity reached')
                 nonce = uuid.uuid4().hex
-                state = PlanState(binding, copy.deepcopy(plan['steps']), self.clock() + self.ttl)
+                state = PlanState(binding, copy.deepcopy(plan['steps']), self.clock() + self.ttl,
+                    history_bindings=_history_bindings(model, catalog, prefix))
                 self.states[nonce] = state
                 return self.dispatch(nonce, state, 0)
         except (ValueError, TypeError, KeyError, IndexError, AttributeError):
@@ -346,10 +363,13 @@ class SemanticPlanner:
     def resume(self, binding, tail, identifier, catalog):
         with self.lock:
             state = None
+            context_matches = False
             try:
                 nonce = identifier.split('_')[2]
                 state = self.states[nonce]
-                if state.failed or state.binding != binding or state.expires <= self.clock() or len(tail) % 2 or len(tail) > 2 * len(state.steps):
+                allowed_bindings = state.history_bindings[state.history_offset:]
+                context_matches = binding in allowed_bindings
+                if state.failed or not context_matches or state.expires <= self.clock() or len(tail) % 2 or len(tail) > 2 * len(state.steps):
                     raise ValueError('Expired or changed plan context')
                 validate_catalog({'mode': 'execute', 'steps': state.steps, 'message': ''}, catalog)
                 summaries = []
@@ -375,6 +395,7 @@ class SemanticPlanner:
                     if len(text) > 2000:
                         raise ValueError('Oversized tool result')
                     summaries.append(text)
+                state.history_offset += allowed_bindings.index(binding)
                 index = len(tail) // 2
                 if index == len(state.steps):
                     content='\n'.join(summaries)
@@ -384,6 +405,6 @@ class SemanticPlanner:
                     return {'content': content, 'route': 'model-system-plan'}
                 return self.dispatch(nonce, state, index)
             except (ValueError, TypeError, KeyError, IndexError, AttributeError):
-                if state is not None and state.binding == binding:
+                if state is not None and context_matches:
                     state.failed = True
                 return {'content': STOP, 'route': 'model-system-plan'}

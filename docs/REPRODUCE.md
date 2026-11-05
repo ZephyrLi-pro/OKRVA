@@ -63,7 +63,17 @@ python3 tools/fetch_vendor.py asr /your/work/model-zoo-asr
 
 `kylinbot/tools/bianbu-kws/kws-policy.py`和同目录C源码是当前KWS的唯一源码版本；编译C辅助程序为`kylinbot-kws-gated`，与策略脚本安装到`~/.local/lib/kylinbot/`。复制`assets/wake/`中的固定提示音到`~/.local/share/kylinbot/`。当前Matcha构建与运行见`riscv-ai-adapter/scripts/README-MATCHA.md`。
 
+手势服务的启动检查脚本需随服务一起安装（在本仓库根目录执行）：
+
+```bash
+install -Dm644 deploy/helpers/wait-gesture-ready.py ~/.local/libexec/okrva-wait-gesture-ready.py
+```
+
+配置好服务后，执行 `systemctl --user daemon-reload` 和 `systemctl --user enable --now ukui-air-gesture.service`。已启动服务需要重载时，执行 `systemctl --user restart ukui-air-gesture.service`。启动检查等待 Wayland 桌面和配置的摄像头就绪，适用于登录时自动启动。
+
 首先检查ASR/TTS，再启动Adapter、KylinBot和小K，配置新的配对token；最后独立启动手势和阅读器。阅读器服务保留当前演示PPT路径，使用自己的文件时修改其`--file`参数。手势服务和阅读器独立启停。
+
+文本与语音的记录按进程生命周期清理，安装主/语音服务时同时安装清理脚本与应用菜单启动器，具体命令见[部署说明](../deploy/README.md#对话记录的进程生命周期)。最小化或隐藏窗口保留对话，实际进程退出后重新启动进入新对话。
 
 各模型互斥驻留与内存保护保持启用：阅读ctx3072、batch128、ubatch128、parallel1，阅读生成3线程/预填充4线程，CPU0–3；按需模型空闲60秒卸载。不要为了少等待而把0.6B和1.7B无条件同时常驻。
 

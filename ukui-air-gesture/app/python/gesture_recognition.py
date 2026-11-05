@@ -46,6 +46,8 @@ TRACKING_MIN_PALM_SIZE_PX = 12
 TRACKING_MAX_PALM_SIZE_RATIO = 0.95
 TRACKING_STATS_INTERVAL = 60
 PALM_SEARCH_INTERVAL_SEC = 0.4
+PALM_IDLE_AFTER_SEC = 2.0
+PALM_IDLE_SEARCH_INTERVAL_SEC = 3.0
 PALM_DETECTION_SCORE_THRESHOLD = 0.6
 
 # Accumulate only high-quality handedness samples.  A hand near an image edge
@@ -187,6 +189,9 @@ class HandTracker:
         self.redetects = 0
         self.search_skips = 0
         self.next_search_at = 0.0
+        self.last_search_at = -float('inf')
+        self.empty_since = None
+        self.search_reference = None
         self.handedness = HandednessStabilizer()
         self.last_handedness_score = None
         self.last_handedness_quality = None
@@ -260,6 +265,21 @@ class HandTracker:
             return None
         return self._run_pose(frame, palms[0])
 
+    @staticmethod
+    def _search_thumbnail(frame):
+        # Kept in memory only. Coarse frame changes wake the palm model before
+        # the quiet fallback probe; this is never a hand/gesture classifier.
+        small = cv2.resize(frame, (64, 48), interpolation=cv2.INTER_NEAREST)
+        return cv2.cvtColor(small, cv2.COLOR_BGR2GRAY).astype(np.int16)
+
+    def _search_scene_changed(self, frame):
+        if self.search_reference is None:
+            return True
+        delta = self._search_thumbnail(frame) - self.search_reference
+        # Ignore a uniform exposure adjustment and isolated sensor noise.
+        delta -= int(np.median(delta))
+        return np.count_nonzero(np.abs(delta) > 12) >= delta.size * .015
+
     def _accept_hand(self, hand):
         self.tracking_palm = self._palm_from_hand(hand)
         self.tracked_frames += 1
@@ -283,18 +303,22 @@ class HandTracker:
 
     def infer(self, frame, now=None):
         self.total_frames += 1
+        explicit_clock = now is not None
         now = time.monotonic() if now is None else float(now)
         had_track = self.tracking_palm is not None
 
         if not had_track and now < self.next_search_at:
-            self.search_skips += 1
-            if self.handedness.mark_missing():
-                print("Handedness lock expired after prolonged hand loss")
-            self._report_stats()
-            return None, None, "search-wait"
+            changed = (now - self.last_search_at >= PALM_SEARCH_INTERVAL_SEC
+                       and self._search_scene_changed(frame))
+            if not changed:
+                self.search_skips += 1
+                if self.handedness.mark_missing():
+                    print("Handedness lock expired after prolonged hand loss")
+                self._report_stats()
+                return None, None, "search-wait"
 
         if not had_track:
-            self.next_search_at = now + PALM_SEARCH_INTERVAL_SEC
+            self.last_search_at = now
 
         refresh_due = had_track and self.tracked_frames >= TRACKING_REFRESH_FRAMES
         hand = None
@@ -324,13 +348,24 @@ class HandTracker:
 
         if hand is None:
             self.reset()
-            if had_track:
+            if self.empty_since is None:
+                self.empty_since = now
+            self.search_reference = self._search_thumbnail(frame)
+            if now - self.empty_since >= PALM_IDLE_AFTER_SEC:
+                # The quiet interval begins AFTER inference. Starting it before
+                # a slow detector pass can otherwise leave no idle time at all.
+                completed = now if explicit_clock else time.monotonic()
+                self.next_search_at = completed + PALM_IDLE_SEARCH_INTERVAL_SEC
+            else:
+                # Keep the original fast reacquisition cadence after hand loss.
                 self.next_search_at = now + PALM_SEARCH_INTERVAL_SEC
             if self.handedness.mark_missing():
                 print("Handedness lock expired after prolonged hand loss")
             self._report_stats()
             return None, None, mode
 
+        self.empty_since = None
+        self.search_reference = None
         self._accept_hand(hand)
         points = hand[4:67].reshape(21, 3)
         height, width = frame.shape[:2]

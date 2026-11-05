@@ -1,5 +1,7 @@
 [Unit]
 Description=Independent hand gesture recognition and action delivery
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Service]
 Type=simple
@@ -11,10 +13,13 @@ Environment="AIR_GESTURE_PROFILE=reading"
 Environment="AIR_GESTURE_READING_TARGET=reader"
 Environment="AIR_GESTURE_CAMERA=/dev/v4l/by-id/usb-SunplusIT_Inc_USB2.0_FHD_UVC_WebCam_ZS20220104V0-video-index0"
 Environment="AIR_GESTURE_EVENT_LOG=%h/.local/state/riscv-ai-reader/gestures.jsonl"
+ExecStartPre=/usr/bin/python3 %h/.local/libexec/okrva-wait-gesture-ready.py
 ExecStart=/usr/local/bin/ukui-air-gesture
+TimeoutStartSec=100
 TimeoutStopSec=8
 KillMode=control-group
-Restart=no
+Restart=on-failure
+RestartSec=3
 
 [Install]
 WantedBy=default.target

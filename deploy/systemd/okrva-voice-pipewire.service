@@ -1,0 +1,17 @@
+[Unit]
+Description=SmallK voice window using native PipeWire audio
+After=pipewire.service pipewire-pulse.service kylinbot.service
+Wants=pipewire.service pipewire-pulse.service
+
+[Service]
+Type=dbus
+BusName=org.ukui.voice_assistant
+Environment=SDL_AUDIODRIVER=pipewire
+Environment=QT_QPA_PLATFORM=wayland
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=DISPLAY=:0
+ExecStartPre=-/usr/bin/python3 %h/.local/libexec/okrva-clear-conversation-history.py voice
+ExecStart=/usr/bin/voice-assistant --dbus-activation
+TimeoutStartSec=60
+ExecStopPost=-/usr/bin/python3 %h/.local/libexec/okrva-clear-conversation-history.py voice
+TimeoutStopSec=35

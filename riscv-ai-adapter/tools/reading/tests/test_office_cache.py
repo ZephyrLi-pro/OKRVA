@@ -4,16 +4,25 @@ from pathlib import Path
 from office_reader import OfficeReader
 
 class Controller:
-    def __init__(self,names,index=0):self.names,self.index,self.jumps=names,index,[]
+    def __init__(self,names,index=0):
+        self.names,self.index,self.jumps=names,index,[]
+        self.running=True
+    def isRunning(self):return self.running
     def getSlideCount(self):return len(self.names)
     def getSlideByIndex(self,index):return types.SimpleNamespace(Name=self.names[index])
     def getCurrentSlideIndex(self):return self.index
     def gotoSlideIndex(self,index):self.jumps.append(index);self.index=index
 
 class Presentation:
-    def __init__(self,controller):self.controller=controller
-    def isRunning(self):return True
-    def getController(self):return self.controller
+    def __init__(self,controller):
+        self._controller=controller;self.running_calls=0;self.controller_calls=0
+    @property
+    def controller(self):return self._controller
+    @controller.setter
+    def controller(self,value):
+        self._controller.running=False;self._controller=value
+    def isRunning(self):self.running_calls+=1;return True
+    def getController(self):self.controller_calls+=1;return self.controller
 
 class SlideshowIdentityTests(unittest.TestCase):
     def setUp(self):
@@ -52,5 +61,13 @@ class SlideshowIdentityTests(unittest.TestCase):
         self.assertEqual(self.controller.jumps,[1])
         self.assertEqual(self.reader.navigate('right').number,2)
         self.assertEqual(self.controller.jumps,[1])
+
+    def test_active_show_polling_and_navigation_avoid_presentation_render_lock(self):
+        self.start(['pageA','pageC']);self.reader.current()
+        for _ in range(5):self.reader.current()
+        self.reader.navigate('right')
+        self.assertEqual(self.reader.presentation.running_calls,1)
+        self.assertEqual(self.reader.presentation.controller_calls,1)
+        self.assertEqual(self.reader.current().text,'Title C\nBody C')
 
 if __name__=='__main__':unittest.main()

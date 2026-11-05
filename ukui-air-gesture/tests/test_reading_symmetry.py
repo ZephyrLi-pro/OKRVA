@@ -24,7 +24,7 @@ class NeutralPositionTests(unittest.TestCase):
             xs=[home]*3
             for _ in range(3):
                 for sign in (-1,1):
-                    xs += [home+sign*d for d in (.04,.08,.12,.08,.04,0)]
+                    xs += [home+sign*d for d in (.04,.08,.12,.08,.04,0,0)]
             self.assertEqual(detect(xs),['left','right']*3)
 
     def test_same_stroke_distance_works_both_ways_from_offset_home(self):

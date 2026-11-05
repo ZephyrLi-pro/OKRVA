@@ -102,7 +102,9 @@ class OfficeReader:
         while not self.presentation.isRunning() and time.monotonic()<deadline:
             time.sleep(.1)
         if self.presentation.isRunning():
-            self.presentation.getController().gotoSlideIndex(self.start_page-1)
+            controller=self.presentation.getController()
+            self._cache_slideshow(controller)
+            controller.gotoSlideIndex(self.start_page-1)
         else:
             self.doc.getCurrentController().setCurrentPage(self.pages.getByIndex(self.start_page-1))
         self.emit('presentation_ready',pages=len(self.text),readonly=True,source_sha256=self.digest)
@@ -126,8 +128,17 @@ class OfficeReader:
         if self.closed or self.doc is None:
             return None
         try:
-            if self.presentation.isRunning():
-                controller = self.presentation.getController()
+            controller=self._show_controller
+            # The active controller exposes its own liveness and slide index.
+            # Re-entering XPresentation for every poll can wait for the UI's
+            # rendering lock for seconds after a slide change.
+            if controller is not None and not controller.isRunning():
+                controller=None
+                self._show_controller=None
+                self._show_pages=()
+            if controller is None and self.presentation.isRunning():
+                controller=self.presentation.getController()
+            if controller is not None:
                 self._cache_slideshow(controller)
                 index = controller.getCurrentSlideIndex()
                 if not 0 <= index < len(self._show_pages):
@@ -151,8 +162,11 @@ class OfficeReader:
             raise ValueError('Page number out of range')
         if number == page.number:
             return page
-        if self.presentation.isRunning():
-            self.presentation.getController().gotoSlideIndex(number-1)
+        if page.mode=='slideshow':
+            controller=self._show_controller
+            if controller is None or not controller.isRunning():
+                raise RuntimeError('Slideshow controller is no longer running')
+            controller.gotoSlideIndex(number-1)
         else:
             self.doc.getCurrentController().setCurrentPage(self.pages.getByIndex(number-1))
         deadline = time.monotonic()+12

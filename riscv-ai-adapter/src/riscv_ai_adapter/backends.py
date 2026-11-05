@@ -84,7 +84,7 @@ def _open_local_speech(request, timeout: float, cancelled: Callable[[], bool]):
                 raise ConnectionResetError("speech client disconnected")
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                raise TimeoutError("local speech backend timed out")
+                raise TimeoutError("local inference backend timed out")
             try:
                 reply = replies.get(timeout=min(0.1, remaining))
             except queue.Empty:
@@ -550,6 +550,44 @@ def requested_model_from_json(body: bytes) -> str:
         return ""
     model = value.get("model", "")
     return model if isinstance(model, str) else ""
+
+
+def standalone_conversation_request(body, upstream_model, allowed_tools,
+                                    max_system_prompt_chars, system_prompt_override):
+    """Bound a complete benign chat turn before expensive model planning.
+
+    An explicit reference envelope may come from an older voice client. Only
+    its actual question is eligible; reference data never selects this route.
+    The model still generates the answer. Actions and contextual questions
+    retain their existing planner and reference paths.
+    """
+    if not allowed_tools or not system_prompt_override:
+        return None
+    try:
+        value = json.loads(body)
+        if not isinstance(value, dict):
+            return None
+        messages = value.get('messages')
+        if not isinstance(messages, list) or not messages or not all(isinstance(m, dict) for m in messages):
+            return None
+        last = messages[-1]
+        if last.get('role') != 'user' or not isinstance(last.get('content'), str):
+            return None
+        from .reference_context import parse_reference
+        frame = parse_reference(last['content'])
+        text = _system_command_text(frame['question'] if frame else last['content'])
+        # Do not let an embedded marker hide a command or a quoted question.
+        if not text or '用户问题：' in text:
+            return None
+        value = dict(value, messages=[dict(last, content=text)])
+        if not _simple_conversation_query(value):
+            return None
+        return rewrite_chat_request(json.dumps(value, ensure_ascii=False).encode(),
+                                    upstream_model, allowed_tools,
+                                    max_system_prompt_chars, system_prompt_override,
+                                    semantic_only=True)
+    except (ValueError, TypeError, KeyError, UnicodeError):
+        return None
 
 
 def _simple_conversation_query(value: dict[str, object]) -> str:

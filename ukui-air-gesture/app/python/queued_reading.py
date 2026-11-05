@@ -1,5 +1,4 @@
-"""Keep recognition responsive while the reader renders a slow slide."""
-import queue
+"""Maintain one latest absolute page target instead of a queue of old strokes."""
 import threading
 import time
 
@@ -7,47 +6,98 @@ from reading_dispatch import ReadingDispatcher
 
 
 class QueuedReadingDispatcher:
-    def __init__(self,send,emit,max_age=8.):
-        self.send,self.emit,self.max_age=send,emit,max_age
-        self.pending=queue.Queue(maxsize=1)
-        self.closed=threading.Event()
+    def __init__(self,reader,emit,max_age=8.,clock=time.monotonic):
+        self.reader,self.emit,self.max_age,self.clock=reader,emit,max_age,clock
+        self.condition=threading.Condition()
+        self.closed=False
+        self.target=None
+        self.owner=None
+        self.epoch=0
+        self.sequence=0
+        self.created=0.
+        self.last_direction=None
+        self.inflight=False
+        self.confirmed_page=None
         self.dispatcher=ReadingDispatcher(self._enqueue,self._queued_event)
         self.controller=self.dispatcher.controller
-        self.worker=threading.Thread(target=self._deliver,name='reading-page-actions',daemon=True)
+        self.worker=threading.Thread(target=self._deliver,name='reading-page-target',daemon=True)
         self.worker.start()
 
     def _enqueue(self,direction):
-        if self.closed.is_set():raise RuntimeError('Reading session is stopping')
-        try:self.pending.put_nowait((direction,time.monotonic()))
-        except queue.Full:raise RuntimeError('翻页处理中，请等页面更新后再挥动')
+        # GetState is an in-memory snapshot; it also identifies this reader's
+        # unique D-Bus owner. It does not run an Office operation or start an app.
+        state=self.reader.state()
+        owner=state.get('reader_owner')
+        if (not state.get('active') or type(state.get('page')) is not int
+                or type(state.get('total')) is not int
+                or not 1<=state['page']<=state['total']
+                or not isinstance(owner,str) or not owner.startswith(':')):
+            raise RuntimeError('阅读器没有可确认的当前页')
+        with self.condition:
+            if self.closed:raise RuntimeError('Reading session is stopping')
+            if owner!=self.owner:
+                self.epoch+=1;self.owner=owner;self.target=None
+            base=state['page'] if self.target is None else self.target
+            self.target=max(1,min(state['total'],base+(1 if direction=='right' else -1)))
+            self.sequence+=1;self.created=self.clock();self.last_direction=direction
+            self.condition.notify_all()
 
     def _queued_event(self,event,**data):
         if event=='action_candidate':
-            self.emit('action_queued',algorithm='reading',kind='horizontal',direction=data['direction'])
+            self.emit('action_target_updated',direction=data['direction'],
+                      gesture_id=self.controller.event_id,**self.diagnostics())
         else:self.emit(event,**data)
 
     def _deliver(self):
-        while not self.closed.is_set():
-            try:direction,created=self.pending.get(timeout=.1)
-            except queue.Empty:continue
+        while True:
+            with self.condition:
+                self.condition.wait_for(lambda:self.closed or self.target is not None)
+                if self.closed:return
+                target,owner,epoch,sequence,created=(self.target,self.owner,self.epoch,
+                    self.sequence,self.created)
+                direction=self.last_direction
+                if self.clock()-created>self.max_age:
+                    self.target=None
+                    self.emit('action_error',direction=direction,target_page=target,
+                              error='翻页目标已过期，已取消',automatic_retry=False)
+                    self.condition.notify_all();continue
+                self.inflight=True
             try:
-                if self.closed.is_set():break
-                if time.monotonic()-created>self.max_age:
-                    self.emit('action_error',direction=direction,error='待翻页动作已过期',automatic_retry=False)
-                    continue
-                self.send(direction)
-                if not self.closed.is_set():
-                    self.emit('action_candidate',algorithm='reading',kind='horizontal',
-                              direction=direction,delivery='dbus_acknowledged')
+                # Address the same unique owner used to choose the target.
+                # A restarted reader never receives an old session's page.
+                state=self.reader.goto(target,owner)
+                if (not state.get('active') or state.get('page')!=target
+                        or state.get('reader_owner')!=owner):
+                    raise RuntimeError('阅读器未确认目标页')
             except Exception as error:
-                self.emit('action_error',direction=direction,error=str(error),automatic_retry=False)
-            finally:self.pending.task_done()
+                with self.condition:
+                    self.inflight=False
+                    if epoch==self.epoch:self.target=None
+                    self.emit('action_error',direction=direction,target_page=target,
+                              error=str(error),automatic_retry=False)
+                    self.condition.notify_all()
+            else:
+                with self.condition:
+                    self.inflight=False
+                    current=epoch==self.epoch and not self.closed
+                    if current:
+                        self.confirmed_page=target
+                        if sequence==self.sequence:self.target=None
+                        self.emit('page_navigation_confirmed',page=target,target_sequence=sequence,
+                                  direction=direction,delivery='reader_page_confirmed')
+                    self.condition.notify_all()
 
     def process(self,landmarks,timestamp,aspect=.75,age=0.):
         self.dispatcher.process(landmarks,timestamp,aspect,age)
-        # Counts reflect native acknowledgements emitted by the delivery worker.
         return None
 
+    def diagnostics(self):
+        with self.condition:
+            return dict(page_navigation_busy=self.inflight or self.target is not None,
+                        requested_page=self.target,confirmed_page=self.confirmed_page,
+                        target_sequence=self.sequence)
+
     def close(self):
-        self.closed.set()
+        with self.condition:
+            self.closed=True;self.target=None;self.condition.notify_all()
         self.worker.join(timeout=.2)

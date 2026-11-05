@@ -1,0 +1,23 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Qi Ling
+Name[zh_CN]=小K
+Name[zh_HK]=麒靈
+Name[zh_TW]=麒靈
+Name[bo_CN]=ཆི་ལིང་
+Name[mn_MN]=ᠴᠢ ᠯᠢᠩ
+Name[ug_CN]=چى لىڭ
+Name[kk_KZ]=چى لىڭ
+Name[ky_KG]=چى لىڭ
+Icon=kylin-ai-assistant
+Comment=Qi Ling is an application developed based on the Baidu open source model library Qianfan that is convenient for users to operate quickly.
+Comment[zh_CN]=小K（Qi Ling）是基于百度开源模型库 Qianfan 开发的一款便于用户快捷操作的应用。
+Keywords=aiassistant;
+Exec=@HOME@/.local/bin/okrva-smallk
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Utility;kylin-aiassistant;
+X-UKUI-AutoRestart=true
+X-Kylin-Manual-Available=true
+X-KDE-Wayland-Interfaces=org_kde_plasma_window_management,org_kde_plasma_activation_feedback,org_kde_kwin_keystate,org_kde_kwin_fake_input,zkde_screencast_unstable_v1

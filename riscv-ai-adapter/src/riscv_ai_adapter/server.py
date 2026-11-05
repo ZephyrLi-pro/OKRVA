@@ -26,6 +26,7 @@ from .backends import (
     explicit_system_intent,
     requested_model_from_json,
     rewrite_chat_request,
+    standalone_conversation_request,
 )
 from .config import AdapterConfig, load_config
 from .metrics import Metrics
@@ -314,7 +315,14 @@ class AdapterHandler(BaseHTTPRequestHandler):
                 return
             if capability == "chat":
                 reference_body = None
-                if backend.semantic_system_planner:
+                conversation_body = standalone_conversation_request(body,
+                    backend.upstream_model, backend.allowed_tools,
+                    backend.max_system_prompt_chars, backend.system_prompt_override)
+                if conversation_body is not None:
+                    body = conversation_body
+                    intent = None
+                    LOG.info('chat route: standalone conversation before model planning')
+                elif backend.semantic_system_planner:
                     planner_config = next((item for item in self.server.config.backends
                         if item.name == backend.system_planner_backend), backend)
                     def infer_plan(payload):
