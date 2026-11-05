@@ -20,6 +20,16 @@
 
 仓库保留当前实现所需的完整组件源码、构建工具、测试、许可证和说明。备份、修改前源码副本、整理快照、历史试验配置、未采用的算子分支、模型权重、安装包、密钥和用户数据不纳入当前提交。
 
+在同款K1 / Bianbu 2.3.5新设备的桌面终端安装：
+
+```bash
+git clone https://github.com/ZephyrLi-pro/OKRVA.git
+cd OKRVA
+./install.sh
+```
+
+脚本自动准备依赖和模型、构建组件、生成本机配置并启动检查。详细条件、选项及分阶段命令见[联网构建安装说明](deploy/INSTALL.md)。可先执行 `./install.sh --dry-run` 查看计划。
+
 阅读说明：
 
 - [软件栈和调用关系](docs/SOFTWARE_STACK.md)
@@ -28,4 +38,4 @@
 - [验证方式与现有限制](docs/VALIDATION_AND_LIMITS.md)
 - [后端修改说明](patches/README.md)
 
-源码校验：`python3 tools/verify_bundle.py`。依赖自动安装由各组件原有依赖声明负责；模型和厂商运行库按[依赖说明](dependencies/README.md)另行准备。
+源码校验：`python3 tools/verify_bundle.py`。安装入口按固定版本准备模型与外部运行库；来源和校验记录见[依赖说明](dependencies/README.md)与[安装锁定清单](deploy/installer/lock.json)。

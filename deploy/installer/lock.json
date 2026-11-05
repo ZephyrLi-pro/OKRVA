@@ -1,0 +1,299 @@
+{
+  "format": 1,
+  "platform": {
+    "id": "bianbu",
+    "version_prefix": "2.3.",
+    "arch": "riscv64"
+  },
+  "apt_pins": {
+    "llama.cpp-tools-spacemit": "0.1.1-bpo1+6",
+    "spacemit-onnxruntime": "2.0.3-bpo1",
+    "python3-spacemit-ort": "2.0.3-bpo1"
+  },
+  "sdk_packages": [
+    {
+      "name": "libkyai-assistant0",
+      "version": "1.0.0.1-ok2.3",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkyai-assistant/libkyai-assistant0_1.0.0.1-ok2.3_riscv64.deb",
+      "sha256": "b65e74b26b18b9c4417533a93ab02ed61e0005ad208037cd3e88d53b9d5b856a",
+      "bytes": 29584
+    },
+    {
+      "name": "libkyai-config0",
+      "version": "1.1.0.1-ok2.1",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkyai-config/libkyai-config0_1.1.0.1-ok2.1_riscv64.deb",
+      "sha256": "bb6c4c5bf4df4ea5f24ce1fe81c6a266cd90a980af35d77addb34563c7c63b7a",
+      "bytes": 25160
+    },
+    {
+      "name": "libkysdk-ai-common",
+      "version": "1.1.0.1-ok0.4update1",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/k/kysdk-ai-common/libkysdk-ai-common_1.1.0.1-ok0.4update1_riscv64.deb",
+      "sha256": "0879415b0286579d9cee4131f145a1fc5f0133f7138f837d0ec4a5aa8c7db59b",
+      "bytes": 6732
+    },
+    {
+      "name": "libkysdk-alm",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-alm_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "0f6fe987d6b4833a330db8d3048a904c1d0fbe8d8b09f181d8033d0bbddf7a46",
+      "bytes": 15228
+    },
+    {
+      "name": "libkysdk-appconf2",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-appconf2_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "9b5fa02a088c72fc5c3eeb750e877be7167d8d0a067e576ef588e08d397a0f95",
+      "bytes": 13668
+    },
+    {
+      "name": "libkysdk-applications",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-applications_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "ed4c77f85c8dc355a0c86e5a9c19da7c46a9874f7f3cf06cd6f145231da94c84",
+      "bytes": 3124
+    },
+    {
+      "name": "libkysdk-basecommon",
+      "version": "2.5.1.0-0k0.6",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-base/libkysdk-basecommon_2.5.1.0-0k0.6_riscv64.deb",
+      "sha256": "4311cf48dd2dbb065cb8278a6504b5d2e60a07f451de81f3446e8bc7b31ffa5c",
+      "bytes": 3492
+    },
+    {
+      "name": "libkysdk-conf2",
+      "version": "2.5.1.0-0k0.6",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-base/libkysdk-conf2_2.5.1.0-0k0.6_riscv64.deb",
+      "sha256": "ec930fa9b1967fd5820940c0a724177d7b20bf6d701f33af53265808b29a9d4f",
+      "bytes": 28308
+    },
+    {
+      "name": "libkysdk-config",
+      "version": "2.5.1.0-0k0.6",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-base/libkysdk-config_2.5.1.0-0k0.6_riscv64.deb",
+      "sha256": "cfaa6932f44776cc26d85cc77cafd448bb245c0fb44f86c040ff91c0f35af41b",
+      "bytes": 6784
+    },
+    {
+      "name": "libkysdk-coreai-speech0",
+      "version": "1.1.0.1-ok1.3",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-coreai-speech/libkysdk-coreai-speech0_1.1.0.1-ok1.3_riscv64.deb",
+      "sha256": "ec20bc2c1b77c5cc192b6985b8b9cab6b6c5a5f6b038d6f4c563414e6e9077eb",
+      "bytes": 47880
+    },
+    {
+      "name": "libkysdk-datacollect",
+      "version": "2.3.1.0-0k0.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-diagnosetest/libkysdk-datacollect_2.3.1.0-0k0.2_riscv64.deb",
+      "sha256": "2594d8fb92f62bea8206e9de95ee92c7a69961d8ddd7331fcaf6a9966dabd8ce",
+      "bytes": 9564
+    },
+    {
+      "name": "libkysdk-genai-nlp0",
+      "version": "1.1.0.1-ok1.5",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-genai-nlp/libkysdk-genai-nlp0_1.1.0.1-ok1.5_riscv64.deb",
+      "sha256": "cdf8f4ca550be1eface92c39b12dc5686318fed53bbfdecb66c1bd15b06d5d86",
+      "bytes": 56552
+    },
+    {
+      "name": "libkysdk-kabase",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-kabase_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "97af38268cdf234c13c89731c4e49593dbd9bf0a69878a9bf2ba1c4e7bf211c7",
+      "bytes": 67552
+    },
+    {
+      "name": "libkysdk-log",
+      "version": "2.5.1.0-0k0.6",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-base/libkysdk-log_2.5.1.0-0k0.6_riscv64.deb",
+      "sha256": "91bbe534b4384ef2d9970001f8c8233be2b5d73f18aca2f20ed0f8e9b8b2139d",
+      "bytes": 13164
+    },
+    {
+      "name": "libkysdk-qtwidgets",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-qtwidgets_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "b40002d68d0b994cabb335cae31c8df67f347a293d2bea683b58e14cab4509ff",
+      "bytes": 442608
+    },
+    {
+      "name": "libkysdk-ukenv",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-ukenv_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "ee1cbc9161ef46d0cbab062855919805171ffcd83194d228a6d8179634686951",
+      "bytes": 15144
+    },
+    {
+      "name": "libkysdk-utils",
+      "version": "2.5.1.0-0k0.6",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-base/libkysdk-utils_2.5.1.0-0k0.6_riscv64.deb",
+      "sha256": "7b5ac2267e1e02d0283cc7627a4a02b79c79846b77447b578c6a090b1c2acc93",
+      "bytes": 7124
+    },
+    {
+      "name": "libkysdk-waylandhelper",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-waylandhelper_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "6e01d00bc1ef302136a854a8c92d7abcd9d516d4d0a0b90bb030bcd4a06f65ba",
+      "bytes": 105180
+    },
+    {
+      "name": "libkysdk-widgetutils",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "runtime",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-widgetutils_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "13810a7e8b75f27722c2229a97c4632b60b25af70507f1b163eb1745987563b2",
+      "bytes": 8448
+    },
+    {
+      "name": "libkyai-assistant-dev",
+      "version": "1.0.0.1-ok2.3",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkyai-assistant/libkyai-assistant-dev_1.0.0.1-ok2.3_riscv64.deb",
+      "sha256": "2f65403cd3f2fe5933047deabf6c42a60dda33ed0d0db9fe6de73f7558b4b93a",
+      "bytes": 3548
+    },
+    {
+      "name": "libkyai-config-dev",
+      "version": "1.1.0.1-ok2.1",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkyai-config/libkyai-config-dev_1.1.0.1-ok2.1_riscv64.deb",
+      "sha256": "4ab4c4c49ff6bd17a5266896346fbcb114049ae6adfa1a5f46e84c97274abb06",
+      "bytes": 2700
+    },
+    {
+      "name": "libkysdk-ai-common-dev",
+      "version": "1.1.0.1-ok0.4update1",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/k/kysdk-ai-common/libkysdk-ai-common-dev_1.1.0.1-ok0.4update1_riscv64.deb",
+      "sha256": "06f107f21d460b7089144e44e499634445cd8c95a0b6c51a6fe469ad4d368042",
+      "bytes": 6736
+    },
+    {
+      "name": "libkysdk-alm-dev",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-alm-dev_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "08dca217712def895921f00a2d3cbdb5aa67b8ffef86fcf23a1c5f47b58fa2ac",
+      "bytes": 4548
+    },
+    {
+      "name": "libkysdk-coreai-speech-dev",
+      "version": "1.1.0.1-ok1.3",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-coreai-speech/libkysdk-coreai-speech-dev_1.1.0.1-ok1.3_riscv64.deb",
+      "sha256": "c5aea1039392633863462d13eed8f2c6cf52ef8daa8ce01dfd38f5c1fde9c133",
+      "bytes": 7336
+    },
+    {
+      "name": "libkysdk-datacollect-dev",
+      "version": "2.3.1.0-0k0.2",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-diagnosetest/libkysdk-datacollect-dev_2.3.1.0-0k0.2_riscv64.deb",
+      "sha256": "4ba5622be68dfbfa20e0e55a9f2c50207bda4be045829ebfd893a325cbe4cf69",
+      "bytes": 4406
+    },
+    {
+      "name": "libkysdk-genai-nlp-dev",
+      "version": "1.1.0.1-ok1.5",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-genai-nlp/libkysdk-genai-nlp-dev_1.1.0.1-ok1.5_riscv64.deb",
+      "sha256": "1e811e08eb6baaf53e5aa546a34b2f3d029c95f06969884f2a4eb6ad244de035",
+      "bytes": 11620
+    },
+    {
+      "name": "libkysdk-kabase-dev",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-kabase-dev_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "876a885be58a4b249c785f8f59a2a543c7843bbd2fa67728fbbef6262f61efbb",
+      "bytes": 12516
+    },
+    {
+      "name": "libkysdk-qtwidgets-dev",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-qtwidgets-dev_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "4bc78e1a2d9f89276e26d409f77093fde225d2fea11971183ebe1d8f70eda425",
+      "bytes": 31716
+    },
+    {
+      "name": "libkysdk-ukenv-dev",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-ukenv-dev_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "c0943d6f3972b2556bd12039d9aff610a1e66b51d3de99905c0966144c016f0b",
+      "bytes": 4564
+    },
+    {
+      "name": "libkysdk-waylandhelper-dev",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-waylandhelper-dev_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "75e876ee6bdef4893facc7a03dd8cbc2067961f0db446ff12cd6fbc9ac34e119",
+      "bytes": 29616
+    },
+    {
+      "name": "libkysdk-widgetutils-dev",
+      "version": "2.5.1.0-0k9.2",
+      "kind": "development",
+      "url": "https://archive.openkylin.top/openkylin/pool/main/libk/libkysdk-applications/libkysdk-widgetutils-dev_2.5.1.0-0k9.2_riscv64.deb",
+      "sha256": "2d239e8df10d40a1fb70513615727f2ae56323103fb5a5174fa4fa02383784ea",
+      "bytes": 3900
+    }
+  ],
+  "rust": {
+    "version": "1.94.0",
+    "url": "https://static.rust-lang.org/dist/2026-03-05/rust-1.94.0-riscv64gc-unknown-linux-gnu.tar.xz",
+    "sha256": "ffe3f2abb92c832d92248d731ec125de1efc29138954be6cab35372eccc79c89"
+  },
+  "sherpa": {
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.2/sherpa-onnx-v1.13.2-linux-riscv64-spacemit-shared.tar.bz2",
+    "sha256": "4c2c101da444dcca72274653ada16edf2c4b009e55a57bc0e5ef6337f4dbfc60"
+  },
+  "sources": {
+    "cpp-pinyin": {
+      "url": "https://gitee.com/spacemit-robotics/cpp-pinyin.git",
+      "revision": "e4dd8310e3bb6b8ac8edc42f2cbd80be92586a8e"
+    },
+    "cppjieba": {
+      "url": "https://gitee.com/spacemit-robotics/cppjieba.git",
+      "revision": "1a968ac58937ad6dc19813a1adb99516c1646d0b"
+    },
+    "kaldi-native-fbank": {
+      "url": "https://github.com/csukuangfj/kaldi-native-fbank.git",
+      "revision": "de33fce39810e6e9b951ce3b13adea267a1ba5f0"
+    },
+    "kaldifst": {
+      "url": "https://github.com/k2-fsa/kaldifst.git",
+      "revision": "3bb113ae06389392620686afdbb47158d9fd4b12"
+    }
+  },
+  "python_pptx": {
+    "url": "https://files.pythonhosted.org/packages/d9/4f/00be2196329ebbff56ce564aa94efb0fbc828d00de250b1980de1a34ab49/python_pptx-1.0.2-py3-none-any.whl",
+    "sha256": "160838e0b8565a8b1f67947675886e9fea18aa5e795db7ae531606d68e785cba"
+  },
+  "reading_model_input": {
+    "url": "https://archive.spacemit.com/spacemit-ai/model_zoo/llm/Qwen3-1.7B-Q8_0.gguf",
+    "sha256": "061b54daade076b5d3362dac252678d17da8c68f07560be70818cace6590cb1a",
+    "bytes": 1834426016
+  }
+}

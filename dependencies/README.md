@@ -1,6 +1,8 @@
 # 外部依赖和模型
 
-`system-packages.tsv`是本机相关已安装软件的版本版本记录，不是可直接跨发行版执行的apt安装列表。`platform.json`保存Bianbu和CPU信息。Python/Qt/Rust依赖还需分别遵循各项目清单。
+`system-packages.tsv`是本机相关已安装软件的版本记录，不是可直接跨发行版执行的apt安装列表。`platform.json`保存Bianbu和CPU信息。Python/Qt/Rust依赖还需分别遵循各项目清单。
+
+同款新机器可通过[安装入口](../deploy/INSTALL.md)自动准备依赖；精确下载地址和SHA256见[锁定清单](../deploy/installer/lock.json)。系统包仍由Bianbu APT按其签名索引验证。
 
 ## 框架来源
 
