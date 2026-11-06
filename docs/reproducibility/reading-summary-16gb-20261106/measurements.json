@@ -1,0 +1,133 @@
+{
+  "date": "2026-11-06",
+  "platform": "16GB SiPEED LPi3A K1 / Bianbu 2.3.5",
+  "os": "Bianbu 2.3.5 / Linux 6.6.63 / LXQt Wayland",
+  "system_memory_kib": 16266184,
+  "cpu_frequency_khz": {
+    "cores_0_3": 1600000,
+    "cores_4_7": 1600000
+  },
+  "model": {
+    "name": "Qwen3-1.7B-Q4_0",
+    "sha256": "81ccd6caca30f2a1d0ad1401bd0e3c453049ed7b41a4f327ff9447bf3fc28d25",
+    "generation_threads": 3,
+    "prefill_threads": 4,
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "context": 3072,
+    "batch": 128,
+    "ubatch": 128,
+    "parallel": 1
+  },
+  "conditions": {
+    "background_asr_tts_gesture_services_running": true,
+    "foreground_microphone": false,
+    "audio_playback": false,
+    "screen_recording": false,
+    "model_prompt_cache": false,
+    "service_configuration_changed": false
+  },
+  "measurement_scope": "正式 Adapter 的 reading-summary 模型请求；不包括语音唤醒、ASR、Gateway Agent规划和TTS播放。",
+  "cases": [
+    {
+      "case": 1,
+      "backend_running_before": false,
+      "selected_backend": "k1-reading-summary",
+      "first_text_seconds": 26.48194725299254,
+      "total_text_seconds": 42.84680079299142,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 353,
+        "prompt_ms": 15802.139,
+        "prompt_per_token_ms": 44.76526628895184,
+        "prompt_per_second": 22.338747937858287,
+        "predicted_n": 42,
+        "predicted_ms": 16371.815,
+        "predicted_per_token_ms": 389.8051190476191,
+        "predicted_per_second": 2.565384473254798
+      },
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 353,
+        "total_tokens": 395,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "answer": "这一页介绍了AI深度融合在智能办公与多模态交互中的应用，涵盖图像处理、文本转换、智能辅助、记忆功能及交互优化等方面，全面提升用户操作体验与效率。",
+      "finish": "stop",
+      "done": true,
+      "passed": true
+    },
+    {
+      "case": 2,
+      "backend_running_before": true,
+      "selected_backend": "k1-reading-summary",
+      "first_text_seconds": 16.21677443200315,
+      "total_text_seconds": 32.480033269006526,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 353,
+        "prompt_ms": 16122.614,
+        "prompt_per_token_ms": 45.67312747875354,
+        "prompt_per_second": 21.89471260677704,
+        "predicted_n": 42,
+        "predicted_ms": 16270.615,
+        "predicted_per_token_ms": 387.3955952380952,
+        "predicted_per_second": 2.5813406561460646
+      },
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 353,
+        "total_tokens": 395,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "answer": "这一页介绍了AI深度融合在智能办公与多模态交互中的应用，涵盖图像处理、文本转换、智能辅助、记忆功能及交互优化等方面，全面提升用户操作体验与效率。",
+      "finish": "stop",
+      "done": true,
+      "passed": true
+    },
+    {
+      "case": 3,
+      "backend_running_before": true,
+      "selected_backend": "k1-reading-summary",
+      "first_text_seconds": 15.97042174100352,
+      "total_text_seconds": 32.238252191003994,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 353,
+        "prompt_ms": 15891.444,
+        "prompt_per_token_ms": 45.01825495750708,
+        "prompt_per_second": 22.213211083901502,
+        "predicted_n": 42,
+        "predicted_ms": 16268.472,
+        "predicted_per_token_ms": 387.34457142857144,
+        "predicted_per_second": 2.5816806888809225
+      },
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 353,
+        "total_tokens": 395,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "answer": "这一页介绍了AI深度融合在智能办公与多模态交互中的应用，涵盖图像处理、文本转换、智能辅助、记忆功能及交互优化等方面，全面提升用户操作体验与效率。",
+      "finish": "stop",
+      "done": true,
+      "passed": true
+    }
+  ],
+  "model_memory_after_three_requests": {
+    "process_name": "llama-server",
+    "VmHWM_mib": 2412.1015625,
+    "scope": "连续三次请求后的实际 llama-server 子进程 Linux 高水位；不是逐次RSS，也不是整机内存。"
+  },
+  "export_notes": "从原始测量保留请求计时、引擎timings、usage与完整回答；不发布本机路径、进程ID、无关遥测或包装进程的RSS。"
+}

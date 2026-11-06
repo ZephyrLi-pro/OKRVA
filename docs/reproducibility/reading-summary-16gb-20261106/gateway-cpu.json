@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-06",
+  "platform": "16GB SiPEED LPi3A K1 / Bianbu 2.3.5",
+  "workload": "单独的 Gateway PPT概括请求",
+  "measurement_scope": "Gateway接收请求到完成事件；不包括前台收音、回答播放或录屏，后台语音与手势服务运行。此请求与measurements.json的三次Adapter请求不同。",
+  "elapsed_seconds": 72.048,
+  "samples": 71,
+  "average_busy_percent": {
+    "front4": 80.745,
+    "rear4": 33.754
+  },
+  "peak_1s_rear4_busy_percent": 78.372,
+  "normalization": "各组满载分别为100%；busy排除idle及iowait；CPU忙碌率不等于IME矩阵单元利用率。",
+  "aggregation": "整段均值为原测量起止/proc/stat计数差值加权；1秒样本用于观察过程与峰值，不以样本算术平均代替整段均值。",
+  "request_completed": true,
+  "answer": "这一页介绍了AI深度融合在智能办公与多模态交互中的应用，涵盖AI助手、图片处理、文本转换、知识管理、快捷操作及会议辅助等功能，全面提升用户的工作与信息处理效率。"
+}
