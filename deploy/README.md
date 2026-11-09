@@ -8,8 +8,9 @@
 - Matcha：CPU四线程，CPU0–3，CPUWeight400，18083。
 - KWS：门控辅助程序，INT8模型、单线程、CPU0–3；策略脚本观察当前LLM/播报忙闲。
 - 手势：摄像头按本机设备选择，reading识别配置，独立于PPT服务。
+- PPT：LibreOffice24.8.7原生Impress，`~/.local/bin/libreoffice-24.8`；UNO pipe `rvai_trial_248_1000`，桥启动等待300秒。
 
-这是当前设备使用方案的配置文件，不包含用户token、模型权重或机器备份。安装位置及启动方法见[复现说明](../docs/REPRODUCE.md)。
+这是当前设备使用方案的配置文件，不包含用户token、模型权重或机器备份。新设备必须先准备已验证的LibreOffice 24.8或以上RISC-V启动器；安装器检查它，但不会自动获取或替换这套Office运行环境。准备、检查及自定义启动器命令见[安装前提](INSTALL.md#libreoffice-248运行前提)，其余安装位置及启动方法见[复现说明](../docs/REPRODUCE.md)。
 
 语音录音连接随音频服务恢复：`kylinbot.service`通过`PartOf`关联`pipewire.service`和`pipewire-pulse.service`，并在两者之后启动。通过systemd重启音频服务时，KylinBot会一同重启并重新打开默认麦克风，避免保留已经失效的录音连接。
 
@@ -69,3 +70,17 @@ install -m755 deploy/helpers/record-k1.sh ~/record-k1.sh
 需要`wf-recorder`、支持`h264_stcodec`的Bianbu FFmpeg及`ffprobe`、`pactl`、`taskset`和Python3。`taskset`由`util-linux`提供。先在系统音频设置中选择USB摄像头麦克风作为默认输入，再运行脚本。
 
 语音默认采用单轮唤醒：每次说“你好麒麟”后提问，播报结束保留回答并回到等待唤醒。`settings.ini` 的 `[General]` 下 `voice-followup-enabled=false`，缺省时也关闭自动追问。
+
+## LibreOffice 24.8正式入口
+
+`riscv-ai-reader.service`显式设置`RVAI_LIBREOFFICE_LAUNCHER=%h/.local/bin/libreoffice-24.8`和`RVAI_IMPRESS_PIPE=rvai_trial_248_1000`，接入同一原生Impress实例。独立运行库和profile沿用`~/.local/opt/libreoffice-24.8-trial`、`~/.local/share/libreoffice-24.8-trial/profile`，路径名保留，不另建阅读器UI。正常显示为大幻灯片加可调整高度的底部备注栏。
+
+安装器只检查既有启动器版本，不自动下载/搬动24.8或替换系统包。缺少合格启动器时`all/check/install/start`明确失败；`doctor`报告版本检查结果，实际底栏与保存行为仍需窗口验收。默认入口可先检查：
+
+```bash
+test -x "$HOME/.local/bin/libreoffice-24.8"
+"$HOME/.local/bin/libreoffice-24.8" --version
+./install.sh --phase check
+```
+
+使用其他已验证布局时，在同一个终端设置`RVAI_LIBREOFFICE_LAUNCHER`为实际绝对路径，设置与Impress实例一致的`RVAI_IMPRESS_PIPE`，再执行安装器。完整命令见[安装说明](INSTALL.md#libreoffice-248运行前提)。默认`-trial`路径仍被当前正式启动器和桥引用，不能仅按路径名删除。

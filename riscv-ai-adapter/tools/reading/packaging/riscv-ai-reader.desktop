@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=多模态PPT阅读
-Comment=挥手翻页，语音询问当前页面
+Name=LibreOffice Impress（语音与手势）
+Comment=在原有LibreOffice Impress中挥手翻页、生成并保存演讲备注
 Icon=libreoffice-impress
 Exec=systemctl --user start riscv-ai-reader.service
 Terminal=false

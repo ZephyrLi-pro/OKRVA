@@ -21,7 +21,7 @@
 精确大小、目标路径和SHA256见`model-manifest.json`；没有打包任何权重。
 
 - **普通对话/规划**：`Qwen3-0.6B-Q4_K_M.gguf`，来源 `https://archive.spacemit.com/spacemit-ai/model_zoo/llm/Qwen3-0.6B-Q4_K_M.gguf`。
-- **阅读总结**：`Qwen3-1.7B-Q4_0.gguf`。从 `https://archive.spacemit.com/spacemit-ai/model_zoo/llm/Qwen3-1.7B-Q8_0.gguf` 本地执行 `llama-quantize --allow-requantize INPUT OUTPUT Q4_0 2` 生成。不是训练新模型，也不是所有tensor强制纯Q4；保留工具默认混合类型。
+- **PPT演讲者备注**：`Qwen3-1.7B-Q4_0.gguf`，并保留该模型的独立固定文本概括基准。从 `https://archive.spacemit.com/spacemit-ai/model_zoo/llm/Qwen3-1.7B-Q8_0.gguf` 本地执行 `llama-quantize --allow-requantize INPUT OUTPUT Q4_0 2` 生成。不是训练新模型，也不是所有tensor强制纯Q4；保留工具默认混合类型。
 - **ASR**：`https://archive.spacemit.com/spacemit-ai/model_zoo/asr/sensevoice.tar.gz`，正式使用`model_quant_optimized.onnx`、`tokens.txt`、`am.mvn`。VAD另需Silero模型。旧Paraformer目录不是当前正式识别模型。
 - **TTS**：`https://archive.spacemit.com/spacemit-ai/model_zoo/tts/matcha-tts/matcha-icefall-zh-en.tar.gz`、`https://archive.spacemit.com/spacemit-ai/model_zoo/tts/vocoder/vocos-16khz-univ.q.onnx`。实际使用原分发的量化模型`model-steps-3.q.onnx`和词表；不是本项目训练的音色，也不把未采用的Melo/XSlim试验列为当前加速。原模型作者为`dengcunqin/matcha_tts_zh_en_20251010`。
 - **KWS**：sherpa-onnx的`kws-models` release中`zipformer-wenetspeech-3.3M-2024-01-01`，正式encoder/decoder/joiner用int8文件。关键词文本见`assets/wake`。

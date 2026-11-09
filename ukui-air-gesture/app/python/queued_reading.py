@@ -87,6 +87,21 @@ class QueuedReadingDispatcher:
                                   direction=direction,delivery='reader_page_confirmed')
                     self.condition.notify_all()
 
+    def cancel_pending(self, wait_timeout=3.):
+        # An already sent UNO call cannot be recalled. Drop unsent targets,
+        # then wait before hiding the desktop so a late Office response cannot
+        # raise the presentation after the desktop action. Do not wait forever.
+        with self.condition:
+            self.epoch += 1
+            self.target = None
+            self.condition.notify_all()
+            if not self.condition.wait_for(lambda:not self.inflight, timeout=wait_timeout):
+                raise RuntimeError('PPT仍在翻页，已取消返回桌面，请等待后重新做手势')
+
+    def reset_tracking(self):
+        self.dispatcher.reset_tracking()
+        self.controller = self.dispatcher.controller
+
     def process(self,landmarks,timestamp,aspect=.75,age=0.):
         self.dispatcher.process(landmarks,timestamp,aspect,age)
         return None

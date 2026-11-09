@@ -1017,7 +1017,7 @@ def rewrite_chat_request(
         # Other agent tools/read-only queries retain KylinBot's existing policy.
         # The experimental mode also withholds shell from delegated requests:
         # otherwise a failed plan could still issue wpctl/amixer as a shell call.
-        controlled_writes = {'shell', 'sys__set_volume', 'sys__adjust_volume', 'sys__set_mute', 'sys__open_application', 'docs__save_report', 'docs__trash_reports'}
+        controlled_writes = {'shell', 'sys__set_volume', 'sys__adjust_volume', 'sys__set_mute', 'sys__open_application', 'docs__save_report', 'docs__trash_reports', 'ppt__open_presentation', 'ppt__save_speaker_notes'}
         value['tools'] = [tool for tool in value['tools'] if not (
             isinstance(tool, dict) and isinstance(tool.get('function'), dict)
             and tool['function'].get('name') in controlled_writes)]
@@ -1185,9 +1185,3 @@ def rewrite_chat_request(
         len(rewritten),
     )
     return rewritten
-
-
-def rewrite_model(body: bytes, upstream_model: str) -> bytes:
-    """Backward-compatible model-only rewrite helper."""
-
-    return rewrite_chat_request(body, upstream_model)

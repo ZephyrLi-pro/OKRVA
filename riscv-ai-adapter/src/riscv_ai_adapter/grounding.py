@@ -165,8 +165,6 @@ def _quantity(ref,items,start,end,operation,left=None,right=None,question=''):
     relative=operation in ('increase_volume','decrease_volume')
     if ref is None:
         if not relative:raise GroundingError('绝对音量必须引用原文中的数值。')
-        scope_items=[item for item in items if item['start']>=(left if left is not None else start)
-            and item['end']<=(right if right is not None else end)]
         if any(item['unit']!='vague' for item in items):
             raise GroundingError('原文有明确数值，不能省略它并套用默认增量。')
         return 10
@@ -293,7 +291,7 @@ def action_schema(question,items):
     return choices
 
 
-def request(model,question,items,feedback=None,previous=None,document_tasks=False,report_cleanup=False):
+def request(model,question,items,feedback=None,previous=None,document_tasks=False,report_cleanup=False,presentation_tasks=False):
     ops=list(ACTION_MAP)+list(UNSUPPORTED_ACTIONS)
     choices=action_schema(question,items)
     branches=[object_schema({'intent':{'const':'chat'},'actions':{'type':'array','maxItems':0,'items':{}}})]
@@ -315,11 +313,14 @@ def request(model,question,items,feedback=None,previous=None,document_tasks=Fals
     if document_definition:branches.append(document_definition)
     from .report_cleanup import task_schema as cleanup_schema
     cleanup_definition=cleanup_schema(question) if report_cleanup else None
-    if cleanup_definition and not document_definition:
+    if cleanup_definition and not document_definition and not presentation_tasks:
         from .report_cleanup import request_plan,filenames
         view=model_view(question,items);view['explicit_report_names']=len(filenames(question))
         return request_plan(model,view,cleanup_definition,feedback,previous)
     if cleanup_definition:branches.append(cleanup_definition)
+    from .presentation_workflow import task_schema as presentation_schema
+    presentation_definition=presentation_schema(question) if presentation_tasks else None
+    if presentation_definition:branches.append(presentation_definition)
     definition={'anyOf':branches}
     instructions=SYSTEM
     if document_definition:
@@ -328,6 +329,8 @@ def request(model,question,items,feedback=None,previous=None,document_tasks=Fals
         instructions+='\n文档任务格式：{"intent":"documents","directory":"documents","count":"数量引用q0","destination":"desktop","order":"modified_desc"}。count引用原文份数ID，不生成数字。KylinBot随后逐步调用真实文档工具。\n'
     if cleanup_definition:
         instructions+='\n桌面已有摘要的查看或清理才用intent=report_cleanup，selection=preview/all/names。读取源文档并形成新摘要、保存到桌面用intent=documents。不要把输出位置当作待清理的输入文件。当前两个能力同时可用，请按本轮完整请求选择；不增加删除操作。\n'
+    if presentation_definition:
+        instructions+='\nLibreOffice Impress的PPT工具已接入，始终可用。由你根据整句语义选择意图，不依赖固定关键词或话术。用户要求打开/重新展示演示文稿：intent=presentation,action=open；用户授权根据当前幻灯片写讲解稿、放入演讲者笔记并持久保存：intent=presentation,action=notes。notes会真实读取当前页、AI生成文字、写入原文件并保存，query填空字符串。open的query只抄本轮user_request里的文件名片段；保留<q编号:单位>占位符，代码会按原文还原。泛指或刚才/最近那份的query填空字符串，由工具查真实最近打开历史，不猜文件路径或默认文件。解释、教学、纯引用、只要讲稿文本或明确不要写入/保存时选chat/analyze，不调用PPT。不要把“不用备份”“不用列候选”等对无关动作的限制误解为拒绝整个任务。当前一次PPT计划只支持open或notes之一，不能省略混合请求的其它操作。\n'
     # The grammar already restricts these operation labels. Explain exactly
     # that same domain; argument validation still chooses no operation.
     visible_ops={choice['properties']['operation']['const'] for choice in choices}
@@ -341,11 +344,10 @@ def request(model,question,items,feedback=None,previous=None,document_tasks=Fals
         ('不要更改扬声器，只启动系统设置。',[('open_settings','只启动系统设置',None)]),
         ('现在外放声音是多少？',[('query_volume','现在外放声音是多少',None)]),
     ]
-    # A documents-only grammar has no audio/application operation. Keep its
-    # non-execution counterexample, without teaching unrelated system actions.
-    mandatory=(2,) if document_definition and visible_ops <= {'unsupported'} else (0,1,2)
+    # Teach only actions visible in this grammar. Always retain the teaching
+    # counterexample; a PPT-only request must not see unrelated audio actions.
     examples=[entry for index,entry in enumerate(examples)
-        if index in mandatory or any(op in visible_ops for op,_,_ in entry[1])]
+        if index == 2 or (entry[1] and all(op in visible_ops for op,_,_ in entry[1]))]
     for text,actions in examples:
         reverse_sources={value:key for key,value in source_map(text).items()}
         messages.extend([{'role':'user','content':json.dumps(model_view(text,measurements(text)),ensure_ascii=False,separators=(',',':'))},
@@ -358,6 +360,17 @@ def request(model,question,items,feedback=None,previous=None,document_tasks=Fals
         example='将资料目录最新修改的两篇资料分别概括，存到桌面。'
         messages.extend([{'role':'user','content':json.dumps(model_view(example,measurements(example)),ensure_ascii=False,separators=(',',':'))},
             {'role':'assistant','content':json.dumps({'intent':'documents','directory':'documents','count':'q0','destination':'desktop','order':'modified_desc'})}])
+    if presentation_definition:
+        ppt_examples=[
+            ('打开刚才那份。',{'intent':'presentation','action':'open','query':''}),
+            ('给这一张写讲解词，放进演讲者笔记并存盘。',{'intent':'presentation','action':'notes','query':''}),
+            ('不用备份，给这一页写一段讲解，放进笔记并存盘。',{'intent':'presentation','action':'notes','query':''}),
+            ('只给我讲稿文本，不要写入或保存。',{'intent':'chat','actions':[]}),
+            ('解释“给这一页写讲解词并存盘”这句话。',{'intent':'chat','actions':[]}),
+        ]
+        for example,plan in ppt_examples:
+            messages.extend([{'role':'user','content':json.dumps(model_view(example,measurements(example)),ensure_ascii=False,separators=(',',':'))},
+                {'role':'assistant','content':json.dumps(plan,ensure_ascii=False,separators=(',',':'))}])
     view=model_view(question,items)
     messages.append({'role':'user','content':json.dumps(view,ensure_ascii=False,separators=(',',':'))})
     if feedback:
@@ -377,13 +390,17 @@ class GroundedPlanner:
         self.documents=DocumentWorkflow()
         from .report_cleanup import ReportCleanup
         self.reports=ReportCleanup()
+        from .presentation_workflow import PresentationWorkflow
+        self.presentations=PresentationWorkflow()
 
-    def handle(self,body,model,allowed,infer,cancelled=lambda:False,document_tasks=False):
+    def handle(self,body,model,allowed,infer,cancelled=lambda:False,document_tasks=False,infer_presentation=None):
+        resumed=self.presentations.resume(body,model,allowed,infer_presentation or infer,cancelled,enabled=document_tasks)
+        if resumed is not None:return resumed
         resumed=self.reports.resume(body,model,allowed,enabled=document_tasks,cancelled=cancelled)
         if resumed is not None:return resumed
         resumed=self.documents.resume(body,model,allowed,infer,cancelled,enabled=document_tasks)
         if resumed is not None:return resumed
-        decline=[];selected=[];cleanup_selected=[];analysis_selected=[]
+        decline=[];selected=[];cleanup_selected=[];analysis_selected=[];presentation_selected=[]
         try:
             value=json.loads(body)
             last=next(m for m in reversed(value.get('messages',[])) if m.get('role')=='user')
@@ -399,20 +416,27 @@ class GroundedPlanner:
                 if (value.get('messages',[])[-1].get('role')=='user'
                         and value.get('tool_choice') in (None,'auto')
                         and not permitted_catalog(value,allowed)
-                        and not (document_tasks and self.documents.available(value,allowed))):
+                        and not (document_tasks and self.documents.available(value,allowed))
+                        and not (document_tasks and self.presentations.available(value,allowed))):
                     return {'read_only_analysis':True,'route':'model-read-only-analysis'}
             items=measurements(question)
         except (ValueError,TypeError,KeyError,StopIteration,AttributeError):return None
         enabled=document_tasks and value.get('tool_choice') in (None,'auto') and self.documents.available(value,allowed)
         cleanup_enabled=document_tasks and value.get('tool_choice') in (None,'auto') and self.reports.available(value,allowed)
+        ppt_enabled=document_tasks and value.get('tool_choice') in (None,'auto') and self.presentations.available(value,allowed)
         def checked_infer(_unused):
             feedback=None;previous=None
             for _ in range(2):
                 if cancelled():raise ConnectionResetError('Planner cancelled')
-                result=infer(request(model,question,items,feedback,previous,document_tasks=enabled,report_cleanup=cleanup_enabled))
+                result=infer(request(model,question,items,feedback,previous,document_tasks=enabled,report_cleanup=cleanup_enabled,presentation_tasks=ppt_enabled))
                 try:
                     from .document_workflow import decode_plan
                     raw=json.loads(result['choices'][0]['message']['content'])
+                    if raw.get('intent')=='presentation':
+                        from .presentation_workflow import decode_plan as decode_presentation
+                        if not ppt_enabled:raise ValueError('Presentation tools unavailable')
+                        presentation_selected.append(decode_presentation(result,question))
+                        return {'choices':[{'finish_reason':'stop','message':{'content':'{"intent":"chat","actions":[]}'}}]}
                     if raw.get('intent')=='analyze':
                         if raw != {'intent':'analyze','actions':[]} or result['choices'][0].get('finish_reason')!='stop' or result['choices'][0]['message'].get('tool_calls'):
                             raise ValueError('Invalid read-only analysis plan')
@@ -440,8 +464,10 @@ class GroundedPlanner:
             return {'choices':[{'finish_reason':'stop','message':{'content':json.dumps(plan)}}]}
         from .document_workflow import task_schema
         from .report_cleanup import task_schema as cleanup_schema
-        if enabled and task_schema(question,items) or cleanup_enabled and cleanup_schema(question):
+        from .presentation_workflow import task_schema as presentation_schema
+        if enabled and task_schema(question,items) or cleanup_enabled and cleanup_schema(question) or ppt_enabled and presentation_schema(question):
             cached=checked_infer(None)
+            if presentation_selected:return self.presentations.begin(body,model,allowed,presentation_selected[0])
             if cleanup_selected:return self.reports.begin(body,model,allowed,*cleanup_selected[0])
             if selected:return self.documents.begin(body,model,allowed,selected[0])
             if cleanup_enabled and cleanup_schema(question):
@@ -450,6 +476,7 @@ class GroundedPlanner:
             answer=self.base.handle(body,model,allowed,lambda _body:cached,cancelled)
         else:
             answer=self.base.handle(body,model,allowed,checked_infer,cancelled)
+        if presentation_selected:return self.presentations.begin(body,model,allowed,presentation_selected[0])
         if selected:return self.documents.begin(body,model,allowed,selected[0])
         if cleanup_selected:return self.reports.begin(body,model,allowed,*cleanup_selected[0])
         if analysis_selected and answer is None:return {'read_only_analysis':True,'route':'model-read-only-analysis'}

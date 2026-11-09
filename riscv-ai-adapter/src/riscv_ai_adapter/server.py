@@ -338,16 +338,31 @@ class AdapterHandler(BaseHTTPRequestHandler):
                             result = json.loads(raw)
                             try:
                                 selected = json.loads(result['choices'][0]['message']['content']).get('intent')
-                                if selected in ('analyze','agent','chat','operate','documents','report_cleanup'):
+                                if selected in ('analyze','agent','chat','operate','documents','report_cleanup','presentation'):
                                     LOG.info('private model plan: intent=%s', selected)
                             except (ValueError,TypeError,KeyError,IndexError,AttributeError):
                                 pass
                             return result
+                    def infer_presentation(payload):
+                        # A direct registry lease, after planner inference has closed.
+                        # Never re-enter this HTTP adapter while holding a model slot.
+                        name = backend.reading_summary_backend
+                        notes_backend = next((item for item in self.server.config.backends
+                            if item.name == name and item.enabled and item.capability == 'chat'), planner_config)
+                        request = dict(payload, model=notes_backend.upstream_model or payload['model'])
+                        with self.server.registry.open(notes_backend, json.dumps(request, ensure_ascii=False).encode(),
+                                'application/json', 'application/json', priority, cancelled=self.client_disconnected) as upstream:
+                            if upstream.status != 200:
+                                raise BackendUnavailableError('Speaker-notes model upstream failed')
+                            raw = upstream.stream.read(128 * 1024 + 1)
+                            if len(raw) > 128 * 1024:
+                                raise BackendUnavailableError('Speaker-notes response exceeds limit')
+                            return json.loads(raw)
                     planner_model = planner_config.upstream_model or (planner_config.models[0] if planner_config.models else requested_model)
                     planner_engine = self.server.grounded_planner if backend.grounded_system_planner else self.server.semantic_planner
                     intent = planner_engine.handle(body, planner_model,
                         backend.allowed_tools, infer_plan, self.client_disconnected,
-                        **({'document_tasks':backend.document_tasks} if backend.grounded_system_planner else {}))
+                        **({'document_tasks':backend.document_tasks,'infer_presentation':infer_presentation} if backend.grounded_system_planner else {}))
                     if intent is not None:
                         intent.update(planner_model=planner_model, planner_backend=planner_config.name)
                 else:

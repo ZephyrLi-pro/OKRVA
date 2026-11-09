@@ -58,7 +58,7 @@ max_context_tokens = 7000
 max_history_messages = 16
 max_system_prompt_chars = 1500
 max_tool_iterations = 10
-max_tool_result_chars = 8000
+max_tool_result_chars = 40000
 parallel_tools = false
 tool_call_dedup_exempt = []
 tool_dispatcher = "auto"
@@ -75,7 +75,7 @@ summary_max_chars = 4000
 threshold_ratio = 0.5
 timeout_secs = 60
 tool_result_retrim_chars = 2000
-tool_result_trim_exempt = []
+tool_result_trim_exempt = ["ppt__get_current_slide", "ppt__save_speaker_notes"]
 
 [agent.eval]
 enabled = false
@@ -437,7 +437,7 @@ model = "stable-diffusion-xl-1024-v1-0"
 [mcp]
 deferred_loading = false
 enabled = true
-servers = [{"args" = ["-I", "@HOME@/kylin-sys-tools/sysmcp.py"], "command" = "/usr/bin/python3", "env" = {}, "headers" = {}, "name" = "sys", "tool_timeout_secs" = 25, "transport" = "stdio"}, {"name" = "docs", "transport" = "stdio", "command" = "/usr/bin/python3", "args" = ["-I", "@HOME@/kylin-sys-tools/document_mcp.py", "--documents-root", "@HOME@/文档", "--desktop-root", "@HOME@/Desktop", "--reader-cli", "@HOME@/.local/libexec/kylin-document-reader"], "tool_timeout_secs" = 300}]
+servers = [{"args" = ["-I", "@HOME@/kylin-sys-tools/sysmcp.py"], "command" = "/usr/bin/python3", "env" = {}, "headers" = {}, "name" = "sys", "tool_timeout_secs" = 25, "transport" = "stdio"}, {"name" = "docs", "transport" = "stdio", "command" = "/usr/bin/python3", "args" = ["-I", "@HOME@/kylin-sys-tools/document_mcp.py", "--documents-root", "@HOME@/文档", "--desktop-root", "@HOME@/Desktop", "--reader-cli", "@HOME@/.local/libexec/kylin-document-reader"], "tool_timeout_secs" = 300}, {"name" = "ppt", "transport" = "stdio", "command" = "/usr/bin/python3", "args" = ["-I", "@HOME@/kylin-sys-tools/presentation_mcp.py", "--documents-root", "@HOME@/文档", "--desktop-root", "@HOME@/Desktop", "--demo-root", "@PPT_DIR@"], "tool_timeout_secs" = 600}]
 
 [media_pipeline]
 describe_images = true

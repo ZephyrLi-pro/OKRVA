@@ -126,6 +126,9 @@ def run():
                             counts['horizontal:'+data['direction']] += 1
                     emit(event, **data)
                 dispatcher = QueuedReadingDispatcher(actions, confirmed)
+                from desktop_reading import DesktopDBusActions, DesktopReadingDispatcher
+                dispatcher = DesktopReadingDispatcher(
+                    dispatcher, actions, DesktopDBusActions().show_desktop, emit)
             else:
                 dispatcher = ReadingDispatcher(actions.horizontal, emit)
             emit('model_thread_config', palm_threads=palm_threads, pose_threads=pose_threads,

@@ -3,6 +3,7 @@ import asyncio
 import hashlib
 import time
 from dataclasses import dataclass
+from pathlib import Path
 
 EMPTY_PAGE = '当前页没有可提取的原生文字，可能以图片为主。没有图像识别结果，请不要猜测页面内容。'
 
@@ -43,6 +44,7 @@ class ReaderBridge:
         self.published_version = -1
         self.published_at = None
         self.publish_error = None
+        self.document = {}
 
     async def _publish(self, force=False):
         if not force and self.published_version == self.version and self.published_at is not None and self.clock()-self.published_at<10:
@@ -107,9 +109,47 @@ class ReaderBridge:
             self._select(None)
             await self._publish(force=True)
 
+    async def open_presentation(self, path):
+        async with self.lock:
+            page = await self.office('open_presentation', path)
+            self.document = await self.office('metadata')
+            self.title = limit_utf16(Path(self.document['source_path']).stem,160)
+            self._select(page)
+            self.published_version = -1
+            await self._publish(force=True)
+            return dict(ok=True, **self.state())
+
+    async def snapshot(self):
+        async with self.lock:
+            result = await self.office('snapshot')
+            identity = {key: result[key] for key in ('session_id','source_path')}
+            # Preserve the independently checked visibility cache for this same
+            # document; never transfer it to another document/session.
+            if any(self.document.get(key) != value for key,value in identity.items()):
+                self.document = identity
+            else:
+                self.document.update(identity)
+            self._select(await self.office('current'))
+            await self._publish()
+            return result
+
+    async def save_notes(self, session_id, page, text_sha256, notes):
+        async with self.lock:
+            result = await self.office('save_speaker_notes',session_id,page,text_sha256,notes)
+            self.document = await self.office('metadata')
+            self._select(await self.office('current'))
+            await self._publish(force=True)
+            return result
+
     def state(self):
         text = self.page.text if self.active else ''
-        return dict(active=self.active, title=self.title if self.active else '',
+        document = dict(presentation_visible=False,visibility_source='unknown',visibility_checked_at=0.,
+                        **{key:value for key,value in self.document.items() if key not in
+                           ('presentation_visible','visibility_source','visibility_checked_at')})
+        if self.active:
+            document.update((key,self.document[key]) for key in
+                ('presentation_visible','visibility_source','visibility_checked_at') if key in self.document)
+        return dict(**document, active=self.active, title=self.title if self.active else '',
             page_title=self.page.heading if self.active else '',
             page=self.page.number if self.active else 0,
             total=self.page.total if self.active else 0,

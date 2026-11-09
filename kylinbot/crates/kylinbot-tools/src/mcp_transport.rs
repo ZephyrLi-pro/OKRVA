@@ -45,6 +45,10 @@ pub struct StdioTransport {
     _child: Child,
     stdin: tokio::process::ChildStdin,
     stdout_lines: tokio::io::Lines<BufReader<tokio::process::ChildStdout>>,
+    // Entries survive cancellation of send_and_recv by McpServer's timeout.
+    // Only these known older requests may have their late replies discarded.
+    unanswered_ids: Vec<serde_json::Value>,
+    write_in_progress: bool,
 }
 
 impl StdioTransport {
@@ -73,6 +77,8 @@ impl StdioTransport {
             _child: child,
             stdin,
             stdout_lines,
+            unanswered_ids: Vec::new(),
+            write_in_progress: false,
         })
     }
 
@@ -105,8 +111,24 @@ impl StdioTransport {
 #[async_trait::async_trait]
 impl McpTransportConn for StdioTransport {
     async fn send_and_recv(&mut self, request: &JsonRpcRequest) -> Result<JsonRpcResponse> {
+        if self.write_in_progress {
+            bail!("MCP stdio previous write was interrupted; reconnect required");
+        }
         let line = serde_json::to_string(request)?;
+        if let Some(id) = &request.id {
+            if self.unanswered_ids.contains(id) {
+                bail!("MCP stdio request id is still awaiting a response");
+            }
+            if self.unanswered_ids.len() >= 64 {
+                bail!("MCP stdio too many unanswered requests; reconnect required");
+            }
+            self.unanswered_ids.push(id.clone());
+        }
+        // Cancellation while writing can leave a partial JSON line. Do not
+        // append another request to that ambiguous stream on the next call.
+        self.write_in_progress = true;
         self.send_raw(&line).await?;
+        self.write_in_progress = false;
         if request.id.is_none() {
             return Ok(JsonRpcResponse {
                 jsonrpc: crate::mcp_protocol::JSONRPC_VERSION.to_string(),
@@ -115,26 +137,45 @@ impl McpTransportConn for StdioTransport {
                 error: None,
             });
         }
-        let deadline = std::time::Instant::now() + Duration::from_secs(RECV_TIMEOUT_SECS);
+        // McpServer bounds initialize/tools-list at 30s and tools-call at the
+        // configured per-server timeout. A second 30s limit here would silently
+        // defeat long-running tools regardless of tool_timeout_secs.
         loop {
-            let remaining = deadline.saturating_duration_since(std::time::Instant::now());
-            if remaining.is_zero() {
-                bail!("timeout waiting for MCP response");
-            }
-            let resp_line = timeout(remaining, self.recv_raw())
-                .await
-                .context("timeout waiting for MCP response")??;
-            let resp: JsonRpcResponse = serde_json::from_str(&resp_line)
+            let resp_line = self.recv_raw().await?;
+            let message: serde_json::Value = serde_json::from_str(&resp_line)
                 .with_context(|| format!("invalid JSON-RPC response: {}", resp_line))?;
-            if resp.id.is_none() {
-                // Server-sent notification (e.g. `notifications/initialized`) — skip and
-                // keep waiting for the actual response to our request.
+            // Option fields alone cannot distinguish an absent result from
+            // result:null. Only an actual method notification may omit its id.
+            let notification = message
+                .get("method")
+                .and_then(|method| method.as_str())
+                .is_some()
+                && message.get("id").is_none()
+                && message.get("result").is_none()
+                && message.get("error").is_none();
+            let resp: JsonRpcResponse =
+                serde_json::from_value(message).context("invalid JSON-RPC response")?;
+            let Some(id) = &resp.id else {
+                if !notification {
+                    bail!("MCP stdio response is missing its request id");
+                }
                 tracing::debug!(
                     "MCP stdio: skipping server notification while waiting for response"
                 );
                 continue;
+            };
+            if resp.id == request.id {
+                self.unanswered_ids.retain(|pending| pending != id);
+                return Ok(resp);
             }
-            return Ok(resp);
+            if let Some(index) = self.unanswered_ids.iter().position(|pending| pending == id) {
+                self.unanswered_ids.swap_remove(index);
+                tracing::debug!("MCP stdio: discarding a late response to an earlier request");
+                continue;
+            }
+            // An unknown/future id is not evidence of a timed-out old request.
+            // Fail this exchange instead of assigning another call's result.
+            bail!("MCP stdio received an unrecognized response id");
         }
     }
 
@@ -1281,3 +1322,7 @@ mod tests {
         assert!(req.headers().get(MCP_SESSION_ID_HEADER).is_none());
     }
 }
+
+#[cfg(all(test, unix))]
+#[path = "mcp_stdio_tests.rs"]
+mod stdio_tests;

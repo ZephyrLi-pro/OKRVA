@@ -66,3 +66,25 @@ JSON-RPC应用错误-32010；参数错误-32602，客户端会标记工具失败
 设备能力发现、原生命令执行、Gateway模型调用、真实小K界面验收是不同阶段，
 不能把某一层通过当成全部能力已完成。复合任务还需确认每个子步骤实际执行。
 当前配置见仓库根目录`deploy/templates/kylinbot.toml.in`。
+
+## PPT语音工具
+
+`presentation_mcp.py` 提供受限的 `open_presentation`、`get_current_slide`、
+`save_speaker_notes`。通过本地UNO/D-Bus桥操作原有LibreOffice Impress，打开指定演示文稿、读取真实当前页，
+并将AI生成的讲稿追加到该页的演讲备注区，直接保存，不创建备份。
+保存后必须回读确认；生成期间翻页仍绑定取得当前页快照时的文档会话和页码。
+
+接入完整PPT工具目录后，Adapter始终向语义规划模型提供打开PPT、根据当前页生成并保存演讲备注的能力。模型根据整句请求选择动作和参数；指定文件名必须来自本轮原文，泛指打开使用真实最近历史。执行代码校验本轮授权、允许目录、文档会话、原始页码与正文哈希、工具调用及保存回读结果。`semantic_only`普通聊天回退保留读取当前页的能力，打开和保存统一经过受控PPT工作流。
+
+可说“打开PPT”“打开刚才那个PPT”或“打开项目汇报PPT”，再说“根据当前页生成演讲备注并保存”。这些句子是意图示例，等价自然语言表达由模型理解。
+泛指打开只使用最近真实打开记录，包括已关闭文档的历史；没有有效记录时提示先打开一份PPT。MCP先启动无文件的后台桥，再核实live D-Bus owner和历史路径；启动桥仅恢复元数据，实际打开请求才启动Impress。旧`--default-presentation`参数仅保留兼容，不参与选择。
+打开名称只在已配置的文档、桌面和演示目录内匹配，同名歧义会报错；
+模型不能提供路径或任意页码。阅读支持PPT/PPTX/ODP，备注保存当前仅支持PPTX。
+保存后保留普通大幻灯片，并在正式24.8.7原生底部备注栏显示讲稿，不默认切换备注整页视图。
+PPT使用LibreOffice默认用户配置和普通可编辑窗口，不另建只读查看器；停止语音/手势桥不会关闭用户的Impress文档。
+当前页必须含原生文字，不会把图片页面假称为已做OCR。
+
+```bash
+PYTHONPATH=system-tools python3 -m unittest discover -s system-tools/tests -p test_presentation_mcp.py
+PYTHONPATH=riscv-ai-adapter/src python3 -m unittest discover -s riscv-ai-adapter/tests -p test_presentation_workflow.py
+```

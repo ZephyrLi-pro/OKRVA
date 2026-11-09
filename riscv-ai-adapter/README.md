@@ -9,7 +9,7 @@ Python3.11+模型服务适配与调度层，为小K和KylinBot提供统一的本
 - 未发送日志草稿及PPT当前页上下文，独立阅读总结模型。
 - 最近文档读取、逐文档摘要与分别保存、受限摘要清理的工作流。
 - 模型互斥驻留、空闲卸载、内存保护、推理调度、取消和健康状态。
-- LibreOffice UNO/D-Bus专用PPT阅读器；Matcha HTTP/C ABI播报桥接。
+- 原生LibreOffice Impress的UNO/D-Bus后台控制桥；Matcha HTTP/C ABI播报桥接。
 
 当前配置统一保存在仓库根目录[`deploy/`](../deploy/)，旧Ollama、Melo和Paraformer配置不另行收录。系统/文档MCP使用[`system-tools/`](../system-tools/)；手势使用独立[`ukui-air-gesture/`](../ukui-air-gesture/)。
 
@@ -36,9 +36,15 @@ PYTHONPATH=src python3 -B -m unittest discover -s tests -p 'test_*.py'
 
 ## 精简受限规划
 
-规划提示只解释本轮已有参数校验语法允许的候选操作，保留必要的操作、教学和分析示例，使用紧凑JSON传递数值引用。模型仍选择意图、操作和顺序；原有来源、单位、否定范围、工具目录和真实执行回执校验不变。文档专用参数域不携带无关音量操作示例。
+规划提示按可用工具目录与参数校验语法说明操作能力，保留必要的操作、教学和分析示例，使用紧凑JSON传递数值引用。模型仍选择意图、操作和顺序；原有来源、单位、否定范围、工具目录和真实执行回执校验不变。文档专用参数域不携带无关音量操作示例。
 
 带显式参考资料的语音问题由同一次受限规划选择分析或操作，不再先运行一次独立意图分类。操作授权只来自实际提问，参考资料中的指令不进入操作规划；没有可执行工具或模型选择聊天/分析时，参考资料通过无工具的只读请求处理。回归见`tests/test_reference_context.py`。
+
+## PPT语义操作
+
+完整PPT工具目录接入后，规划schema始终提供打开演示文稿与当前页演讲备注保存两类能力。模型根据本轮完整语义选择`open`或`notes`及参数；指定文件名绑定本轮原文，泛指打开使用工具验证的最近真实历史。
+
+执行工作流核对本轮授权、参数schema、工具调用ID、文档会话、原始页码和正文哈希，保存后验证实际回读结果。明确禁止副作用、纯引用或教学请求仍受授权校验。`semantic_only`普通聊天回退只保留PPT读取工具，打开和保存统一经过受控工作流。回归见`tests/test_presentation_workflow.py`与`tests/test_presentation_fallback.py`。
 
 ## 文档摘要复用
 

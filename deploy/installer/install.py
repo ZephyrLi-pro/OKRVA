@@ -25,6 +25,7 @@ from recipes import Recipes
 from resources import Resources
 from resources import FSTS
 from deployment import Deployment,check_existing
+from libreoffice_runtime import check_libreoffice,runtime_settings
 
 
 PHASES=('all','check','deps','fetch','build','install','start','doctor')
@@ -42,6 +43,8 @@ class Context:
         self.display=os.environ.get('WAYLAND_DISPLAY','wayland-0')
         self.runner=Runner(self.work)
         self.revision=None
+        office=runtime_settings()
+        self.libreoffice_launcher=office['launcher'];self.impress_pipe=office['pipe']
 
 
 def platform_info():
@@ -71,12 +74,15 @@ def preflight(c):
         free=shutil.disk_usage(probe).free
         if free<12*1024**3:raise InstallError('构建与模型缓存至少需要12GiB可用空间，建议20GiB以上；可用 --work-dir 选择其他磁盘。')
     if c.phase in ('all','install'):check_existing(Path.home())
+    office=None
+    if c.phase in ('all','check','install','start'):
+        office=check_libreoffice(Path.home(),c.libreoffice_launcher,c.impress_pipe)
     if c.phase in ('all','start') and not c.no_start:
         display=Path(c.display) if Path(c.display).is_absolute() else c.runtime/c.display
         if not display.exists() or not (c.runtime/'bus').exists():
             raise InstallError('请先登录Bianbu Wayland桌面并在桌面终端运行；仅构建安装可加 --no-start。')
     return dict(os=info.get('PRETTY_NAME'),architecture=platform.machine(),user=c.username,
-                work_dir=str(c.work),runtime_dir=str(c.runtime))
+                work_dir=str(c.work),runtime_dir=str(c.runtime),libreoffice=office)
 
 
 def show_plan(c):
@@ -85,7 +91,7 @@ def show_plan(c):
     print('当前: '+platform.machine()+' / '+platform_info().get('PRETTY_NAME','unknown'))
     print('仓库: '+str(c.repo));print('构建、下载和日志: '+str(c.work))
     for text in (
-        '1. 检查平台、磁盘、桌面会话及已有配置。',
+        '1. 检查平台、磁盘、桌面会话、已有配置和预先准备的LibreOffice24.8启动器。',
         '2. 安装Bianbu依赖和固定版本SpacemiT运行库；麒麟SDK包逐个校验SHA256。',
         '3. 下载并校验0.6B、1.7B、SenseVoice、Matcha、KWS/VAD和手势模型。',
         '4. 固定外部源码版本，应用项目后端补丁；使用独立Qt GLES开发目录。',
@@ -158,9 +164,15 @@ def doctor(c,wait=0,smoke=False):
         except (OSError,KeyError,configparser.Error) as error:errors.append('Gateway尚未就绪: '+type(error).__name__)
         if not errors or time.monotonic()>=deadline:break
         time.sleep(1)
+    try:
+        report['LibreOffice']=check_libreoffice(Path.home(),
+            getattr(c,'libreoffice_launcher',None),getattr(c,'impress_pipe',None))
+    except InstallError as error:
+        report['LibreOffice']={'version_check_passed':False}
+        errors.append(str(error))
     # Read-only checks: no volume changes, app opening, microphone recording,
     # session deletion or user-file edits are part of doctor.
-    libraries=['/usr/bin/kylin-aiassistant','/usr/bin/voice-assistant','/usr/local/bin/kylinbot',
+    libraries=['/usr/bin/kylin-aiassistant','/usr/bin/voice-assistant','/usr/local/bin/kylinbot','/usr/bin/wlrctl',
                '/usr/local/bin/ukui-air-gesture',str(Path.home()/'.local/lib/riscv-ai-adapter/tts-matcha-20261016/libkylinbot-matcha.so')]
     for name in libraries:
         if not Path(name).is_file():errors.append('缺少程序: '+name);continue
@@ -229,7 +241,8 @@ def main():
         elif phase=='start':Deployment(c,recipes).start()
         elif phase=='doctor':doctor(c,wait=120,smoke=True)
     if args.phase in ('all','install','start'):
-        print('\n程序安装阶段完成。小K从应用菜单打开；PPT阅读可执行 systemctl --user start riscv-ai-reader.service。')
+        print('\n程序安装阶段完成。小K从应用菜单打开；PPT使用LibreOffice Impress，语音与手势桥可执行 systemctl --user start riscv-ai-reader.service。')
+        print('PPT默认使用已检查的LibreOffice24.8运行入口；底部备注栏和实际当前页须在Impress窗口中验收。')
         print('默认单轮唤醒：每次提问前说“你好麒麟”，播报结束保留回答、等待下次唤醒。')
         if args.no_start:print('服务尚未启动；登录桌面后执行 ./install.sh --phase start，再执行 --phase doctor。')
     else:print('\n已完成阶段: '+args.phase)

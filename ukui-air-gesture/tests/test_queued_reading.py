@@ -87,6 +87,16 @@ class PageTargetTests(unittest.TestCase):
         self.assertFalse(d.worker.is_alive())
         self.assertEqual(r.calls,[(':1.1',14)])
 
+    def test_desktop_cancellation_drops_unsent_target_and_waits_for_inflight(self):
+        r,d,events=self.make();self.start(d,r);d._enqueue('right')
+        with self.assertRaisesRegex(RuntimeError,'PPT仍在翻页'):
+            d.cancel_pending(wait_timeout=.01)
+        self.assertIsNone(d.diagnostics()['requested_page'])
+        r.release.set();self.idle(d)
+        d.cancel_pending(wait_timeout=.01)
+        self.assertEqual(r.calls,[(':1.1',14)])
+        self.assertFalse(any(e['event']=='page_navigation_confirmed' for e in events))
+
     def test_manual_page_change_is_respected_when_no_target_is_pending(self):
         r,d,_=self.make();r.block_first=False;self.start(d,r);self.idle(d)
         r.pages[r.owner]=7;d._enqueue('left');self.idle(d)

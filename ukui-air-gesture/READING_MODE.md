@@ -30,3 +30,21 @@ systemctl --user start riscv-ai-reader.service
 连续无手两秒后，使用内存中的64×48灰度缩略图检查局部画面变化；场景变化可提前触发手掌检测，静态场景每三秒保留一次完整检测作为兜底。曝光整体变化与少量噪点不会触发完整模型。检测到手后立即恢复原有姿态跟踪；刚丢手时保留原有快速重检，回位与计数状态机不变。缩略图不写入磁盘。
 
 OpenCV预处理限制为一线程，ORT手掌/姿态模型仍按各自配置运行。`recognition_state`中的`palm_model_runs`、`pose_model_runs`、`palm_search_skips`可用于核对实际检测频率。CPU对比应使用整个服务cgroup的CPUUsageNSec差值，避开模型初始化，并确认测量期间没有手。
+
+## 演示结束后返回桌面
+
+当前`reading`模式且`AIR_GESTURE_READING_TARGET=reader`时，新增独立的结束动作：
+
+1. 等AI报告当前页演讲备注已保存。
+2. 张开手掌放在画面中央，等相机反馈“握拳返回桌面已就绪”。准备至少需要0.45秒；至少三根手指完整可见，第四根仍须满足有限几何范围。
+3. 在原位置握拳，保持约1.2秒，收到一次返回桌面反馈后移开手。
+
+保持握拳只触发一次。开掌准备采用滚动参考位置，可自然移入中央；相机将握拳准备与滑动就绪分别标明，未满足时显示具体准备原因。仅尚未armed的opening阶段，前后均为新鲜、中央、有效开掌时，可容忍首次完整检测造成的不超过1.2秒采样间隔；两帧各自仍须满足原1秒新鲜度，失手或坏几何会清除该资格。已armed、closing和holding继续使用原0.9秒间隔上限。准备完成后须在两秒内形成有效拳态，短暂的过渡几何异常不会计入保持。真正闭拳后才固定腕部与MCP中点，保持至少1.2秒且有四个严格闭拳采样，触发帧本身也须严格闭拳；持拳期间明显移动、手部丢失、超时帧或偏离中央会取消。掌体尺寸使用腕部和MCP的二维尺度，避免握拳或转手时仅因横向跨度变窄而丢失。左右挥手的采样与中心复位保持原逻辑。动作失败仅记录错误，不自动重试，也不降级为全局按键。
+
+持拳采用有限迟滞：入拳与触发仍要求平均张开度不超过115度、四指各自不超过135度。已经建立的持拳中，平均不超过125度且四指各自不超过145度的近阈值帧只延续定锚保持时间，不增加严格样本数，也不会触发动作；明显松开仍立即清本轮保持。时间足够但当前不是严格闭拳或严格样本不足时，相机显示“请保持握拳，正在确认；张开手可取消”，不会显示0秒完成。
+
+该动作通过设备已有`wlrctl`向Wayland合成器显式请求最小化所有尚未最小化的普通窗口，并回读确认没有剩余未最小化窗口；不使用全局桌面toggle，因此反复“返回桌面→语音打开PPT→返回桌面”不会被旧toggle状态反向恢复。事件投递标记为`wayland_minimized_verified`；翻页仍使用阅读器D-Bus接口。返回桌面后暂停对隐藏PPT的翻页，丢弃未投递的翻页目标；已经送达阅读器的UNO请求先等待结束，最多等待三秒，超时则取消本次返回桌面并报告错误，不在翻页未完成时隐藏窗口。手动从任务栏恢复受管PPT窗口，或语音重新打开后，须由阅读器按精确Impress app_id和窗口标题确认该文档已恢复可见，才解除暂停并重置手势准备。可见性查询须开始于桌面动作完成之后，且结果不超过两秒；隐藏、未知、旧缓存或其他窗口可见都不会恢复翻页。新`session_id`同样需要有效可见性确认，重新张开手掌后才能继续操作。此动作本身不会替用户生成、保存或关闭文档。若最小化已投递但确认失败，桌面状态可能不确定，同样暂停翻页，待该PPT恢复可见并通过确认后继续；不会因超时重复切换桌面。
+
+诊断仅新增标量：`desktop_decision_gate`、`desktop_reset_reason/count`、`desktop_last_reset_*`保留取消原因与此前几何；`desktop_open_visible_fingers`、`desktop_open_border_mask`与`desktop_open_frame_margin`说明开掌边界，`desktop_prepared`及`desktop_preparation_feedback`说明准备状态，`desktop_open_gap_preserved`标记有限startup间隔容忍；`desktop_openness`、四指角度及`desktop_max_finger_angle`说明拳态门槛；`desktop_fist_qualification`区分strict/soft/open，`desktop_hold_samples`与`desktop_hold_strict_samples`仅计严格样本，`desktop_hold_soft_samples`记录续持帧，距离、age/gap与arming/hold秒数说明位置和时序。`reading_paused_for_desktop`及`reading_resume_gate`说明暂停和可见性恢复门槛；即时取消事件为`desktop_gesture_cancelled`。这些诊断不记录图像或原始关键点序列。
+
+这项扩展仅属于新的阅读模式。openKylin镜像内原版`ukui-air-gesture 4.24.0.0-ok1.10`的握拳动作是截图，现有legacy模式仍保持截图，未被替换。依据为本机保留的原版镜像rootfs中`gesture_classifier.py`的`_on_ptrsc_triggered()`及`gesture_actions.py`的`ptrsc()`；原版调用列表未包含返回桌面。

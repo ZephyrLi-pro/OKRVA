@@ -25,9 +25,9 @@ url = "http://127.0.0.1:18082/v1/chat/completions"
 health_url = "http://127.0.0.1:18082/health"
 models = ["qwen-local"]
 upstream_model = "Qwen3-0.6B-Q4_K_M.gguf"
-# These tools cover the five competition scenarios while avoiding KylinBot's
+# Keep the local task tool surface bounded, avoiding KylinBot's
 # full ~12k-token tool catalog on every request.
-allowed_tools = ["shell", "file_read", "file_write", "glob_search", "sys__set_volume", "sys__get_volume", "sys__get_capabilities", "sys__adjust_volume", "sys__set_mute", "sys__wifi_status", "sys__wifi_scan", "sys__bluetooth_status", "sys__get_brightness", "sys__open_application", "docs__recent_documents", "docs__read_document", "docs__save_report", "docs__list_reports", "docs__trash_reports"]
+allowed_tools = ["shell", "file_read", "file_write", "glob_search", "sys__set_volume", "sys__get_volume", "sys__get_capabilities", "sys__adjust_volume", "sys__set_mute", "sys__wifi_status", "sys__wifi_scan", "sys__bluetooth_status", "sys__get_brightness", "sys__open_application", "docs__recent_documents", "docs__read_document", "docs__save_report", "docs__list_reports", "docs__trash_reports", "ppt__open_presentation", "ppt__get_current_slide", "ppt__save_speaker_notes"]
 # KylinBot 0.7.4's Gateway Agent path can bypass its own prompt-size setting.
 # Enforce the K1 budget again at the model boundary.
 max_system_prompt_chars = 1500

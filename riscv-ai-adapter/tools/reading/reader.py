@@ -13,7 +13,7 @@ from dbus_next import Message, MessageFlag, MessageType, NameFlag, RequestNameRe
 from dbus_next.aio import MessageBus
 from dbus_next.service import ServiceInterface, method, signal as dbus_signal
 
-from office_reader import OfficeReader
+from office_reader import OfficeReader, recent_source
 from reader_core import ReaderBridge
 
 SERVICE='org.riscv.AIReader'
@@ -49,6 +49,27 @@ class ReaderInterface(ServiceInterface):
     @method()
     def GetState(self)->'s':
         return json.dumps(self.bridge.state(),ensure_ascii=False)
+
+    @method()
+    async def OpenPresentation(self,path:'s')->'s':
+        try:
+            return json.dumps(await self.bridge.open_presentation(path),ensure_ascii=False)
+        except Exception as error:
+            raise DBusError(SERVICE+'.OperationError',str(error))
+
+    @method()
+    async def GetSlideSnapshot(self)->'s':
+        try:
+            return json.dumps(await self.bridge.snapshot(),ensure_ascii=False)
+        except Exception as error:
+            raise DBusError(SERVICE+'.OperationError',str(error))
+
+    @method()
+    async def SaveSpeakerNotes(self,session_id:'s',page:'u',text_sha256:'s',notes:'s')->'s':
+        try:
+            return json.dumps(await self.bridge.save_notes(session_id,page,text_sha256,notes),ensure_ascii=False)
+        except Exception as error:
+            raise DBusError(SERVICE+'.OperationError',str(error))
 
     @method()
     async def Navigate(self,direction:'s')->'s':
@@ -95,7 +116,10 @@ async def serve(args):
         elif event=='context_published':last_error[0]=None
         row=dict(event=event,time=datetime.datetime.now().isoformat(timespec='milliseconds'),**data)
         print(json.dumps(row,ensure_ascii=False),flush=True)
-    office=OfficeReader(args.file,state_dir/'office-profile',emit,args.start_page)
+    # A background controller needs no fixed presentation. Keep trusted recent
+    # history as closed context; load only the path chosen by an explicit open.
+    initial_source=args.file or recent_source(state_path)
+    office=OfficeReader(initial_source,state_dir/'office-profile',emit,args.start_page)
     worker=concurrent.futures.ThreadPoolExecutor(max_workers=1,thread_name_prefix='reader-uno')
     loop=asyncio.get_running_loop()
     async def call_office(action,*values):
@@ -104,7 +128,7 @@ async def serve(args):
         return await voice_context(bus,title,text,page)
     stop=asyncio.Event()
     for sig in (signal.SIGTERM,signal.SIGINT):loop.add_signal_handler(sig,stop.set)
-    bridge=ReaderBridge(call_office,publish,args.title or Path(args.file).stem,emit)
+    bridge=ReaderBridge(call_office,publish,args.title or (Path(initial_source).stem if initial_source else '演示文稿'),emit)
     interface=ReaderInterface(bridge,stop)
     def voice_owner_changed(message):
         if (message.message_type==MessageType.SIGNAL and message.interface=='org.freedesktop.DBus'
@@ -116,14 +140,20 @@ async def serve(args):
         interface='org.freedesktop.DBus',member='AddMatch',signature='s',body=[
         "type='signal',sender='org.freedesktop.DBus',interface='org.freedesktop.DBus',member='NameOwnerChanged',arg0='org.ukui.voice_assistant'"]))
     try:
-        await call_office('open')
+        if args.file:
+            await call_office('open')
+        bridge.document = await call_office('metadata')
         await bridge.refresh()
         bus.export(OBJECT,interface)
         emit('reader_bridge_ready',service=SERVICE,page=bridge.state()['page'])
-        notify('READY=1\nSTATUS=Presentation ready, page '+str(bridge.state()['page']))
+        notify('READY=1\nSTATUS=Presentation controller ready, page '+str(bridge.state()['page']))
         old_version=-1
         while not stop.is_set():
             state=await bridge.refresh()
+            bridge.document=await call_office('metadata')
+            if state['active']:
+                bridge.title=Path(bridge.document['source_path']).stem
+            state=bridge.state()
             # Text stays in memory / D-Bus; the status file contains metadata.
             metadata={key:value for key,value in state.items() if key!='text'}
             temporary=state_path.with_suffix('.tmp')
@@ -133,9 +163,8 @@ async def serve(args):
             if state['version']!=old_version:
                 interface.PageChanged(json.dumps(metadata,ensure_ascii=False))
                 old_version=state['version']
-            if not state['active']:
-                stop.set()
-                break
+            # The ordinary Impress window can temporarily lose focus to Writer
+            # or a dialog; keep the background bridge available for its return.
             try:await asyncio.wait_for(stop.wait(),timeout=.4)
             except asyncio.TimeoutError:pass
     finally:
@@ -146,18 +175,17 @@ async def serve(args):
         worker.shutdown(wait=False,cancel_futures=True)
         bus.unexport(OBJECT)
         bus.disconnect()
-        emit('reader_bridge_closed',source_unchanged=True)
+        emit('impress_control_disconnected',user_documents_left_open=True)
 
 
 def main():
-    parser=argparse.ArgumentParser(description='Read-only presentation bridge for gestures and voice')
+    parser=argparse.ArgumentParser(description='Background voice/gesture control for normal LibreOffice Impress')
     parser.add_argument('--file')
     parser.add_argument('--title')
     parser.add_argument('--start-page',type=int,default=1)
     parser.add_argument('--state-dir',default='~/.local/state/riscv-ai-reader')
     parser.add_argument('--clear-context',action='store_true')
     args=parser.parse_args()
-    if not args.clear_context and not args.file:parser.error('--file is required')
     asyncio.run(serve(args))
 
 

@@ -15,6 +15,7 @@ import tomllib
 
 from common import InstallError,atomic_write,copy_file,install_model,json_write,sha,unpack_zip
 from resources import Resources,FSTS,KWS
+from libreoffice_runtime import check_libreoffice,runtime_settings
 
 CONFIG_NAMES=('.kylinbot/config.toml','.config/kylin-aiassistant/settings.ini',
               '.config/kylin-aiassistant/tts.ini','.config/kylinbot-asr/env',
@@ -71,7 +72,8 @@ def discover_camera(explicit=None):
     return '/dev/video0'
 
 
-def units_for_device(repo,home,camera,ppt,display='wayland-0'):
+def units_for_device(repo,home,camera,ppt,display='wayland-0',launcher=None,impress_pipe=None):
+    office=runtime_settings(home,launcher,impress_pipe)
     units={}
     for p in (repo/'deploy/systemd').glob('*.service'):
         text=p.read_text().replace('WAYLAND_DISPLAY=wayland-0','WAYLAND_DISPLAY='+display.replace('%','%%'))
@@ -79,8 +81,10 @@ def units_for_device(repo,home,camera,ppt,display='wayland-0'):
             text=re.sub(r'^Environment="AIR_GESTURE_CAMERA=.*"$',
                 'Environment="AIR_GESTURE_CAMERA='+camera.replace('%','%%').replace('"','\\"')+'"',text,flags=re.M)
         elif p.name=='riscv-ai-reader.service':
-            command=['/usr/bin/python3','-u','-B','%h/riscv-ai-adapter/tools/reading/reader.py',
-                     '--file',str(ppt).replace('%','%%'),'--title',ppt.stem.replace('%','%%'),'--start-page','1']
+            for name,value in (('RVAI_LIBREOFFICE_LAUNCHER',office['launcher']),('RVAI_IMPRESS_PIPE',office['pipe'])):
+                line='Environment='+json.dumps(name+'='+value.replace('%','%%'),ensure_ascii=False)
+                text=re.sub(r'^Environment="'+name+r'=.*"$',lambda _:line,text,flags=re.M)
+            command=['/usr/bin/python3','-u','-B','%h/riscv-ai-adapter/tools/reading/reader.py']
             # systemd command quoting differs from shell quoting.
             line='ExecStart='+' '.join(json.dumps(a,ensure_ascii=False) for a in command)
             text=re.sub(r'^ExecStart=.*$',lambda _:line,text,flags=re.M)
@@ -149,7 +153,9 @@ class Deployment:
         return destination
 
     def install(self):
+        office=check_libreoffice(self.home,getattr(self.c,'libreoffice_launcher',None),getattr(self.c,'impress_pipe',None))
         check_existing(self.home)
+        self.state['libreoffice']=office
         source=self.b.stage_source();revision=self.c.revision
         receipt=self.work/'last-build.json'
         record=json.loads(receipt.read_text()) if receipt.is_file() else {}
@@ -244,7 +250,10 @@ class Deployment:
         if p.is_file():credentials=json.loads(p.read_text())
         else:
             credentials=dict(gateway_token='zc_'+secrets.token_hex(32),asr_token=secrets.token_urlsafe(32));json_write(p,credentials)
-        bot=render_bot((release/'deploy/templates/kylinbot.toml.in').read_text(),self.home,self.c.runtime,
+        ppt=self.example_ppt(release)
+        bot_template=(release/'deploy/templates/kylinbot.toml.in').read_text()
+        bot_template=bot_template.replace('@PPT_DIR@',toml_text(ppt.parent)).replace('@PPT@',toml_text(ppt))
+        bot=render_bot(bot_template,self.home,self.c.runtime,
             directory['DOCUMENTS'],directory['DESKTOP'],credentials['asr_token'],credentials['gateway_token'])
         self.managed(self.home/'.kylinbot/config.toml',bot,0o600)
         adapter=(release/'deploy/templates/riscv-ai-adapter.toml.in').read_text().replace('@HOME@',toml_text(self.home))
@@ -263,8 +272,8 @@ class Deployment:
         workspace=self.home/'.kylinbot/workspace'
         for name in ('IDENTITY.md','SOUL.md'):
             self.managed(workspace/name,(release/'deploy/templates/workspace'/name).read_text(),0o644)
-        ppt=self.example_ppt(release)
-        for name,text in units_for_device(release,self.home,camera,ppt,self.c.display).items():
+        for name,text in units_for_device(release,self.home,camera,ppt,self.c.display,
+                getattr(self.c,'libreoffice_launcher',None),getattr(self.c,'impress_pipe',None)).items():
             self.managed(self.home/'.config/systemd/user'/name,text)
         dbus='[D-BUS Service]\nName=org.ukui.voice_assistant\nExec=/usr/bin/env SDL_AUDIODRIVER=pipewire /usr/bin/voice-assistant --dbus-activation\nSystemdService=okrva-voice-pipewire.service\n'
         self.managed(self.home/'.local/share/dbus-1/services/org.ukui.voice_assistant.service',dbus)
@@ -322,6 +331,7 @@ class Deployment:
         return restarted
 
     def start(self):
+        check_libreoffice(self.home,getattr(self.c,'libreoffice_launcher',None),getattr(self.c,'impress_pipe',None))
         bot_running=subprocess.run(['systemctl','--user','is-active','--quiet','kylinbot.service']).returncode==0
         audio_restarted=self.audio()
         self.r.run(['systemctl','--user','import-environment','DISPLAY','WAYLAND_DISPLAY','XDG_RUNTIME_DIR'],label='desktop-environment')

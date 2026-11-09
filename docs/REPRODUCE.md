@@ -49,13 +49,13 @@ python3 tools/fetch_vendor.py asr /your/work/model-zoo-asr
 
 ## 3. 构建本项目
 
-- Adapter：`python3 -m pip install ./riscv-ai-adapter`，或在隔离venv中安装。核心是Python标准库；阅读器另用系统`python3-uno`、D-Bus等。
+- Adapter：`python3 -m pip install ./riscv-ai-adapter`，或在隔离venv中安装。核心是Python标准库；LibreOffice Impress控制桥另用系统`python3-uno`、D-Bus等。
 - 小K：按`kylin-aiassistant-lite/README.md`和真实`debian/control`安装开发依赖后，在该目录执行`debuild -b -us -uc`。RISC-V原生界面不导入QtWebEngine；仍有部分麒麟SDK链接，不能在纯净Bianbu上跳过所有SDK。React/Web Admin的生成`dist`未打包，支持该可选页的架构须按其package-lock构建前端。
 - 文档CLI：在`kylin-aiassistant-lite/tools/document-reader-cli`执行`qmake reader-cli.pro`、`make -j1`；向文档MCP指定生成的可执行文件。
 - KylinBot：遵循其README/Cargo.lock在RISC-V构建，保留所需Gateway/MCP/语音特性；例如在该项目执行`cargo build --release --locked`。本方案保留完整源码和原有features，不凭猜测改变特性组合。
 - KWS/VAD辅助程序：按`kylinbot/tools/bianbu-kws/README.md`和`tools/bianbu-vad`说明，链接匹配的sherpa C API；C源码已提供，不把二进制当源码。
-- 手势：按`ukui-air-gesture`的CMake/README构建，另准备OpenCV、ORT Python与对应ONNX。摄像头要按真实设备校准。手势服务独立启动，阅读器按需打开。
-- 系统和文档MCP：以桌面普通用户启动`system-tools`内脚本，设置本机Documents/Desktop根和reader-cli路径，接入KylinBot的sys/docs stdio服务器。不要放开任意shell/提权权限。
+- 手势：按`ukui-air-gesture`的CMake/README构建，另准备OpenCV、ORT Python与对应ONNX。摄像头要按真实设备校准。手势服务独立启动，原有LibreOffice Impress由后台UNO桥接入。
+- 系统和文档MCP：以桌面普通用户启动`system-tools`内脚本，设置本机Documents/Desktop根和reader-cli路径，接入KylinBot的sys/docs/ppt stdio服务器。完整PPT工具目录可用时，受限规划schema始终包含PPT打开和备注保存能力，由模型按整句语义选择动作及参数；执行时核对本轮参数出处、文档快照和保存回执。`semantic_only`普通聊天回退保留PPT读取，打开和保存经过受控工作流。不要放开任意shell/提权权限。
 
 ## 4. 配置与启动
 
@@ -73,7 +73,9 @@ install -Dm644 deploy/helpers/wait-gesture-ready.py ~/.local/libexec/okrva-wait-
 
 配置好服务后，执行 `systemctl --user daemon-reload` 和 `systemctl --user enable --now ukui-air-gesture.service`。已启动服务需要重载时，执行 `systemctl --user restart ukui-air-gesture.service`。启动检查等待 Wayland 桌面和配置的摄像头就绪，适用于登录时自动启动。
 
-首先检查ASR/TTS，再启动Adapter、KylinBot和小K，配置新的配对token；最后独立启动手势和阅读器。阅读器服务保留当前演示PPT路径，使用自己的文件时修改其`--file`参数。手势服务和阅读器独立启停。
+首先检查ASR/TTS，再启动Adapter、KylinBot和小K，配置新的配对token；最后独立启动手势和LibreOffice Impress的UNO桥（内部服务名仍为`riscv-ai-reader.service`）。正式使用`~/.local/bin/libreoffice-24.8`启动的原生Impress普通可编辑窗口，保留已有24.8配置`~/.local/share/libreoffice-24.8-trial/profile`；可语音按名称打开文档、桌面中的PPT，也可在Impress中打开其他本地演示文稿，桥跟随实际当前文档。正式桥服务不传`--file`，以无文件方式懒启动；仅恢复受控状态中最近真实打开的路径元数据，明确打开请求才加载Impress。“打开PPT”或“打开刚才那个PPT”只使用该真实历史，无有效历史时提示先打开一份PPT。停止后台桥仅清理语音上下文，不关闭用户的LibreOffice；服务使用`KillMode=process`。
+
+桥服务固定`RVAI_LIBREOFFICE_LAUNCHER=%h/.local/bin/libreoffice-24.8`、`RVAI_IMPRESS_PIPE=rvai_trial_248_1000`，启动等待300秒；launcher负责沿用`~/.local/opt/libreoffice-24.8-trial`中的运行库。新设备若没有此启动器，安装器会在版本能力检查处停止，不能把系统24.2依赖安装当成迁移完成。
 
 文本与语音的记录按进程生命周期清理，安装主/语音服务时同时安装清理脚本与应用菜单启动器，具体命令见[部署说明](../deploy/README.md#对话记录的进程生命周期)。最小化或隐藏窗口保留对话，实际进程退出后重新启动进入新对话。
 
@@ -87,4 +89,4 @@ install -Dm644 deploy/helpers/wait-gesture-ready.py ~/.local/libexec/okrva-wait-
 PYTHONPATH=src python3 -B -m unittest discover -s tests -p 'test_*.py'
 ```
 
-工具测试使用替身，详见各项目测试说明；不要将真实用户Documents用于破坏性测试。随后按五场景逐项人工验证实际副作用、当前页、答案、播报和历史。场景四应得到三个独立摘要文件；扫描页不应假称有原生文字。场景五必须从专用阅读器打开自己的PPT。
+工具测试使用替身，详见各项目测试说明；不要将真实用户Documents用于破坏性测试。随后按五场景逐项人工验证实际副作用、当前页、答案、播报和历史。场景四应得到三个独立摘要文件；扫描页不应假称有原生文字。PPT场景在原有LibreOffice Impress中验收：语音打开PPT、手势翻页、根据当前页生成演讲备注并保存、手势返回桌面。核对保存后保持普通大幻灯片；支持的版本在底部备注栏显示讲稿，正式24.8.7显示原生底部备注栏，可拖动上缘调整高度。关闭再打开PPTX仍应保留讲稿；停止后台桥不应关闭Impress或丢失用户未保存编辑。

@@ -92,14 +92,25 @@ class InstallerTests(unittest.TestCase):
         self.assertNotIn('gateway-secret',raw)
         self.assertEqual(data['autonomy']['allowed_roots'],[str(docs),str(desktop)])
         self.assertIn(str(docs),data['mcp']['servers'][1]['args'])
+        servers={item['name']:item for item in data['mcp']['servers']}
+        self.assertEqual(servers['ppt']['tool_timeout_secs'],600)
+        self.assertNotIn('--default-presentation',servers['ppt']['args'])
+        self.assertEqual(servers['sys']['tool_timeout_secs'],25)
+        self.assertEqual(servers['docs']['tool_timeout_secs'],300)
 
     def test_device_units_do_not_keep_old_camera_or_demo_path(self):
         units=units_for_device(REPO,Path('/home/new'),'/dev/video9',Path('/home/new/My Slides.pptx'),'wayland-2')
         self.assertIn('AIR_GESTURE_CAMERA=/dev/video9',units['ukui-air-gesture.service'])
         self.assertNotIn('Sunplus',units['ukui-air-gesture.service'])
         self.assertIn('WAYLAND_DISPLAY=wayland-2',units['okrva-aiassistant.service'])
-        self.assertIn('My Slides.pptx',units['riscv-ai-reader.service'])
+        self.assertNotIn('--file',units['riscv-ai-reader.service'])
+        self.assertNotIn('My Slides.pptx',units['riscv-ai-reader.service'])
         self.assertNotIn('scenario5-20261028',units['riscv-ai-reader.service'])
+        self.assertIn('KillMode=process',units['riscv-ai-reader.service'])
+        self.assertIn('RVAI_LIBREOFFICE_LAUNCHER=/home/new/.local/bin/libreoffice-24.8',units['riscv-ai-reader.service'])
+        self.assertIn('RVAI_IMPRESS_PIPE=rvai_trial_248_1000',units['riscv-ai-reader.service'])
+        self.assertIn('TimeoutStartSec=300',units['riscv-ai-reader.service'])
+        self.assertNotIn('KillMode=control-group',units['riscv-ai-reader.service'])
 
     def test_foreign_config_is_not_adopted(self):
         with tempfile.TemporaryDirectory() as tmp:

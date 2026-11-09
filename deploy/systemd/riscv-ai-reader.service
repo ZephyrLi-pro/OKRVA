@@ -1,5 +1,5 @@
 [Unit]
-Description=Multimodal PPT reader, scoped navigation and voice page context
+Description=LibreOffice Impress voice and gesture UNO bridge
 Wants=kylinbot.service
 After=kylinbot.service
 
@@ -10,10 +10,13 @@ Environment="XDG_RUNTIME_DIR=%t"
 Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus"
 Environment="WAYLAND_DISPLAY=wayland-0"
 Environment="DISPLAY=:0"
-ExecStart=/usr/bin/python3 -u -B %h/riscv-ai-adapter/tools/reading/reader.py --file %h/scenario5-20261028/openKylin-2026.pptx --title openKylin社区介绍2026 --start-page 13
+Environment="RVAI_LIBREOFFICE_LAUNCHER=%h/.local/bin/libreoffice-24.8"
+Environment="RVAI_IMPRESS_PIPE=rvai_trial_248_1000"
+ExecStart=/usr/bin/python3 -u -B %h/riscv-ai-adapter/tools/reading/reader.py
 ExecStopPost=-/usr/bin/python3 -B %h/riscv-ai-adapter/tools/reading/reader.py --clear-context
-TimeoutStartSec=120
+TimeoutStartSec=300
 TimeoutStopSec=15
-KillMode=control-group
+# LibreOffice is the user application; stopping its UNO bridge must not kill it.
+KillMode=process
 Restart=no
 NoNewPrivileges=true

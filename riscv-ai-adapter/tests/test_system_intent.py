@@ -150,8 +150,14 @@ class SystemIntentHTTPTests(unittest.TestCase):
                 models=('test',), allowed_tools=NAMES, system_prompt_override='本地系统助手。'),))
         app = make_server(config)
         threading.Thread(target=app.serve_forever, daemon=True).start()
+        # Exercise the loopback Adapter, never an HTTP proxy inherited from the
+        # developer's shell. A proxy response is not an authentication result.
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         try:
-            with patch.dict(os.environ, {'RVAI_INTENT_TEST_TOKEN': 'synthetic-test-only'}):
+            with patch.dict(os.environ, {
+                    'RVAI_INTENT_TEST_TOKEN': 'synthetic-test-only',
+                    'http_proxy': 'http://127.0.0.1:1', 'HTTP_PROXY': 'http://127.0.0.1:1',
+                    'no_proxy': '', 'NO_PROXY': ''}):
                 for authorization, priority, status in [('', '50', 401), ('Bearer incorrect', '50', 401),
                         ('Bearer synthetic-test-only', '101', 400), ('Bearer synthetic-test-only', 'bad', 400)]:
                     value = payload(QUERY); value['model'] = 'test'
@@ -160,7 +166,7 @@ class SystemIntentHTTPTests(unittest.TestCase):
                         'Authorization': authorization, 'X-RVAI-Priority': priority})
                     with patch.object(app.registry, 'open', side_effect=AssertionError('Must reject first')):
                         with self.assertRaises(urllib.error.HTTPError) as caught:
-                            urllib.request.urlopen(req, timeout=2)
+                            opener.open(req, timeout=2)
                         self.assertEqual(caught.exception.code, status)
                         caught.exception.close()
                 received = []
@@ -175,7 +181,7 @@ class SystemIntentHTTPTests(unittest.TestCase):
                 req = urllib.request.Request(f'http://127.0.0.1:{app.server_port}/v1/chat/completions',
                     data=json.dumps(value).encode(), headers={'Content-Type': 'application/json', 'Authorization': 'Bearer synthetic-test-only'})
                 with patch.object(app.registry, 'open', upstream):
-                    with urllib.request.urlopen(req, timeout=2) as response:
+                    with opener.open(req, timeout=2) as response:
                         self.assertEqual(json.load(response)['choices'][0]['message']['content'], 'model reply')
                 self.assertEqual(len(received), 1)
                 self.assertEqual(received[0]['messages'][-1]['content'], value['messages'][-1]['content'])

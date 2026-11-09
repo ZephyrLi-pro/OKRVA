@@ -7,6 +7,7 @@
 - 使用`deploy/systemd/ukui-air-gesture.service`指定的内置摄像头。
 - `AIR_GESTURE_PROFILE=reading`采用已校准的左右挥手和中心复位；`AIR_GESTURE_READING_TARGET=reader`定向调用PPT阅读器。
 - 右挥下一页，左挥上一页；回到中间只复位。
+- 阅读器模式：中央张开手停稳后握拳保持约1.2秒返回桌面；重新语音打开PPT后恢复翻页。legacy握拳截图不变。
 - 识别到手显示桌面小手图标，移开后隐藏；可按需启用完整画面校准。
 - 手势与PPT服务独立启停，阅读器未打开时不会自动向其他窗口发送翻页按键。
 

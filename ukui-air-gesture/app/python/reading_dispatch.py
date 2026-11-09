@@ -9,6 +9,13 @@ class ReadingDispatcher:
         self.send = send
         self.emit = emit
 
+    def reset_tracking(self):
+        counts = dict(self.controller.accepted_counts)
+        event_id = self.controller.event_id
+        self.controller = ReadingNavigationController()
+        self.controller.accepted_counts = counts
+        self.controller.event_id = event_id
+
     def process(self, landmarks, timestamp, aspect=.75, age=0.):
         # Late results must not turn a page after the user's hand has moved on.
         if not result_is_fresh(age):

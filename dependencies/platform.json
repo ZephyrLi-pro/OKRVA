@@ -1,5 +1,5 @@
 {
   "os": "PRETTY_NAME=\"Bianbu 2.3.5\"\nNAME=\"Bianbu\"\nVERSION_ID=\"2.3.5\"\nVERSION=\"2.3.5 (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=bianbu\nID_LIKE=debian\nHOME_URL=\"https://bianbu.spacemit.com\"\nSUPPORT_URL=\"https://bianbu.spacemit.com\"\nBUG_REPORT_URL=\"https://ticket.spacemit.com\"\nPRIVACY_POLICY_URL=\"https://www.spacemit.com/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=bianbu-logo",
   "cpu": "架构：              riscv64\n字节序：            Little Endian\nCPU:                8\n在线 CPU 列表：     0-7\n型号名称：          Spacemit(R) X60\n每个核的线程数：    1\n每个座的核数：      8\n座：                1\nFrequency boost:    disabled\nCPU(s) scaling MHz: 100%\nCPU 最大 MHz：      1600.0000\nCPU 最小 MHz：      614.4000\nL1d 缓存：          256 KiB (8 instances)\nL1i 缓存：          256 KiB (8 instances)\nL2 缓存：           1 MiB (2 instances)",
-  "board": "M1-MUSE-BOOK"
+  "board": "SiPEED LPi3A K1 (16GB)"
 }
