@@ -145,7 +145,7 @@ class Deployment:
             from pptx import Presentation
             p=Presentation()
             for title,body in (
-                ('多模态智能终端','文本输入、语音输入和手势输入共同连接本地智能体。'),
+                ('面向IRSC-V的多模态智能终端系统','文本输入、语音输入和手势输入共同连接本地智能体。'),
                 ('本地系统控制','KylinBot通过系统工具调整音量、查询状态和打开应用；执行结果需要实际回读确认。'),
                 ('智能文档阅读','阅读器提取当前页原生文本，通过语音提出问题，由本地模型总结并播报。右挥下一页，左挥上一页。')):
                 slide=p.slides.add_slide(p.slide_layouts[1]);slide.shapes.title.text=title;slide.placeholders[1].text=body
@@ -284,7 +284,7 @@ class Deployment:
         self.managed(self.home/'.local/share/applications/riscv-ai-reader.desktop',
             (release/'riscv-ai-adapter/tools/reading/packaging/riscv-ai-reader.desktop').read_text())
         self.managed(self.home/'.config/autostart/okrva-smallk.desktop',
-            '[Desktop Entry]\nType=Application\nName=OKRVA 小K\nExec=systemctl --user start okrva-aiassistant.service\nX-GNOME-Autostart-enabled=true\n')
+            '[Desktop Entry]\nType=Application\nName=面向IRSC-V的多模态智能终端系统（小K）\nExec=systemctl --user start okrva-aiassistant.service\nX-GNOME-Autostart-enabled=true\n')
         self.state.update(camera=camera,ppt=str(ppt),documents=str(directory['DOCUMENTS']),desktop=str(directory['DESKTOP']))
         (self.home/'.local/state/riscv-ai-reader').mkdir(parents=True,exist_ok=True)
         self.r.run(['systemctl','--user','daemon-reload'],label='user-units-reload')

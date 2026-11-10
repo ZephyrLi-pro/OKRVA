@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clone OKRVA, then run ./install.sh in a Bianbu 2.3.5 K1 desktop terminal."""
+"""面向IRSC-V的多模态智能终端系统：在Bianbu 2.3.5 K1桌面终端运行 ./install.sh。"""
 from __future__ import annotations
 import argparse
 import configparser
@@ -86,7 +86,7 @@ def preflight(c):
 
 
 def show_plan(c):
-    print('OKRVA 同款K1联网构建安装计划')
+    print('面向IRSC-V的多模态智能终端系统 · 同款K1联网构建安装计划')
     print('目标: Bianbu 2.3.x / K1 / riscv64；普通桌面用户；基线2.3.5')
     print('当前: '+platform.machine()+' / '+platform_info().get('PRETTY_NAME','unknown'))
     print('仓库: '+str(c.repo));print('构建、下载和日志: '+str(c.work))
